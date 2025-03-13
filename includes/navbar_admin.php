@@ -1,7 +1,7 @@
         <!-- Sidebar -->
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
-            <div style="margin-top: 20px;"></div> 
+            <div style="margin-top: 20px;"></div>
 
             <!-- Nav Item - Dashboard -->
             <li class="nav-item">
@@ -36,13 +36,13 @@
 
             <li class="nav-item">
                 <a class="nav-link" href="requisitions.php">
-                <i class="fas fa-fw fa-list-alt"></i>
+                    <i class="fas fa-fw fa-list-alt"></i>
                     <span>Requisitions</span></a>
             </li>
 
             <li class="nav-item">
                 <a class="nav-link" href="issuance.php">
-                <i class="fas fa-fw fa-share-square"></i>
+                    <i class="fas fa-fw fa-share-square"></i>
                     <span>Issuance</span></a>
             </li>
 
@@ -72,8 +72,13 @@
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
 
-           
 
+            <!-- Divider -->
+
+            <!-- Sidebar Toggler (Sidebar) -->
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+            </div>
 
         </ul>
         <!-- End of Sidebar -->
@@ -98,7 +103,7 @@
                     <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
                     <div class="modal-footer">
                         <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                        <a class="btn btn-primary" href="login.html">Logout</a>
+                        <a class="btn btn-primary" href="../login/login.php">Logout</a>
                     </div>
                 </div>
             </div>
