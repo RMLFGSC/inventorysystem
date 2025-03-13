@@ -70,7 +70,7 @@ $result = mysqli_query($conn, $query);
                                     <div class="form-group">
                                         <label>Requisition #</label>
                                         <input type="text" name="req_number" class="form-control" value="<?php
-                                         $req_number = 'REQ-' . mt_rand(10000, 99999); // 5-digit random number                                                                  echo $req_number; ?>" readonly>
+                                         $req_number = 'REQ-' . mt_rand(10000, 99999); echo $req_number; ?>" readonly>
                                     </div>
                                     <div id="itemFields">
                                         <div class="form-row">
