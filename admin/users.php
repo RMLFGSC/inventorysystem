@@ -136,28 +136,7 @@ include("../includes/navbar_admin.php");
             </div>
         </div>
         <!-- END OF EDIT MODAL -->
-
-        <script>
-            $('#GMCedituser').on('shown.bs.modal', function() {
-                $('#updateUserBtn').off('click').on('click', function(e) {
-                    e.preventDefault();
-                    Swal.fire({
-                        title: 'Are you sure?',
-                        text: "Do you want to save these changes?",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#3085d6',
-                        cancelButtonColor: '#d33',
-                        confirmButtonText: 'Yes, update it!',
-                        width: '300px'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            $('#editUserForm')[0].submit();
-                        }
-                    });
-                });
-            });
-        </script>
+        
 
         <!-- Delete Confirmation Modal -->
         <div class="modal fade" id="deleteConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
@@ -274,9 +253,28 @@ include("../includes/navbar_admin.php");
 
     ?>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
+        $('#GMCedituser').on('shown.bs.modal', function() {
+                $('#updateUserBtn').off('click').on('click', function(e) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "Do you want to save these changes?",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, update it!',
+                        width: '300px'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $('#editUserForm')[0].submit();
+                        }
+                    });
+                });
+            });
+
         $(document).ready(function() {
             $(".delete-btn").click(function() {
                 var userId = $(this).data("id");

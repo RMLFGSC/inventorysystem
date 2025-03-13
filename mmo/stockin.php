@@ -233,19 +233,18 @@ $result = mysqli_query($conn, $query);
 
         <div class="container-fluid">
             <!-- Page Heading -->
-            <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                <h1 class="h3 mb-0 text-gray-800">Stock-in</h1>
-                <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#GMCaddStockin">
-                    <i class="fas fa-plus fa-sm text-white-50"></i> Add Stock-in
-                </button>
-            </div>
-
-            <!-- DataTales Example -->
+            <!-- Table Card -->
             <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Requisition List</h6>
+                    <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#GMCaddRequest">
+                        <i class="fas fa-plus fa-sm text-white-50"></i> Add Request
+                    </button>
+                </div>
                 <div class="card-body">
-                    <div class="table">
-                        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                            <thead>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                            <thead class="thead-light">
                                 <tr>
                                     <th>Control #</th>
                                     <th>Item</th>
@@ -302,5 +301,4 @@ $result = mysqli_query($conn, $query);
     <?php
     include("../includes/scripts.php");
     include("../includes/footer.php");
-    include("../includes/datatables.php");
     ?>

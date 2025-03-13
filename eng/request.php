@@ -6,6 +6,19 @@ if (!isset($_SESSION['auth_user']['user_id'])) {
     die("Error: User is not logged in. Please log in first.");
 }
 
+$req_query = "SELECT req_number FROM request ORDER BY req_id DESC LIMIT 1";
+$req_result = mysqli_query($conn, $req_query);
+$req_row = mysqli_fetch_assoc($req_result);
+
+if ($req_row) {
+    $last_number = (int)substr($req_row['req_number'], 4);
+    $new_number = $last_number + 1;
+} else {
+    $new_number = 1;
+}
+
+$formatted_req_number = 'REQ-' . str_pad($new_number, 5, '0', STR_PAD_LEFT);
+
 // Get the current user's ID
 $current_user_id = $_SESSION['auth_user']['user_id'];
 
@@ -51,11 +64,9 @@ $result = mysqli_query($conn, $query);
                                     <strong>Requisition items</strong>
                                 </div>
                                 <div class="card-body">
-                                    <div class="form-group">
+                                <div class="form-group">
                                         <label>Requisition #</label>
-                                        <input type="text" name="req_number" class="form-control" value="<?php
-                                                                                                            $req_number = 'REQ-' . mt_rand(10000, 99999); // 5-digit random number
-                                                                                                            echo $req_number; ?>" readonly>
+                                        <input type="text" name="req_number" class="form-control" value="<?php echo $formatted_req_number; ?>" readonly>
                                     </div>
                                     <div id="itemFields">
                                         <div class="form-row">

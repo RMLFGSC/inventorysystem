@@ -54,8 +54,8 @@ $result = mysqli_query($conn, $query);
                     </form>
 
                     <div class="card-datatable">
-                        <table class="datatables-basic table table-bordered" id="dataTable" width="100%">
-                            <thead>
+                        <table class="datatables-basic table table-hover table-bordered" id="dataTable" width="100%">
+                            <thead class="thead-light">
                                 <tr>
                                     <th>Item</th>
                                     <th>Category</th>
