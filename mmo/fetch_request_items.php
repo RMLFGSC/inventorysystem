@@ -1,27 +1,56 @@
 <?php
-include("../conn.php"); 
+include("../conn.php");
 
 if (isset($_POST['req_number'])) {
-    $reqNO = $_POST['req_number'];
+    $req_number = $_POST['req_number'];
 
-    $query = "SELECT u.fullname, u.department, r.date, si.item, r.qty, r.stockin_id, r.status 
+    // Query to fetch the requisition details along with stock-in items
+    $query = "SELECT r.req_number, r.date, u.fullname AS requester_name, u.department, s.item, r.qty 
               FROM request r 
-              JOIN stock_in si ON r.stockin_id = si.stockin_id 
-              JOIN users u ON r.user_id = u.user_id  
+              JOIN stock_in s ON r.stockin_id = s.stockin_id 
+              JOIN users u ON r.user_id = u.user_id 
               WHERE r.req_number = ?";
+    
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("s", $req_number); 
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-    $stmt = mysqli_prepare($conn, $query);
-    mysqli_stmt_bind_param($stmt, 's', $reqNO);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-
-    while ($row = mysqli_fetch_assoc($result)) {
-        echo "<tr data-item_id='" . htmlspecialchars($row['stockin_id']) . "' data-status='" . htmlspecialchars($row['status']) . "'>
-                <td>" . htmlspecialchars($row['item']) . "</td>
-                <td>" . htmlspecialchars($row['qty']) . "</td>
-              </tr>";
+    $items = [];
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $items[] = $row; // Collect items
+        }
+        
+        // Return the first item's details for the modal
+        $firstItem = $items[0];
+        echo json_encode([
+            'req_number' => $firstItem['req_number'],
+            'date' => $firstItem['date'],
+            'requester_name' => $firstItem['requester_name'],
+            'department' => $firstItem['department'],
+            'items' => $items // Return all items
+        ]);
+    } else {
+        echo json_encode([
+            'req_number' => '',
+            'date' => '',
+            'requester_name' => '',
+            'department' => '',
+            'items' => []
+        ]);
     }
 
-    mysqli_stmt_close($stmt);       
+    $stmt->close();
+} else {
+    echo json_encode([
+        'req_number' => '',
+        'date' => '',
+        'requester_name' => '',
+        'department' => '',
+        'items' => []
+    ]);
 }
+
+$conn->close();
 ?>

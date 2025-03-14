@@ -28,7 +28,7 @@ $result = mysqli_query($conn, $query);
 
         <!-- topbar -->
         <?php
-        include("../includes/topbar.php");
+        include("../includes/topbar_eng.php");
         ?>
 
 
@@ -88,7 +88,7 @@ $result = mysqli_query($conn, $query);
                                 </div>
                             </div>
                             <div class="ml-auto d-flex align-items-center gap-2">
-                                <!-- ✅ Print button - initially hidden -->
+                                <!-- Print button - initially hidden -->
                                 <button id="printRequestBtn" class="btn btn-sm btn-secondary mr-2" style="display: none;">
                                     <i class="fa fa-print"></i> Print
                                 </button>
@@ -100,75 +100,71 @@ $result = mysqli_query($conn, $query);
             </div>
         </div>
         <!--End of view modal-->
-
         <div class="container-fluid">
-            <!-- Page Heading -->
+ 
+    <!-- Table Card -->
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex justify-content-between align-items-center">
             <h6 class="m-0 font-weight-bold text-primary">Issuance List</h6>
         </div>
-            <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th>Req Number</th>
-                                    <th>Requester</th>
-                                    <th>Department</th>
-                                    <th>Date</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
+        <div class="card-body">
+            <div class="table">
+                <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Req Number</th>
+                            <th>Requester</th>
+                            <th>Department</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
 
-                            <tbody>
-                                <?php while ($row = mysqli_fetch_assoc($result)): ?>
-                                    <tr>
-                                        <td><?php echo $row['req_number']; ?></td>
-                                        <td><?php echo $row['requester_name']; ?></td>
-                                        <td><?php echo $row['department']; ?></td>
-                                        <td><?php echo $row['date']; ?></td>
-                                        <td>
-                                            <?php
-                                            if ($row['status'] == 0) {
-                                                echo '<span class="badge badge-warning">Pending</span>';
-                                            } elseif ($row['status'] == 1) {
-                                                echo '<span class="badge badge-success">Served</span>';
-                                            } elseif ($row['status'] == 2) {
-                                                echo '<span class="badge badge-danger">Declined</span>';
-                                            }
-                                            ?>
-                                        </td>
+                    <tbody>
+                        <?php while ($row = mysqli_fetch_assoc($result)): ?>
+                            <tr>
+                                <td><?php echo $row['req_number']; ?></td>
+                                <td><?php echo $row['requester_name']; ?></td>
+                                <td><?php echo $row['department']; ?></td>
+                                <td><?php echo $row['date']; ?></td>
+                                <td>
+                                    <?php
+                                    if ($row['status'] == 0) {
+                                        echo '<span class="badge badge-warning">Pending</span>';
+                                    } elseif ($row['status'] == 1) {
+                                        echo '<span class="badge badge-success">Served</span>';
+                                    } elseif ($row['status'] == 2) {
+                                        echo '<span class="badge badge-danger">Declined</span>';
+                                    }
+                                    ?>
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" data-toggle="modal" data-target="#viewRequestModal"
+                                        class="btn btn-sm btn-warning viewrequest-btn"
+                                        data-id="<?php echo $row['req_id']; ?>"
+                                        data-req_number="<?php echo $row['req_number']; ?>"
+                                        data-status="<?php echo $row['status']; ?>">
+                                        <i class="fa-solid fa-eye text-white"></i>
+                                    </button>
 
-                                        <td>
-                                            <!-- VIEW BUTTON: Show always -->
-                                            <button type="button" data-toggle="modal" data-target="#viewRequestModal"
-                                                class="btn btn-sm btn-warning viewrequest-btn"
-                                                data-id="<?php echo $row['req_id']; ?>"
-                                                data-req_number="<?php echo $row['req_number']; ?>"
-                                                data-status="<?php echo $row['status']; ?>">
-                                                <i class="fa-solid fa-eye"></i>
-                                            </button>
-
-                                            <!-- EDIT BUTTON: Show only if status is still pending -->
-                                            <?php if ($row['status'] == 0): ?>
-                                                <button type="button" data-toggle="modal" data-target="#editRequestModal"
-                                                    class="btn btn-sm btn-primary editrequest-btn"
-                                                    data-id="<?php echo $row['req_id']; ?>">
-                                                    <i class="fa-solid fa-pencil-alt"></i>
-                                                </button>
-                                            <?php endif; ?>
-                                        </td>
-                                    </tr>
-                                <?php endwhile; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                                    <?php if ($row['status'] == 0): ?>
+                                        <button type="button" data-toggle="modal" data-target="#editRequestModal"
+                                            class="btn btn-sm btn-primary editrequest-btn"
+                                            data-id="<?php echo $row['req_id']; ?>">
+                                            <i class="fa-solid fa-pencil-alt"></i>
+                                        </button>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endwhile; ?>
+                    </tbody>
+                </table>
             </div>
-
         </div>
-        <!-- /.container-fluid -->
+    </div>
+</div>
+
 
 
     </div>
@@ -179,120 +175,140 @@ $result = mysqli_query($conn, $query);
     include("../includes/footer.php");
     ?>
 
-<script>
-    $(document).ready(function () {
-        // View request modal functionality
-        $('.viewrequest-btn').on('click', function () {
-            const reqno = $(this).data('req_number');
-            const reqId = $(this).data('id');
-            const status = $(this).data('status');
+    <script>
+        $(document).ready(function() {
+            // View request modal functionality
+            $('.viewrequest-btn').on('click', function() {
+                const reqno = $(this).data('req_number');
+                const reqId = $(this).data('id');
+                const status = $(this).data('status');
 
-            // Store the request ID inside the modal
-            $('#viewRequestModal').data('id', reqId);
+                // Store the request ID inside the modal
+                $('#viewRequestModal').data('id', reqId);
 
-            if (status == 2 || status == 1) {
-                $('#action-buttons').hide();
-                $('#printRequestBtn').show(); // ✅ show print button only if approved or declined
-            } else {
-                $('#action-buttons').show();
-                $('#printRequestBtn').hide(); // ✅ hide print button for pending requests
-            }
-
-            // Fetch request items via AJAX
-            $.ajax({
-                url: 'fetch_request_items.php',
-                type: 'POST',
-                data: {
-                    req_number: reqno
-                },
-                success: function (data) {
-                    $('#view_request_items').html(data);
-                },
-                error: function (xhr, status, error) {
-                    console.error("Error fetching request items: ", error);
+                if (status == 2 || status == 1) {
+                    $('#action-buttons').hide();
+                    $('#printRequestBtn').show(); //show print button only if approved or declined
+                } else {
+                    $('#action-buttons').show();
+                    $('#printRequestBtn').hide(); //hide print button for pending requests
                 }
-            });
-        });
 
-        // Decline button handler
-        $('#confirmDecline').on('click', function () {
-            const requestId = $('#viewRequestModal').data('id');
+                // Fetch request items via AJAX
+                $.ajax({
+                    url: 'fetch_request_items.php', // Update to the correct PHP file
+                    type: 'POST',
+                    data: {
+                        req_number: reqno
+                    },
+                    dataType: 'json', // Expect JSON response
+                    success: function(data) {
+                        if (data) {
+                            $('#requestedBy').val(data.requester_name); // Set requester name
+                            $('#department').val(data.department); // Set department
+                            $('#requisitionNumber').val(data.req_number); // Set requisition number
+                            $('#date').val(data.date); // Set date
 
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "You want to decline this request?",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, Decline',
-                cancelButtonText: 'Cancel',
-                width: '300px',
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#6c757d'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: 'update_status.php',
-                        type: 'POST',
-                        data: {
-                            id: requestId,
-                            status: 2
-                        },
-                        success: function (response) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Declined!',
-                                text: 'The request has been declined.',
-                                timer: 1500,
-                                showConfirmButton: false
-                            }).then(() => {
-                                location.reload();
+                            // Populate the items in the table
+                            let itemsHtml = '';
+                            data.items.forEach(item => {
+                                itemsHtml += `<tr>
+                                                <td>${item.item}</td>
+                                                <td>${item.qty}</td>
+                                              </tr>`;
                             });
+                            $('#view_request_items').html(itemsHtml); // Set items in the table
+                            $('#viewRequestModal').data('id', requestId); // Store the request ID in the modal
+                        } else {
+                            console.error("No data returned from the server.");
                         }
-                    });
-                }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error fetching request items: ", error);
+                    }
+                });
             });
-        });
 
-        // Approve button handler with SweetAlert + Print
-        $('#saveRequest').on('click', function () {
-            const requestId = $('#viewRequestModal').data('id');
-            if (!requestId) {
-                console.error("No request ID found!");
-                return;
-            }
+            // Decline button handler
+            $('#confirmDecline').on('click', function() {
+                const requestId = $('#viewRequestModal').data('id');
 
-            Swal.fire({
-                title: 'Approve Request?',
-                text: "Are you sure you want to approve this request?",
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, Approve',
-                cancelButtonText: 'Cancel',
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#6c757d',
-                width: '300px'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const itemsToDeduct = [];
-                    $('#view_request_items tr').each(function () {
-                        const itemId = $(this).data('item_id');
-                        const quantity = $(this).find('td:eq(1)').text().trim(); 
-                        itemsToDeduct.push({
-                            id: itemId,
-                            qty: quantity
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You want to decline this request?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, Decline',
+                    cancelButtonText: 'Cancel',
+                    width: '300px',
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: 'update_status.php',
+                            type: 'POST',
+                            data: {
+                                id: requestId,
+                                status: 2
+                            },
+                            success: function(response) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Declined!',
+                                    text: 'The request has been declined.',
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                }).then(() => {
+                                    location.reload();
+                                });
+                            }
                         });
-                    });
+                    }
+                });
+            });
 
-                    $.ajax({
-                        url: 'update_status.php',
-                        type: 'POST',
-                        data: {
-                            id: requestId,
-                            status: 1,
-                            items: itemsToDeduct
-                        },
-                        success: function (response) {
-                            const printContent = `
+            // Approve button handler with SweetAlert + Print
+            $('#saveRequest').on('click', function() {
+                const requestId = $('#viewRequestModal').data('id');
+                if (!requestId) {
+                    console.error("No request ID found!");
+                    return;
+                }
+
+                Swal.fire({
+                    title: 'Approve Request?',
+                    text: "Are you sure you want to approve this request?",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, Approve',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#28a745',
+                    cancelButtonColor: '#6c757d',
+                    width: '300px'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const itemsToDeduct = [];
+                        $('#view_request_items tr').each(function() {
+                            const itemId = $(this).data('item_id');
+                            const quantity = $(this).find('td:eq(1)').text().trim();
+                            itemsToDeduct.push({
+                                id: itemId,
+                                qty: quantity
+                            });
+                        });
+
+                        $.ajax({
+                            url: 'update_status.php',
+                            type: 'POST',
+                            data: {
+                                id: requestId,
+                                status: 1,
+                                date_issued: new Date().toISOString().slice(0, 10),
+                                items: itemsToDeduct
+                            },
+                            success: function(response) {
+                                const printContent = `
                                 <div id="printSection" style="display: none;">
                                     <h3>Request Approved</h3>
                                     <p><strong>Request Number:</strong> ${requestId}</p>
@@ -306,54 +322,54 @@ $result = mysqli_query($conn, $query);
                                     </table>
                                 </div>
                             `;
-                            $('body').append(printContent);
+                                $('body').append(printContent);
 
-                            const printWindow = window.open('', '', 'width=800,height=600');
-                            printWindow.document.write('<html><head><title>Print</title></head><body>');
-                            printWindow.document.write(document.getElementById('printSection').innerHTML);
-                            printWindow.document.write('</body></html>');
-                            printWindow.document.close();
-                            printWindow.focus();
-                            printWindow.print();
-                            printWindow.close();
+                                const printWindow = window.open('', '', 'width=800,height=600');
+                                printWindow.document.write('<html><head><title>Print</title></head><body>');
+                                printWindow.document.write(document.getElementById('printSection').innerHTML);
+                                printWindow.document.write('</body></html>');
+                                printWindow.document.close();
+                                printWindow.focus();
+                                printWindow.print();
+                                printWindow.close();
 
-                            $('#printSection').remove();
+                                $('#printSection').remove();
 
-                            // sweet alert show after printint
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Approved!',
-                                text: 'The request has been approved.',
-                                timer: 1500,
-                                showConfirmButton: false
-                            }).then(() => {
-                                location.reload();
-                            });
-                        },
-                        error: function (xhr, status, error) {
-                            console.error("Error updating status: ", error);
-                        }
-                    });
-                }
-            });
-        });
-
-        // printing
-        $('#printRequestBtn').on('click', function () {
-            const requestId = $('#viewRequestModal').data('id');
-            const itemsToDeduct = [];
-
-            $('#view_request_items tr').each(function () {
-                const itemId = $(this).data('item_id');
-                const quantity = $(this).find('td:eq(1)').text().trim(); 
-                itemsToDeduct.push({
-                    id: itemId,
-                    qty: quantity
+                                // sweet alert show after printint
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Approved!',
+                                    text: 'The request has been approved.',
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                }).then(() => {
+                                    location.reload();
+                                });
+                            },
+                            error: function(xhr, status, error) {
+                                console.error("Error updating status: ", error);
+                            }
+                        });
+                    }
                 });
             });
 
-            // Build printable content
-            const printContent = `
+            // printing
+            $('#printRequestBtn').on('click', function() {
+                const requestId = $('#viewRequestModal').data('id');
+                const itemsToDeduct = [];
+
+                $('#view_request_items tr').each(function() {
+                    const itemId = $(this).data('item_id');
+                    const quantity = $(this).find('td:eq(1)').text().trim();
+                    itemsToDeduct.push({
+                        id: itemId,
+                        qty: quantity
+                    });
+                });
+
+                // Build printable content
+                const printContent = `
                 <div id="printSection" style="display: none;">
                     <h3>Request Approved</h3>
                     <p><strong>Request Number:</strong> ${requestId}</p>
@@ -368,21 +384,19 @@ $result = mysqli_query($conn, $query);
                 </div>
             `;
 
-            $('body').append(printContent);
+                $('body').append(printContent);
 
-            const printWindow = window.open('', '', 'width=800,height=600');
-            printWindow.document.write('<html><head><title>Print</title></head><body>');
-            printWindow.document.write(document.getElementById('printSection').innerHTML);
-            printWindow.document.write('</body></html>');
-            printWindow.document.close();
-            printWindow.focus();
-            printWindow.print();
-            printWindow.close();
+                const printWindow = window.open('', '', 'width=800,height=600');
+                printWindow.document.write('<html><head><title>Print</title></head><body>');
+                printWindow.document.write(document.getElementById('printSection').innerHTML);
+                printWindow.document.write('</body></html>');
+                printWindow.document.close();
+                printWindow.focus();
+                printWindow.print();
+                printWindow.close();
 
-            $('#printSection').remove();
+                $('#printSection').remove();
+            });
+
         });
-
-    });
-</script>
-
-    
+    </script>
