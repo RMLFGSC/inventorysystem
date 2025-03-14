@@ -1,5 +1,5 @@
 <?php
-include("../dbconn/conn.php");
+include("../conn.php");
 
 if (isset($_POST['req_number'])) {
     $req_number = $_POST['req_number'];

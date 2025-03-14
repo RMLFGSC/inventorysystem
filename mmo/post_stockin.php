@@ -1,6 +1,6 @@
 <?php
 session_start();
-include ("../dbconn/conn.php"); 
+include ("../conn.php"); 
 
 // Check if stockin_id is provided
 if (isset($_GET['stockin_id'])) {

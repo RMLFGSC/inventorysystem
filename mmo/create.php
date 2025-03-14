@@ -1,6 +1,6 @@
 <?php
 session_start();
-include("../dbconn/conn.php");
+include("../conn.php");
 
 
 //start of stockin

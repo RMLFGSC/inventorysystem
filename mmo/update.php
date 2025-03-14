@@ -1,5 +1,5 @@
 <?php
-include("../dbconn/conn.php"); 
+include("../conn.php"); 
 
 if (isset($_POST['stockin_id'])) {
     $stockinId = $_POST['stockin_id'];

@@ -1,5 +1,5 @@
 <?php
-include("../dbconn/conn.php"); 
+include("../conn.php"); 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Get the request ID and new status from the POST data
