@@ -236,9 +236,9 @@ $result = mysqli_query($conn, $query);
             <!-- Table Card -->
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                    <h6 class="m-0 font-weight-bold text-primary">Requisition List</h6>
-                    <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#GMCaddRequest">
-                        <i class="fas fa-plus fa-sm text-white-50"></i> Add Request
+                    <h6 class="m-0 font-weight-bold text-primary">Stock-in</h6>
+                    <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#GMCaddStockin">
+                        <i class="fas fa-plus fa-sm text-white-50"></i> Add Stock-in
                     </button>
                 </div>
                 <div class="card-body">

@@ -10,23 +10,13 @@
                     <span>Dashboard</span></a>
             </li>
 
-            <!-- Nav Item - Utilities Collapse Menu -->
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities"
-                    aria-expanded="true" aria-controls="collapseUtilities">
-                    <i class="fas fa-fw fa-boxes"></i>
-                    <span>Inventory</span>
-                </a>
-                <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities"
-                    data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item" href="stockin.php">Stock-in</a>
-                        <!-- <a class="collapse-item" href="stockout.php">Stock-out</a> -->
-                        <!-- <a class="collapse-item" href="overview.php">Stock Overview</a> -->
-                    </div>
-                </div>
-            </li>
 
+            <li class="nav-item">
+                <a class="nav-link" href="stockin.php">
+                <i class="fas fa-fw fa-boxes"></i>
+                    <span>Inventory</span></a>
+            </li>
+           
 
             <li class="nav-item">
                 <a class="nav-link" href="issuance.php">
