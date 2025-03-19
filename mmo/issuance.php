@@ -2,6 +2,19 @@
 include("../includes/header.php");
 include("../includes/navbar_mmo.php");
 
+$req_query = "SELECT req_number FROM request ORDER BY req_id DESC LIMIT 1";
+$req_result = mysqli_query($conn, $req_query);
+$req_row = mysqli_fetch_assoc($req_result);
+
+if ($req_row) {
+    $last_number = (int)substr($req_row['req_number'], 4);
+    $new_number = $last_number + 1;
+} else {
+    $new_number = 1;
+}
+
+$formatted_req_number = 'REQ-' . str_pad($new_number, 5, '0', STR_PAD_LEFT);
+
 //query
 $query = "SELECT request.*, users.fullname AS requester_name, users.department, stock_in.item
           FROM request 
@@ -13,11 +26,6 @@ $query = "SELECT request.*, users.fullname AS requester_name, users.department, 
 $result = mysqli_query($conn, $query);
 ?>
 
-<!-- SweetAlert2 CSS -->
-<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-
-<!-- SweetAlert2 JS -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
 <!-- Content Wrapper -->
@@ -165,8 +173,6 @@ $result = mysqli_query($conn, $query);
     </div>
 </div>
 
-
-
     </div>
     <!-- End of Main Content -->
 
@@ -270,6 +276,8 @@ $result = mysqli_query($conn, $query);
 
             // Approve button handler with SweetAlert
             $('#saveRequest').on('click', function() {
+                $('#viewRequestModal').modal('hide');
+
                 const requestId = $('#viewRequestModal').data('id');
                 if (!requestId) {
                     console.error("No request ID found!");
@@ -277,17 +285,22 @@ $result = mysqli_query($conn, $query);
                 }
 
                 Swal.fire({
-                    title: 'Approve Request?',
-                    text: "Are you sure you want to approve this request?",
-                    icon: 'question',
+                    title: 'Enter Issued By',
+                    input: 'text',
+                    inputPlaceholder: 'Enter name',
                     showCancelButton: true,
-                    confirmButtonText: 'Yes, Approve',
+                    confirmButtonText: 'Submit',
                     cancelButtonText: 'Cancel',
-                    confirmButtonColor: '#28a745',
-                    cancelButtonColor: '#6c757d',
-                    width: '300px'
-                }).then((result) => {
-                    if (result.isConfirmed) {
+                    preConfirm: (issuedBy) => {
+                        if (!issuedBy) {
+                            Swal.showValidationMessage('Please enter a valid name for "Issued By".');
+                        }
+                        return issuedBy;
+                    }
+                }).then((inputResult) => {
+                    if (inputResult.isConfirmed) {
+                        const issuedBy = inputResult.value.trim();
+
                         const itemsToDeduct = [];
                         $('#view_request_items tr').each(function() {
                             const itemId = $(this).data('item_id');
@@ -305,14 +318,14 @@ $result = mysqli_query($conn, $query);
                                 id: requestId,
                                 status: 1,
                                 date_issued: new Date().toISOString().slice(0, 10),
+                                issued_by: issuedBy,
                                 items: itemsToDeduct
                             },
                             success: function(response) {
-                                // Show success message
                                 Swal.fire({
                                     icon: 'success',
                                     title: 'Approved!',
-                                    text: 'The request has been approved.',
+                                    text: 'The request has been approved and issued by: ' + issuedBy,
                                     timer: 1500,
                                     showConfirmButton: false
                                 }).then(() => {
@@ -325,6 +338,11 @@ $result = mysqli_query($conn, $query);
                         });
                     }
                 });
+
+                // Manually focus on the input field after the modal appears
+                setTimeout(() => {
+                    document.querySelector('#swal2-input').focus();
+                }, 100);
             });
 
             // printing
@@ -388,10 +406,10 @@ $result = mysqli_query($conn, $query);
             printWindow.document.write('</table>');
 
             printWindow.document.write('<div class="footer-signatures" style="font-size: 12px;">');
-            printWindow.document.write('<div><strong>Requested By:</strong><br><br>' + requestedBy + '<br>____________________</div>');
-            printWindow.document.write('<div><strong>Received By:</strong><br><br><br>____________________</div>');
-            printWindow.document.write('<div><strong>Issued By:</strong><br><br><br>____________________</div>');
-            printWindow.document.write('<div><strong>Approved By:</strong><br><br><br>____________________</div>');
+            printWindow.document.write('<div><strong>Requested By:</strong><br>' + requestedBy + '<br>____________________</div>');
+            printWindow.document.write('<div><strong>Received By:</strong><br>____________________</div>');
+            printWindow.document.write('<div><strong>Issued By:</strong><br>____________________</div>');
+            printWindow.document.write('<div><strong>Approved By:</strong><br>____________________</div>');
             printWindow.document.write('</div>');
 
             printWindow.document.write('</div>'); 
