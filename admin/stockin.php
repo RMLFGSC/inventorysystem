@@ -161,21 +161,21 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
                     newItemRow.classList.add('form-row', 'item-row', 'mb-3');
 
                     newItemRow.innerHTML = `
-                <div class="form-group col-md-6 col-12">
-                    <label>Item</label>
-                    <input type="text" name="item[]" class="form-control" required>
-                </div>
-                <div class="form-group col-md-6 col-12">
-                    <label>Quantity</label>
-                    <input type="number" name="qty[]" class="form-control" required>
-                </div>
-                <div class="form-group col-md-12">
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input" name="warranty[]" value="1">
-                        <label class="form-check-label">With Warranty?</label>
+                    <div class="form-group col-md-6 col-12">
+                        <label>Item</label>
+                        <input type="text" name="item[]" class="form-control" required>
                     </div>
-                </div>
-                <button type="button" class="btn btn-danger btn-sm removeItem">X</button>
+                    <div class="form-group col-md-6 col-12">
+                        <label>Quantity</label>
+                        <input type="number" name="qty[]" class="form-control" required>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" name="warranty[]" value="1">
+                            <label class="form-check-label">With Warranty?</label>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-danger btn-sm removeItem">X</button>
             `;
 
                     itemFields.appendChild(newItemRow);
@@ -242,7 +242,7 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
                 </div>
         <div class="card-body">
             <div class="table">
-                <table class="table table-borderedr table-hover" id="dataTable" width="100%" cellspacing="0">
+                <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
                     <thead class="thead-light">
                         <tr>
                             <th>Control #</th>

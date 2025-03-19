@@ -1,6 +1,6 @@
 <?php
 session_start();
-include("../dbconn/conn.php"); 
+include("../conn.php"); 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Check if the required POST variables are set

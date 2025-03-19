@@ -42,8 +42,8 @@ if (isset($_POST['addRequest'])) {
 
         if ($stockinRow = mysqli_fetch_assoc($checkResult)) {
             // Insert each item with the same req_number
-            $query = "INSERT INTO request (req_number, user_id, stockin_id, qty, department, date, status) 
-                      VALUES ('$formatted_req_number', '$user_id', '{$stockinRow['stockin_id']}', '$qty', '$department', '$date', '$status')";
+            $query = "INSERT INTO request (req_number, user_id, stockin_id, unassigned_qty, qty, department, date, status) 
+                      VALUES ('$formatted_req_number', '$user_id', '{$stockinRow['stockin_id']}', '$qty', '$qty', '$department', '$date', '$status')";
             
             if (!mysqli_query($conn, $query)) {
                 echo "Error: " . mysqli_error($conn);

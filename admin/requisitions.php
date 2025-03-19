@@ -255,7 +255,6 @@ $result = mysqli_query($conn, $query);
     include("../includes/footer.php");
     ?>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

@@ -175,7 +175,7 @@ $result = mysqli_query($conn, $query);
     include("../includes/footer.php");
     ?>
 
-    <script>
+<script>
         $(document).ready(function() {
             // View request modal functionality
             $('.viewrequest-btn').on('click', function() {
@@ -268,7 +268,7 @@ $result = mysqli_query($conn, $query);
                 });
             });
 
-            // Approve button handler with SweetAlert + Print
+            // Approve button handler with SweetAlert
             $('#saveRequest').on('click', function() {
                 const requestId = $('#viewRequestModal').data('id');
                 if (!requestId) {
@@ -308,34 +308,7 @@ $result = mysqli_query($conn, $query);
                                 items: itemsToDeduct
                             },
                             success: function(response) {
-                                const printContent = `
-                                <div id="printSection" style="display: none;">
-                                    <h3>Request Approved</h3>
-                                    <p><strong>Request Number:</strong> ${requestId}</p>
-                                    <table border="1" cellspacing="0" cellpadding="5" style="width:100%; margin-top:10px;">
-                                        <thead>
-                                            <tr><th>Item</th><th>Quantity</th></tr>
-                                        </thead>
-                                        <tbody>
-                                            ${itemsToDeduct.map(item => `<tr><td>${item.id}</td><td>${item.qty}</td></tr>`).join('')}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            `;
-                                $('body').append(printContent);
-
-                                const printWindow = window.open('', '', 'width=800,height=600');
-                                printWindow.document.write('<html><head><title>Print</title></head><body>');
-                                printWindow.document.write(document.getElementById('printSection').innerHTML);
-                                printWindow.document.write('</body></html>');
-                                printWindow.document.close();
-                                printWindow.focus();
-                                printWindow.print();
-                                printWindow.close();
-
-                                $('#printSection').remove();
-
-                                // sweet alert show after printint
+                                // Show success message
                                 Swal.fire({
                                     icon: 'success',
                                     title: 'Approved!',
@@ -355,47 +328,78 @@ $result = mysqli_query($conn, $query);
             });
 
             // printing
-            $('#printRequestBtn').on('click', function() {
-                const requestId = $('#viewRequestModal').data('id');
-                const itemsToDeduct = [];
+            // Print button functionality
+        $('#printRequestBtn').on('click', function () {
+            const reqNumber = $('#requisitionNumber').val();
+            const requestedBy = $('#requestedBy').val();
+            const department = $('#department').val();
+            const date = $('#date').val();
 
-                $('#view_request_items tr').each(function() {
-                    const itemId = $(this).data('item_id');
-                    const quantity = $(this).find('td:eq(1)').text().trim();
-                    itemsToDeduct.push({
-                        id: itemId,
-                        qty: quantity
-                    });
-                });
+            let printContents = document.getElementById('view_request_items').innerHTML;
 
-                // Build printable content
-                const printContent = `
-                <div id="printSection" style="display: none;">
-                    <h3>Request Approved</h3>
-                    <p><strong>Request Number:</strong> ${requestId}</p>
-                    <table border="1" cellspacing="0" cellpadding="5" style="width:100%; margin-top:10px;">
-                        <thead>
-                            <tr><th>Item</th><th>Quantity</th></tr>
-                        </thead>
-                        <tbody>
-                            ${itemsToDeduct.map(item => `<tr><td>${item.id}</td><td>${item.qty}</td></tr>`).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
+            let printWindow = window.open('', '', 'height=1000,width=1000');
 
-                $('body').append(printContent);
+            printWindow.document.write('<html><head><title>.</title>');
+            printWindow.document.write('<style>');
+            printWindow.document.write('body { font-family: "Arial", sans-serif; margin: 20px; color: #333; text-align: left; }');
+            printWindow.document.write('.header { text-align: center; margin-bottom: 40px; }');
+            printWindow.document.write('.header h1 { font-size: 20px; color: #000; font-weight: 700; margin-bottom: 5px; }');
+            printWindow.document.write('.header h2 { font-size: 15px; color: #666; margin-top: 0; font-weight: 400; }');
+            printWindow.document.write('.meta-data { display: flex; justify-content: space-between; font-size: 14px; color: #555; margin-bottom: 20px; padding: 5px 0; border-bottom: 1px solid #eee; }');
+            printWindow.document.write('.table-container { margin-top: 20px; width: 100%; border-collapse: collapse; }');
+            printWindow.document.write('table { width: 100%; margin-bottom: 20px; border-collapse: collapse; }');
+            printWindow.document.write('th, td { padding: 12px 15px; text-align: left; font-size: 12px; border: 1px solid #000; }');
+            printWindow.document.write('th { background-color: #f4f4f4; color: #333; font-weight: 600; }');
+            printWindow.document.write('tbody tr:nth-child(even) { background-color: #f9f9f9; }');
+            printWindow.document.write('.footer { margin-top: 30px; font-size: 12px; color: #555; text-align: center; padding-top: 20px; border-top: 1px solid #ddd; }');
+            printWindow.document.write('.footer-signatures { margin-top: 30px; display: flex; justify-content: space-between; font-size: 14px; }');
+            printWindow.document.write('.footer-signatures div { text-align: center; width: 23%; }');
+            printWindow.document.write('.footer-signatures div p { margin-top: 50px; border-top: 1px solid #ddd; padding-top: 5px; }');
+            printWindow.document.write('@media print { .container { width: 100%; max-width: 100%; } }');
 
-                const printWindow = window.open('', '', 'width=800,height=600');
-                printWindow.document.write('<html><head><title>Print</title></head><body>');
-                printWindow.document.write(document.getElementById('printSection').innerHTML);
-                printWindow.document.write('</body></html>');
-                printWindow.document.close();
-                printWindow.focus();
-                printWindow.print();
-                printWindow.close();
+            // force landscape printing
+            printWindow.document.write('@page { size: A4 landscape; }');
 
-                $('#printSection').remove();
+            printWindow.document.write('</style>');
+            printWindow.document.write('</head><body>');
+
+            // Add current date and time
+            const currentDate = new Date();
+            const formattedDate = currentDate.toLocaleString(); 
+            printWindow.document.write('<div style="text-align: right; font-size: 12px;">' + formattedDate + '</div>'); 
+
+            printWindow.document.write('<div class="container">');
+            printWindow.document.write('<div class="header" style="margin-bottom: 20px;">');
+            printWindow.document.write('<h1>GENSAN MEDICAL CENTER</h1>');
+            printWindow.document.write('<div><strong>Issued Date:</strong> ' + new Date().toLocaleDateString() + '</div>');
+            printWindow.document.write('</div>');
+
+            printWindow.document.write('<div class="meta-data" style="text-align: left; width: 100%;">');
+            printWindow.document.write('<div style="float: left; margin-right: 20px;">');
+            printWindow.document.write('<div style="margin-bottom: 5px;"><strong>Requisition #:</strong> ' + reqNumber + '</div>');
+            printWindow.document.write('<div style="margin-bottom: 5px;"><strong>Requesting Department:</strong> ' + department + '</div>');
+            printWindow.document.write('</div>');
+            printWindow.document.write('</div>');
+
+            // Table with normal look
+            printWindow.document.write('<table>');
+            printWindow.document.write('<thead><tr><th>Item Description</th><th>Quantity</th></tr></thead>');
+            printWindow.document.write('<tbody>' + printContents + '</tbody>');
+            printWindow.document.write('</table>');
+
+            printWindow.document.write('<div class="footer-signatures" style="font-size: 12px;">');
+            printWindow.document.write('<div><strong>Requested By:</strong><br><br>' + requestedBy + '<br>____________________</div>');
+            printWindow.document.write('<div><strong>Received By:</strong><br><br><br>____________________</div>');
+            printWindow.document.write('<div><strong>Issued By:</strong><br><br><br>____________________</div>');
+            printWindow.document.write('<div><strong>Approved By:</strong><br><br><br>____________________</div>');
+            printWindow.document.write('</div>');
+
+            printWindow.document.write('</div>'); 
+            printWindow.document.write('</body></html>');
+
+            printWindow.document.close();
+            printWindow.print();
+            printWindow.close();
             });
 
         });

@@ -29,7 +29,7 @@
                     <div class="bg-white py-2 collapse-inner rounded">
                         <a class="collapse-item" href="stockin.php">Stock-in</a>
                         <!-- <a class="collapse-item" href="stockout.php">Stock-out</a> -->
-                        <a class="collapse-item" href="overview.php">Stock Overview</a>
+                        <!-- <a class="collapse-item" href="overview.php">Stock Overview</a> -->
                     </div>
                 </div>
             </li>

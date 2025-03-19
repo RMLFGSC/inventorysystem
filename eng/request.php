@@ -23,7 +23,7 @@ $formatted_req_number = 'REQ-' . str_pad($new_number, 5, '0', STR_PAD_LEFT);
 $current_user_id = $_SESSION['auth_user']['user_id'];
 
 //query
-$query = "SELECT request.req_number, request.date, request.status, stock_in.item, stock_in.qty, request.is_posted
+$query = "SELECT request.req_number, request.date, request.status, stock_in.item, request.qty, request.is_posted
           FROM request 
           JOIN stock_in ON request.stockin_id = stock_in.stockin_id
           WHERE request.user_id = '$current_user_id' AND request.req_id IN (SELECT MIN(req_id) 
@@ -243,7 +243,6 @@ $result = mysqli_query($conn, $query);
     </div>
     <!-- End of Main Content -->
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Add new item row
