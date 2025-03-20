@@ -1,5 +1,5 @@
 <?php
-include("../conn.php"); 
+include("../conn.php");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Get the request ID, new status, issued_by, date_issued, date_approved, date_declined from the POST data
@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $removedItems = isset($_POST['removed_items']) ? $_POST['removed_items'] : []; // Expecting an array of item IDs to remove
 
     // Log incoming data
-    error_log("Request ID: $requestId");
+    error_log("Received request ID: $requestId");
     error_log("Status: $status");
     error_log("Issued By: $issued_by");
     error_log("Date Issued: $date_issued");
@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     error_log("Removed Items: " . json_encode($removedItems));
 
     // Check if the request ID and status are valid
-    if ($requestId > 0 && ($status === 1 || $status === 2)) { 
+    if ($requestId > 0 && ($status === 1 || $status === 2)) {
         // Prepare the SQL statement to update the status, issued_by, date_issued, date_approved, date_declined, and declined_by
         $query = "UPDATE request SET status = ?, issued_by = ?, date_issued = ?, date_approved = ?, date_declined = ?, declined_by = ? WHERE req_id = ?";
         $stmt = $conn->prepare($query);
@@ -35,22 +35,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             foreach ($updatedItems as $item) {
                 $itemId = intval($item['id']);
                 $quantity = intval($item['qty']);
-                $updateQuery = "UPDATE stockin SET qty = qty - ? WHERE stockin_id = ?";
+                $updateQuery = "UPDATE stock_in SET qty = qty - ? WHERE stockin_id = ?"; // Corrected table name
                 $updateStmt = $conn->prepare($updateQuery);
                 $updateStmt->bind_param("ii", $quantity, $itemId);
+
+                error_log("Updating stock_in: stockin_id = $itemId, qty = $quantity"); // Log the values
+                error_log("Executing query: $updateQuery with params: qty = $quantity, stockin_id = $itemId");
+
                 if (!$updateStmt->execute()) {
-                    error_log("Error updating stockin for item ID $itemId: " . $updateStmt->error);
+                    error_log("Error updating stock_in for item ID $itemId: " . $updateStmt->error);
                 }
                 $updateStmt->close();
             }
 
-            // Remove items if any
+            // Remove items if any (using is_posted to hide)
             foreach ($removedItems as $itemId) {
-                $hideQuery = "UPDATE stockin SET status = 'hidden' WHERE stockin_id = ?";
+                $hideQuery = "UPDATE stock_in SET is_posted = 0 WHERE stockin_id = ?"; // Corrected table name and hiding logic
                 $hideStmt = $conn->prepare($hideQuery);
                 $hideStmt->bind_param("i", $itemId);
+
+                error_log("Hiding stock_in: stockin_id = $itemId"); // Log the value
+
                 if (!$hideStmt->execute()) {
-                    error_log("Error hiding stockin for item ID $itemId: " . $hideStmt->error);
+                    error_log("Error hiding stock_in for item ID $itemId: " . $hideStmt->error);
+                    echo json_encode(['success' => false, 'error' => 'Failed to hide item with ID ' . $itemId]);
+                    return; // Exit after logging the error
                 }
                 $hideStmt->close();
             }
