@@ -15,8 +15,7 @@ $query = "
         s.orig_qty,
         r.issued_by, 
         r.date_issued, 
-        fa.assigned_to, 
-        au.fullname AS assigned_to_name,
+        fa.owner, 
         fa.location, 
         r.status 
     FROM 
@@ -27,8 +26,6 @@ $query = "
         fixed_assets fa ON r.req_number = fa.req_id 
     LEFT JOIN
         stock_in s ON r.stockin_id = s.stockin_id
-    LEFT JOIN
-        users au ON fa.assigned_to = au.user_id
     WHERE 
         1=1"; // Assuming 'requestor_id' in request table corresponds to 'id' in users table
 
@@ -104,7 +101,7 @@ $result = mysqli_query($conn, $query);
                                         <td><?= $row['orig_qty']; ?></td>
                                         <td><?= $row['issued_by']; ?></td>
                                         <td><?= $row['date_issued']; ?></td>
-                                        <td><?= $row['assigned_to_name']; ?></td>
+                                        <td><?= $row['owner']; ?></td>
                                         <td><?= $row['location']; ?></td>
                                     </tr>
                                 <?php endwhile; ?>

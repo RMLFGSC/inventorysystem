@@ -5,7 +5,7 @@ include("../includes/navbar_admin.php");
 $startDate = $_GET['start_date'] ?? null;
 $endDate = $_GET['end_date'] ?? null;
 
-$query = "SELECT req_id, req_number, u.fullname AS requestor, r.qty, s.item, s.category, u.department, r.status, r.date_approved 
+$query = "SELECT req_id, req_number, u.fullname AS requestor, r.qty, s.item, s.category, u.department, r.status, r.date_issued 
           FROM request r 
           JOIN users u ON r.user_id = u.user_id 
           JOIN stock_in s ON r.stockin_id = s.stockin_id WHERE 1=1";
@@ -58,7 +58,7 @@ $result = mysqli_query($conn, $query);
                         <table class="datatables-basic table table-bordered" id="dataTable" width="100%">
                             <thead>
                                 <tr>
-                                    <th>Request Number</th>
+                                    <th>Request #</th>
                                     <th>Requestor</th>
                                     <th>Department</th>
                                     <th>Item</th>
@@ -81,7 +81,7 @@ $result = mysqli_query($conn, $query);
                                         <td><?= $row['item']; ?></td>
                                         <td><?= $row['category']; ?></td>
                                         <td><?= $row['qty']; ?></td>
-                                        <td><?= $row['date_approved']; ?></td>
+                                        <td><?= $row['date_issued']; ?></td>
                                         <td><?= $statusText; ?></td>
                                     </tr>
                                 <?php endwhile; ?>
