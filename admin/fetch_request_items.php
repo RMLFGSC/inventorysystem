@@ -6,7 +6,7 @@ if (isset($_POST['req_number'])) {
 
     // Query to fetch the requisition details along with stock-in items
     $query = "SELECT r.req_number, r.date, u.fullname AS requester_name, u.department, 
-                     s.item, r.qty, r.issued_by, r.date_issued, r.date_declined
+                     s.item, r.qty, r.issued_by, r.date_issued, r.declined_by, r.date_declined
               FROM request r 
               JOIN stock_in s ON r.stockin_id = s.stockin_id 
               JOIN users u ON r.user_id = u.user_id 
@@ -32,6 +32,7 @@ if (isset($_POST['req_number'])) {
             'department' => $firstItem['department'],
             'issued_by' => $firstItem['issued_by'],
             'date_issued' => $firstItem['date_issued'],
+            'declined_by' => $firstItem['declined_by'],
             'date_declined' => $firstItem['date_declined'],
             'items' => $items // Return all items
         ]);
@@ -43,6 +44,7 @@ if (isset($_POST['req_number'])) {
             'department' => '',
             'issued_by' => '',
             'date_issued' => '',
+            'declined_by' => '',
             'date_declined' => '',
             'items' => []
         ]);
@@ -57,6 +59,7 @@ if (isset($_POST['req_number'])) {
         'department' => '',
         'issued_by' => '',
         'date_issued' => '',
+        'declined_by' => '',
         'date_declined' => '',
         'items' => []
     ]);

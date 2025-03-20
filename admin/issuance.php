@@ -13,11 +13,7 @@ $query = "SELECT request.*, users.fullname AS requester_name, users.department, 
 $result = mysqli_query($conn, $query);
 ?>
 
-<!-- SweetAlert2 CSS -->
-<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 
-<!-- SweetAlert2 JS -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
 <!-- Content Wrapper -->
@@ -33,9 +29,7 @@ $result = mysqli_query($conn, $query);
 
 
 
-       
-
-<div class="modal fade" id="viewRequestModal" tabindex="-1" role="dialog"
+        <div class="modal fade" id="viewRequestModal" tabindex="-1" role="dialog"
             aria-labelledby="viewRequestModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                 <div class="modal-content">
@@ -74,7 +68,7 @@ $result = mysqli_query($conn, $query);
                             </div>
                             <div class="col-md-6">
                                 <label>Issued Date</label>
-                                <input type="text" id="issuedDate" name="date_issued" class="form-control" readonly>
+                                <input type="text" id="issuedDate" name="issued_date" class="form-control" readonly>
                             </div>
                         </div>
                         <div class="row mb-3">
@@ -84,7 +78,7 @@ $result = mysqli_query($conn, $query);
                             </div>
                             <div class="col-md-6">
                                 <label>Decline Date</label>
-                                <input type="text" id="declineDate" name="date_declined" class="form-control" readonly>
+                                <input type="text" id="declineDate" name="decline_date" class="form-control" readonly>
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -121,73 +115,80 @@ $result = mysqli_query($conn, $query);
                 </div>
             </div>
         </div>
-
+        <!--End of view modal-->
         <div class="container-fluid">
- 
-    <!-- Table Card -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3 d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold text-primary">Issuance List</h6>
-        </div>
-        <div class="card-body">
-            <div class="table">
-                <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
-                    <thead class="thead-light">
-                        <tr>
-                            <th>Req Number</th>
-                            <th>Requester</th>
-                            <th>Department</th>
-                            <th>Date</th>
-                            <th>Status</th>
-                            <th class="text-center">Actions</th>
-                        </tr>
-                    </thead>
 
-                    <tbody>
-                        <?php while ($row = mysqli_fetch_assoc($result)): ?>
-                            <tr>
-                                <td><?php echo $row['req_number']; ?></td>
-                                <td><?php echo $row['requester_name']; ?></td>
-                                <td><?php echo $row['department']; ?></td>
-                                <td><?php echo $row['date']; ?></td>
-                                <td>
-                                    <?php
-                                    if ($row['status'] == 0) {
-                                        echo '<span class="badge badge-warning">Pending</span>';
-                                    } elseif ($row['status'] == 1) {
-                                        echo '<span class="badge badge-success">Served</span>';
-                                    } elseif ($row['status'] == 2) {
-                                        echo '<span class="badge badge-danger">Declined</span>';
-                                    }
-                                    ?>
-                                </td>
-                                <td class="text-center">
-                                    <button type="button" data-toggle="modal" data-target="#viewRequestModal"
-                                        class="btn btn-sm btn-warning viewrequest-btn"
-                                        data-id="<?php echo $row['req_id']; ?>"
-                                        data-req_number="<?php echo $row['req_number']; ?>"
-                                        data-status="<?php echo $row['status']; ?>">
-                                        <i class="fa-solid fa-eye text-white"></i>
-                                    </button>
+            <!-- Table Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Issuance List</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table">
+                        <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Req Number</th>
+                                    <th>Requester</th>
+                                    <th>Department</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th class="text-center">Actions</th>
+                                </tr>
+                            </thead>
 
-                                    <?php if ($row['status'] == 0): ?>
-                                        <button type="button" data-toggle="modal" data-target="#editRequestModal"
-                                            class="btn btn-sm btn-primary editrequest-btn"
-                                            data-id="<?php echo $row['req_id']; ?>">
-                                            <i class="fa-solid fa-pencil-alt"></i>
-                                        </button>
-                                    <?php endif; ?>
-                                </td>
-                            </tr>
-                        <?php endwhile; ?>
-                    </tbody>
-                </table>
+                            <tbody>
+                                <?php while ($row = mysqli_fetch_assoc($result)): ?>
+                                    <tr>
+                                        <td><?php echo $row['req_number']; ?></td>
+                                        <td><?php echo $row['requester_name']; ?></td>
+                                        <td><?php echo $row['department']; ?></td>
+                                        <td><?php echo $row['date']; ?></td>
+                                        <td>
+                                            <?php
+                                            if ($row['status'] == 0) {
+                                                echo '<span class="badge badge-warning">Pending</span>';
+                                            } elseif ($row['status'] == 1) {
+                                                echo '<span class="badge badge-success">Served</span>';
+                                            } elseif ($row['status'] == 2) {
+                                                echo '<span class="badge badge-danger">Declined</span>';
+                                            }
+                                            ?>
+                                        </td>
+                                        <td class="text-center">
+                                            <?php if ($row['status'] == 0): ?>
+                                                <button type="button" data-toggle="modal" data-target="#viewRequestModal"
+                                                    class="btn btn-sm btn-success viewrequest-btn"
+                                                    data-id="<?php echo $row['req_id']; ?>"
+                                                    data-req_number="<?php echo $row['req_number']; ?>"
+                                                    data-status="<?php echo $row['status']; ?>">
+                                                    <i class="fa fa-check text-white"></i> 
+                                                </button>
+                                            <?php else: ?>
+                                                <button type="button" data-toggle="modal" data-target="#viewRequestModal"
+                                                    class="btn btn-sm btn-warning viewrequest-btn"
+                                                    data-id="<?php echo $row['req_id']; ?>"
+                                                    data-req_number="<?php echo $row['req_number']; ?>"
+                                                    data-status="<?php echo $row['status']; ?>">
+                                                    <i class="fa-solid fa-eye text-white"></i> 
+                                                </button>
+                                            <?php endif; ?>
+                                            <?php if ($row['status'] == 0): ?>
+                                                <button type="button" data-toggle="modal" data-target="#editRequestModal"
+                                                    class="btn btn-sm btn-primary editrequest-btn"
+                                                    data-id="<?php echo $row['req_id']; ?>">
+                                                    <i class="fa-solid fa-pencil-alt"></i>
+                                                </button>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                <?php endwhile; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
-
-
 
     </div>
     <!-- End of Main Content -->
@@ -197,7 +198,7 @@ $result = mysqli_query($conn, $query);
     include("../includes/footer.php");
     ?>
 
-<script>
+    <script>
         $(document).ready(function() {
             // View request modal functionality
             $('.viewrequest-btn').on('click', function() {
@@ -210,7 +211,7 @@ $result = mysqli_query($conn, $query);
 
                 // Fetch request items and details via AJAX
                 $.ajax({
-                    url: 'fetch_request_items.php', 
+                    url: 'fetch_request_items.php', // Update to the correct PHP file
                     type: 'POST',
                     data: {
                         req_number: reqno
@@ -218,47 +219,48 @@ $result = mysqli_query($conn, $query);
                     dataType: 'json', // Expect JSON response
                     success: function(data) {
                         if (data) {
-                            $('#requestedBy').val(data.requester_name); 
-                            $('#department').val(data.department); 
-                            $('#requisitionNumber').val(data.req_number); 
+                            $('#requestedBy').val(data.requester_name);
+                            $('#department').val(data.department);
+                            $('#requisitionNumber').val(data.req_number);
                             $('#date').val(data.date || 'N/A'); // Set date or N/A
 
                             // Check the status and show/hide relevant fields
                             if (status == 1) { // If the status is "Approved"
-                                $('#issuedBy').val(data.issued_by || 'N/A'); 
-                                $('#issuedDate').val(data.date_issued || 'N/A'); 
-                                $('#declinedBy').val('N/A'); 
-                                $('#declineDate').val('N/A'); 
-                                $('#issuedBy').closest('.row').show(); 
-                                $('#issuedDate').closest('.row').show(); 
-                                $('#declinedBy').closest('.row').hide(); 
-                                $('#declineDate').closest('.row').hide(); 
-                                $('#printRequestBtn').show(); 
-                                $('#action-buttons').hide(); 
+                                $('#issuedBy').val(data.issued_by || 'N/A');
+                                $('#issuedDate').val(data.date_issued || 'N/A');
+                                $('#declinedBy').val('N/A');
+                                $('#declineDate').val('N/A');
+                                $('#issuedBy').closest('.row').show();
+                                $('#issuedDate').closest('.row').show();
+                                $('#declinedBy').closest('.row').hide();
+                                $('#declineDate').closest('.row').hide();
+                                $('#printRequestBtn').show();
+                                $('#action-buttons').hide();
                             } else if (status == 2) { // If the status is "Declined"
-                                $('#declinedBy').val(data.declined_by || 'N/A'); 
-                                $('#declineDate').val(data.date_declined || 'N/A'); 
-                                $('#issuedBy').val('N/A'); 
-                                $('#issuedDate').val('N/A'); 
-                                $('#declinedBy').closest('.row').show(); 
-                                $('#declineDate').closest('.row').show(); 
-                                $('#issuedBy').closest('.row').hide(); 
-                                $('#issuedDate').closest('.row').hide(); 
-                                $('#printRequestBtn').hide(); 
-                                $('#action-buttons').hide(); 
+                                $('#declinedBy').val(data.declined_by || 'N/A');
+                                $('#declineDate').val(data.date_declined || 'N/A');
+                                $('#issuedBy').val('N/A');
+                                $('#issuedDate').val('N/A');
+                                $('#declinedBy').closest('.row').show();
+                                $('#declineDate').closest('.row').show();
+                                $('#issuedBy').closest('.row').hide();
+                                $('#issuedDate').closest('.row').hide();
+                                $('#printRequestBtn').hide();
+                                $('#action-buttons').hide();
                             } else { // If the status is "Pending"
-                                $('#issuedBy').val('N/A'); 
-                                $('#issuedDate').val('N/A'); 
-                                $('#declinedBy').val('N/A'); 
-                                $('#declineDate').val('N/A'); 
-                                $('#issuedBy').closest('.row').show(); 
-                                $('#issuedDate').closest('.row').show(); 
-                                $('#declinedBy').closest('.row').show(); 
-                                $('#declineDate').closest('.row').show(); 
-                                $('#printRequestBtn').hide(); 
-                                $('#action-buttons').show(); 
+                                $('#issuedBy').val('N/A');
+                                $('#issuedDate').val('N/A');
+                                $('#declinedBy').val('N/A');
+                                $('#declineDate').val('N/A');
+                                $('#issuedBy').closest('.row').show();
+                                $('#issuedDate').closest('.row').show();
+                                $('#declinedBy').closest('.row').show();
+                                $('#declineDate').closest('.row').show();
+                                $('#printRequestBtn').hide();
+                                $('#action-buttons').show();
                             }
 
+                            // Populate the items in the table
                             let itemsHtml = '';
                             data.items.forEach(item => {
                                 itemsHtml += `<tr>
@@ -320,8 +322,8 @@ $result = mysqli_query($conn, $query);
                                     data: {
                                         id: requestId,
                                         status: 2,
-                                        declined_by: declinedBy, 
-                                        date_declined: new Date().toISOString().slice(0, 10) 
+                                        declined_by: declinedBy,
+                                        date_declined: new Date().toISOString().slice(0, 10)
                                     },
                                     success: function(response) {
                                         Swal.fire({
@@ -414,77 +416,77 @@ $result = mysqli_query($conn, $query);
 
             // printing
             // Print button functionality
-        $('#printRequestBtn').on('click', function () {
-            const reqNumber = $('#requisitionNumber').val();
-            const requestedBy = $('#requestedBy').val();
-            const department = $('#department').val();
-            const date = $('#date').val();
+            $('#printRequestBtn').on('click', function() {
+                const reqNumber = $('#requisitionNumber').val();
+                const requestedBy = $('#requestedBy').val();
+                const department = $('#department').val();
+                const date = $('#date').val();
 
-            let printContents = document.getElementById('view_request_items').innerHTML;
+                let printContents = document.getElementById('view_request_items').innerHTML;
 
-            let printWindow = window.open('', '', 'height=1000,width=1000');
+                let printWindow = window.open('', '', 'height=1000,width=1000');
 
-            printWindow.document.write('<html><head><title>.</title>');
-            printWindow.document.write('<style>');
-            printWindow.document.write('body { font-family: "Arial", sans-serif; margin: 20px; color: #333; text-align: left; }');
-            printWindow.document.write('.header { text-align: center; margin-bottom: 40px; }');
-            printWindow.document.write('.header h1 { font-size: 20px; color: #000; font-weight: 700; margin-bottom: 5px; }');
-            printWindow.document.write('.header h2 { font-size: 15px; color: #666; margin-top: 0; font-weight: 400; }');
-            printWindow.document.write('.meta-data { display: flex; justify-content: space-between; font-size: 14px; color: #555; margin-bottom: 20px; padding: 5px 0; border-bottom: 1px solid #eee; }');
-            printWindow.document.write('.table-container { margin-top: 20px; width: 100%; border-collapse: collapse; }');
-            printWindow.document.write('table { width: 100%; margin-bottom: 20px; border-collapse: collapse; }');
-            printWindow.document.write('th, td { padding: 12px 15px; text-align: left; font-size: 12px; border: 1px solid #000; }');
-            printWindow.document.write('th { background-color: #f4f4f4; color: #333; font-weight: 600; }');
-            printWindow.document.write('tbody tr:nth-child(even) { background-color: #f9f9f9; }');
-            printWindow.document.write('.footer { margin-top: 30px; font-size: 12px; color: #555; text-align: center; padding-top: 20px; border-top: 1px solid #ddd; }');
-            printWindow.document.write('.footer-signatures { margin-top: 30px; display: flex; justify-content: space-between; font-size: 14px; }');
-            printWindow.document.write('.footer-signatures div { text-align: center; width: 23%; }');
-            printWindow.document.write('.footer-signatures div p { margin-top: 50px; border-top: 1px solid #ddd; padding-top: 5px; }');
-            printWindow.document.write('@media print { .container { width: 100%; max-width: 100%; } }');
+                printWindow.document.write('<html><head><title>.</title>');
+                printWindow.document.write('<style>');
+                printWindow.document.write('body { font-family: "Arial", sans-serif; margin: 20px; color: #333; text-align: left; }');
+                printWindow.document.write('.header { text-align: center; margin-bottom: 40px; }');
+                printWindow.document.write('.header h1 { font-size: 20px; color: #000; font-weight: 700; margin-bottom: 5px; }');
+                printWindow.document.write('.header h2 { font-size: 15px; color: #666; margin-top: 0; font-weight: 400; }');
+                printWindow.document.write('.meta-data { display: flex; justify-content: space-between; font-size: 14px; color: #555; margin-bottom: 20px; padding: 5px 0; border-bottom: 1px solid #eee; }');
+                printWindow.document.write('.table-container { margin-top: 20px; width: 100%; border-collapse: collapse; }');
+                printWindow.document.write('table { width: 100%; margin-bottom: 20px; border-collapse: collapse; }');
+                printWindow.document.write('th, td { padding: 12px 15px; text-align: left; font-size: 12px; border: 1px solid #000; }');
+                printWindow.document.write('th { background-color: #f4f4f4; color: #333; font-weight: 600; }');
+                printWindow.document.write('tbody tr:nth-child(even) { background-color: #f9f9f9; }');
+                printWindow.document.write('.footer { margin-top: 30px; font-size: 12px; color: #555; text-align: center; padding-top: 20px; border-top: 1px solid #ddd; }');
+                printWindow.document.write('.footer-signatures { margin-top: 30px; display: flex; justify-content: space-between; font-size: 14px; }');
+                printWindow.document.write('.footer-signatures div { text-align: center; width: 23%; }');
+                printWindow.document.write('.footer-signatures div p { margin-top: 50px; border-top: 1px solid #ddd; padding-top: 5px; }');
+                printWindow.document.write('@media print { .container { width: 100%; max-width: 100%; } }');
 
-            // force landscape printing
-            printWindow.document.write('@page { size: A4 landscape; }');
+                // force landscape printing
+                printWindow.document.write('@page { size: A4 landscape; }');
 
-            printWindow.document.write('</style>');
-            printWindow.document.write('</head><body>');
+                printWindow.document.write('</style>');
+                printWindow.document.write('</head><body>');
 
-            // Add current date and time
-            const currentDate = new Date();
-            const formattedDate = currentDate.toLocaleString(); 
-            printWindow.document.write('<div style="text-align: right; font-size: 12px;">' + formattedDate + '</div>'); 
+                // Add current date and time
+                const currentDate = new Date();
+                const formattedDate = currentDate.toLocaleString();
+                printWindow.document.write('<div style="text-align: right; font-size: 12px;">' + formattedDate + '</div>');
 
-            printWindow.document.write('<div class="container">');
-            printWindow.document.write('<div class="header" style="margin-bottom: 20px;">');
-            printWindow.document.write('<h1>GENSAN MEDICAL CENTER</h1>');
-            printWindow.document.write('<div><strong>Issued Date:</strong> ' + new Date().toLocaleDateString() + '</div>');
-            printWindow.document.write('</div>');
+                printWindow.document.write('<div class="container">');
+                printWindow.document.write('<div class="header" style="margin-bottom: 20px;">');
+                printWindow.document.write('<h1>GENSAN MEDICAL CENTER</h1>');
+                printWindow.document.write('<div><strong>Issued Date:</strong> ' + new Date().toLocaleDateString() + '</div>');
+                printWindow.document.write('</div>');
 
-            printWindow.document.write('<div class="meta-data" style="text-align: left; width: 100%;">');
-            printWindow.document.write('<div style="float: left; margin-right: 20px;">');
-            printWindow.document.write('<div style="margin-bottom: 5px;"><strong>Requisition #:</strong> ' + reqNumber + '</div>');
-            printWindow.document.write('<div style="margin-bottom: 5px;"><strong>Requesting Department:</strong> ' + department + '</div>');
-            printWindow.document.write('</div>');
-            printWindow.document.write('</div>');
+                printWindow.document.write('<div class="meta-data" style="text-align: left; width: 100%;">');
+                printWindow.document.write('<div style="float: left; margin-right: 20px;">');
+                printWindow.document.write('<div style="margin-bottom: 5px;"><strong>Requisition #:</strong> ' + reqNumber + '</div>');
+                printWindow.document.write('<div style="margin-bottom: 5px;"><strong>Requesting Department:</strong> ' + department + '</div>');
+                printWindow.document.write('</div>');
+                printWindow.document.write('</div>');
 
-            // Table with normal look
-            printWindow.document.write('<table>');
-            printWindow.document.write('<thead><tr><th>Item Description</th><th>Quantity</th></tr></thead>');
-            printWindow.document.write('<tbody>' + printContents + '</tbody>');
-            printWindow.document.write('</table>');
+                // Table with normal look
+                printWindow.document.write('<table>');
+                printWindow.document.write('<thead><tr><th>Item Description</th><th>Quantity</th></tr></thead>');
+                printWindow.document.write('<tbody>' + printContents + '</tbody>');
+                printWindow.document.write('</table>');
 
-            printWindow.document.write('<div class="footer-signatures" style="font-size: 12px;">');
-            printWindow.document.write('<div><strong>Requested By:</strong><br>' + requestedBy + '<br>____________________</div>');
-            printWindow.document.write('<div><strong>Received By:</strong><br>____________________</div>');
-            printWindow.document.write('<div><strong>Issued By:</strong><br>____________________</div>');
-            printWindow.document.write('<div><strong>Approved By:</strong><br>____________________</div>');
-            printWindow.document.write('</div>');
+                printWindow.document.write('<div class="footer-signatures" style="font-size: 12px;">');
+                printWindow.document.write('<div><strong>Requested By:</strong><br>' + requestedBy + '<br>____________________</div>');
+                printWindow.document.write('<div><strong>Received By:</strong><br>____________________</div>');
+                printWindow.document.write('<div><strong>Issued By:</strong><br>____________________</div>');
+                printWindow.document.write('<div><strong>Approved By:</strong><br>____________________</div>');
+                printWindow.document.write('</div>');
 
-            printWindow.document.write('</div>'); 
-            printWindow.document.write('</body></html>');
+                printWindow.document.write('</div>');
+                printWindow.document.write('</body></html>');
 
-            printWindow.document.close();
-            printWindow.print();
-            printWindow.close();
+                printWindow.document.close();
+                printWindow.print();
+                printWindow.close();
             });
 
         });

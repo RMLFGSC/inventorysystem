@@ -103,32 +103,19 @@ $result = mysqli_query($conn, $query);
                                     <th>Qty</th>
                                     <th>User</th>
                                     <th>Department</th>
-                                    <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php
-                                 $detailedQuery = "
-                                 SELECT 
-                                     COALESCE(fa.serial_number, 'N/A') AS serial_number,
-                                     si.item,
-                                     CASE 
-                                         WHEN fa.serial_number IS NOT NULL THEN fa.qty
-                                         ELSE r.unassigned_qty
-                                     END AS qty,
-                                     COALESCE(fa.owner, 'None') AS user,
-                                     COALESCE(fa.department, r.department) AS department,
-                                     CASE 
-                                         WHEN fa.serial_number IS NOT NULL THEN 'In Use'
-                                         ELSE 'Unassigned'
-                                     END AS status
-                                 FROM stock_in si
-                                 LEFT JOIN request r ON si.stockin_id = r.stockin_id
-                                 LEFT JOIN fixed_assets fa ON si.item = fa.stockin_item
-                                 WHERE si.is_posted = 1;
-                             
-                             
-                                    ";
+                                    $detailedQuery = "
+                                    SELECT 
+                                        fa.serial_number,
+                                        fa.stockin_item AS item,
+                                        fa.qty,
+                                        fa.owner AS user,
+                                        fa.department
+                                    FROM fixed_assets fa
+                                ";
 
                                     // Apply date filter if provided
                                     if (!empty($startDate) && !empty($endDate)) {
@@ -144,7 +131,6 @@ $result = mysqli_query($conn, $query);
                                         <td><?= htmlspecialchars($drow['qty']); ?></td>
                                         <td><?= htmlspecialchars($drow['user']); ?></td>
                                         <td><?= htmlspecialchars($drow['department']); ?></td>
-                                        <td><?= htmlspecialchars($drow['status']); ?></td>
                                     </tr>
                                 <?php endwhile; ?>
                             </tbody>
