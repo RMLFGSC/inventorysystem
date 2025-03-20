@@ -73,6 +73,26 @@ $result = mysqli_query($conn, $query);
                                 <input type="text" id="date" name="date" class="form-control" readonly>
                             </div>
                         </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label>Issued By</label>
+                                <input type="text" id="issuedBy" name="issued_by" class="form-control" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Issued Date</label>
+                                <input type="text" id="issuedDate" name="issued_date" class="form-control" readonly>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label>Declined By</label>
+                                <input type="text" id="declinedBy" name="declined_by" class="form-control" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Decline Date</label>
+                                <input type="text" id="declineDate" name="decline_date" class="form-control" readonly>
+                            </div>
+                        </div>
                         <div class="table-responsive">
                             <table class="table table-bordered">
                                 <thead>
@@ -192,15 +212,7 @@ $result = mysqli_query($conn, $query);
                 // Store the request ID inside the modal
                 $('#viewRequestModal').data('id', reqId);
 
-                if (status == 2 || status == 1) {
-                    $('#action-buttons').hide();
-                    $('#printRequestBtn').show(); //show print button only if approved or declined
-                } else {
-                    $('#action-buttons').show();
-                    $('#printRequestBtn').hide(); //hide print button for pending requests
-                }
-
-                // Fetch request items via AJAX
+                // Fetch request items and details via AJAX
                 $.ajax({
                     url: 'fetch_request_items.php', // Update to the correct PHP file
                     type: 'POST',
@@ -210,10 +222,46 @@ $result = mysqli_query($conn, $query);
                     dataType: 'json', // Expect JSON response
                     success: function(data) {
                         if (data) {
-                            $('#requestedBy').val(data.requester_name); // Set requester name
-                            $('#department').val(data.department); // Set department
-                            $('#requisitionNumber').val(data.req_number); // Set requisition number
-                            $('#date').val(data.date); // Set date
+                            $('#requestedBy').val(data.requester_name); 
+                            $('#department').val(data.department); 
+                            $('#requisitionNumber').val(data.req_number); 
+                            $('#date').val(data.date || 'N/A'); // Set date or N/A
+
+                            // Check the status and show/hide relevant fields
+                            if (status == 1) { // If the status is "Approved"
+                                $('#issuedBy').val(data.issued_by || 'N/A'); 
+                                $('#issuedDate').val(data.date_issued || 'N/A'); 
+                                $('#declinedBy').val('N/A'); 
+                                $('#declineDate').val('N/A'); 
+                                $('#issuedBy').closest('.row').show(); 
+                                $('#issuedDate').closest('.row').show(); 
+                                $('#declinedBy').closest('.row').hide(); 
+                                $('#declineDate').closest('.row').hide(); 
+                                $('#printRequestBtn').show(); 
+                                $('#action-buttons').hide(); 
+                            } else if (status == 2) { // If the status is "Declined"
+                                $('#declinedBy').val(data.declined_by || 'N/A'); 
+                                $('#declineDate').val(data.date_declined || 'N/A'); 
+                                $('#issuedBy').val('N/A'); 
+                                $('#issuedDate').val('N/A'); 
+                                $('#declinedBy').closest('.row').show(); 
+                                $('#declineDate').closest('.row').show(); 
+                                $('#issuedBy').closest('.row').hide(); 
+                                $('#issuedDate').closest('.row').hide(); 
+                                $('#printRequestBtn').hide(); 
+                                $('#action-buttons').hide(); 
+                            } else { // If the status is "Pending"
+                                $('#issuedBy').val('N/A'); 
+                                $('#issuedDate').val('N/A'); 
+                                $('#declinedBy').val('N/A'); 
+                                $('#declineDate').val('N/A'); 
+                                $('#issuedBy').closest('.row').show(); 
+                                $('#issuedDate').closest('.row').show(); 
+                                $('#declinedBy').closest('.row').show(); 
+                                $('#declineDate').closest('.row').show(); 
+                                $('#printRequestBtn').hide(); 
+                                $('#action-buttons').show(); 
+                            }
 
                             // Populate the items in the table
                             let itemsHtml = '';
@@ -224,7 +272,7 @@ $result = mysqli_query($conn, $query);
                                               </tr>`;
                             });
                             $('#view_request_items').html(itemsHtml); // Set items in the table
-                            $('#viewRequestModal').data('id', requestId); // Store the request ID in the modal
+                            $('#viewRequestModal').data('id', reqId); // Store the request ID in the modal
                         } else {
                             console.error("No data returned from the server.");
                         }
@@ -239,34 +287,58 @@ $result = mysqli_query($conn, $query);
             $('#confirmDecline').on('click', function() {
                 const requestId = $('#viewRequestModal').data('id');
 
+                // Hide the modal before prompting for the declined by name
+                $('#viewRequestModal').modal('hide');
+
                 Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You want to decline this request?",
-                    icon: 'warning',
+                    title: 'Enter Declined By',
+                    input: 'text',
+                    inputPlaceholder: 'Enter name',
                     showCancelButton: true,
-                    confirmButtonText: 'Yes, Decline',
+                    confirmButtonText: 'Submit',
                     cancelButtonText: 'Cancel',
-                    width: '300px',
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#6c757d'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: 'update_status.php',
-                            type: 'POST',
-                            data: {
-                                id: requestId,
-                                status: 2
-                            },
-                            success: function(response) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Declined!',
-                                    text: 'The request has been declined.',
-                                    timer: 1500,
-                                    showConfirmButton: false
-                                }).then(() => {
-                                    location.reload();
+                    preConfirm: (declinedBy) => {
+                        if (!declinedBy) {
+                            Swal.showValidationMessage('Please enter a valid name for "Declined By".');
+                        }
+                        return declinedBy;
+                    }
+                }).then((inputResult) => {
+                    if (inputResult.isConfirmed) {
+                        const declinedBy = inputResult.value.trim();
+
+                        Swal.fire({
+                            title: 'Are you sure?',
+                            text: "You want to decline this request?",
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonText: 'Yes, Decline',
+                            cancelButtonText: 'Cancel',
+                            width: '300px',
+                            confirmButtonColor: '#d33',
+                            cancelButtonColor: '#6c757d'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                $.ajax({
+                                    url: 'update_status.php',
+                                    type: 'POST',
+                                    data: {
+                                        id: requestId,
+                                        status: 2,
+                                        declined_by: declinedBy, 
+                                        date_declined: new Date().toISOString().slice(0, 10) 
+                                    },
+                                    success: function(response) {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Declined!',
+                                            text: 'The request has been declined by: ' + declinedBy,
+                                            timer: 1500,
+                                            showConfirmButton: false
+                                        }).then(() => {
+                                            location.reload();
+                                        });
+                                    }
                                 });
                             }
                         });
