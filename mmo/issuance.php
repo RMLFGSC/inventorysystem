@@ -179,7 +179,8 @@ $result = mysqli_query($conn, $query);
                                     <?php if ($row['status'] == 0): ?>
                                         <button type="button" data-toggle="modal" data-target="#editRequestModal"
                                             class="btn btn-sm btn-primary editrequest-btn"
-                                            data-id="<?php echo $row['req_id']; ?>">
+                                            data-id="<?php echo $row['req_id']; ?>"
+                                            data-req_number="<?php echo $row['req_number']; ?>">
                                             <i class="fa-solid fa-pencil-alt"></i>
                                         </button>
                                     <?php endif; ?>
@@ -329,15 +330,20 @@ $result = mysqli_query($conn, $query);
                                         date_declined: new Date().toISOString().slice(0, 10) 
                                     },
                                     success: function(response) {
-                                        Swal.fire({
-                                            icon: 'success',
-                                            title: 'Declined!',
-                                            text: 'The request has been declined by: ' + declinedBy,
-                                            timer: 1500,
-                                            showConfirmButton: false
-                                        }).then(() => {
-                                            location.reload();
-                                        });
+                                        console.log(response); // Log the response to see if it contains errors
+                                        if (response.success) {
+                                            Swal.fire({
+                                                icon: 'success',
+                                                title: 'Declined!',
+                                                text: 'The request has been declined by: ' + declinedBy,
+                                                timer: 1500,
+                                                showConfirmButton: false
+                                            }).then(() => {
+                                                location.reload();
+                                            });
+                                        } else {
+                                            console.error("Error:", response.error);
+                                        }
                                     }
                                 });
                             }
@@ -394,15 +400,20 @@ $result = mysqli_query($conn, $query);
                                 items: itemsToDeduct
                             },
                             success: function(response) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Approved!',
-                                    text: 'The request has been approved and issued by: ' + issuedBy,
-                                    timer: 1500,
-                                    showConfirmButton: false
-                                }).then(() => {
-                                    location.reload();
-                                });
+                                console.log(response); // Log the response to see if it contains errors
+                                if (response.success) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Approved!',
+                                        text: 'The request has been approved and issued by: ' + issuedBy,
+                                        timer: 1500,
+                                        showConfirmButton: false
+                                    }).then(() => {
+                                        location.reload();
+                                    });
+                                } else {
+                                    console.error("Error:", response.error);
+                                }
                             },
                             error: function(xhr, status, error) {
                                 console.error("Error updating status: ", error);
@@ -492,5 +503,180 @@ $result = mysqli_query($conn, $query);
             printWindow.close();
             });
 
+            // Edit button handler
+            $('.editrequest-btn').on('click', function() {
+                const reqNumber = $(this).data('req_number');
+
+                // Fetch request items and details via AJAX
+                $.ajax({
+                    url: 'fetch_request_items.php',
+                    type: 'POST',
+                    data: {
+                        req_number: reqNumber
+                    },
+                    dataType: 'json',
+                    success: function(data) {
+                        if (data) {
+                            // Populate the fields with the fetched data
+                            $('#editRequestedBy').val(data.requester_name); 
+                            $('#editDepartment').val(data.department); 
+                            $('#editRequisitionNumber').val(data.req_number); 
+                            $('#editDate').val(data.date); 
+                            
+                            // Populate the items in the table
+                            let itemsHtml = '';
+                            data.items.forEach(item => {
+                                itemsHtml += `<tr>
+                                                <td>${item.item}</td>
+                                                <td><input type="number" value="${item.qty}" class="form-control qty-input" data-item_id="${item.id}"></td>
+                                                <td><button type="button" class="btn btn-danger btn-sm remove-item-btn">Remove</button></td>
+                                              </tr>`;
+                            });
+                            $('#edit_request_items').html(itemsHtml); // Set items in the table
+                        } else {
+                            console.error("No data returned from the server.");
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error fetching request items: ", error);
+                    }
+                });
+            });
+
+            // Remove item button handler
+            $(document).on('click', '.remove-item-btn', function() {
+                $(this).closest('tr').remove(); // Remove the item row
+            });
+
+            // Save changes button handler
+            $('#saveEditRequest').on('click', function() {
+                console.log("Save Changes button clicked"); // Debugging log
+
+                const updatedItems = [];
+                const removedItems = [];
+                const requestId = $('#viewRequestModal').data('id'); // Ensure requestId is defined
+                const issuedBy = $('#editRequestedBy').val(); // Ensure issuedBy is defined
+
+                // Collect updated items
+                $('#edit_request_items tr').each(function() {
+                    const itemId = $(this).find('.qty-input').data('item_id'); // Get item ID
+                    const quantity = $(this).find('.qty-input').val(); // Get quantity
+                    updatedItems.push({
+                        id: itemId,
+                        qty: quantity
+                    });
+                });
+
+                // Collect removed items
+                $('.remove-item-btn').each(function() {
+                    const itemId = $(this).closest('tr').find('.qty-input').data('item_id'); // Get item ID for removed items
+                    removedItems.push(itemId);
+                });
+
+                // Debugging: Log the collected data
+                console.log("Request ID:", requestId);
+                console.log("Issued By:", issuedBy);
+                console.log("Updated Items:", updatedItems);
+                console.log("Removed Items:", removedItems);
+
+                // Proceed with AJAX to save updated items
+                $.ajax({
+                    url: 'update_status.php', // Ensure this is the correct URL
+                    type: 'POST',
+                    data: {
+                        id: requestId, // Ensure requestId is defined and valid
+                        issued_by: issuedBy, // Ensure issuedBy is defined and valid
+                        date_issued: new Date().toISOString().slice(0, 10),
+                        items: updatedItems,
+                        removed_items: removedItems
+                    },
+                    success: function(response) {
+                        console.log("Server Response:", response); // Log the server response
+                        if (response.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Changes Saved!',
+                                text: 'The request has been updated successfully.',
+                                timer: 1500,
+                                showConfirmButton: false
+                            }).then(() => {
+                                $('#editRequestModal').modal('hide'); // Hide the modal after saving
+                                location.reload(); // Reload the page to reflect changes
+                            });
+                        } else {
+                            console.error("Error:", response.error); // Log any errors
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: response.error,
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error updating status: ", error); // Log any AJAX errors
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: 'An error occurred while saving changes.',
+                        });
+                    }
+                });
+            });
+
+
         });
     </script>
+
+    <div class="modal fade" id="editRequestModal" tabindex="-1" role="dialog"
+        aria-labelledby="editRequestModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editRequestModalLabel">Edit Requisition Details</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label>Requested By</label>
+                            <input type="text" id="editRequestedBy" name="fullname" class="form-control" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label>Department</label>
+                            <input type="text" id="editDepartment" name="department" class="form-control" readonly>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label>Requisition #</label>
+                            <input type="text" id="editRequisitionNumber" name="req_number" class="form-control" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label>Date</label>
+                            <input type="text" id="editDate" name="date" class="form-control" readonly>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Items</th>
+                                    <th>Qty</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="edit_request_items">
+                                <!-- Rows will be populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" id="saveEditRequest" class="btn btn-primary">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
