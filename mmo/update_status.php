@@ -1,4 +1,4 @@
-update status<?php
+<?php
 include("../conn.php"); 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -46,13 +46,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Remove items if any
             foreach ($removedItems as $itemId) {
-                $removeQuery = "DELETE FROM stockin WHERE stockin_id = ?";
-                $removeStmt = $conn->prepare($removeQuery);
-                $removeStmt->bind_param("i", $itemId);
-                if (!$removeStmt->execute()) {
-                    error_log("Error removing stockin for item ID $itemId: " . $removeStmt->error);
+                $hideQuery = "UPDATE stockin SET status = 'hidden' WHERE stockin_id = ?";
+                $hideStmt = $conn->prepare($hideQuery);
+                $hideStmt->bind_param("i", $itemId);
+                if (!$hideStmt->execute()) {
+                    error_log("Error hiding stockin for item ID $itemId: " . $hideStmt->error);
                 }
-                $removeStmt->close();
+                $hideStmt->close();
             }
 
             echo json_encode(['success' => true]);

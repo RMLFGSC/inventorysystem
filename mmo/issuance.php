@@ -330,20 +330,15 @@ $result = mysqli_query($conn, $query);
                                         date_declined: new Date().toISOString().slice(0, 10) 
                                     },
                                     success: function(response) {
-                                        console.log(response); // Log the response to see if it contains errors
-                                        if (response.success) {
-                                            Swal.fire({
-                                                icon: 'success',
-                                                title: 'Declined!',
-                                                text: 'The request has been declined by: ' + declinedBy,
-                                                timer: 1500,
-                                                showConfirmButton: false
-                                            }).then(() => {
-                                                location.reload();
-                                            });
-                                        } else {
-                                            console.error("Error:", response.error);
-                                        }
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Declined!',
+                                            text: 'The request has been declined by: ' + declinedBy,
+                                            timer: 1500,
+                                            showConfirmButton: false
+                                        }).then(() => {
+                                            location.reload();
+                                        });
                                     }
                                 });
                             }
@@ -400,20 +395,15 @@ $result = mysqli_query($conn, $query);
                                 items: itemsToDeduct
                             },
                             success: function(response) {
-                                console.log(response); // Log the response to see if it contains errors
-                                if (response.success) {
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'Approved!',
-                                        text: 'The request has been approved and issued by: ' + issuedBy,
-                                        timer: 1500,
-                                        showConfirmButton: false
-                                    }).then(() => {
-                                        location.reload();
-                                    });
-                                } else {
-                                    console.error("Error:", response.error);
-                                }
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Approved!',
+                                    text: 'The request has been approved and issued by: ' + issuedBy,
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                }).then(() => {
+                                    location.reload();
+                                });
                             },
                             error: function(xhr, status, error) {
                                 console.error("Error updating status: ", error);
@@ -555,7 +545,7 @@ $result = mysqli_query($conn, $query);
                 const updatedItems = [];
                 const removedItems = [];
                 const requestId = $('#viewRequestModal').data('id'); // Ensure requestId is defined
-                const issuedBy = $('#editRequestedBy').val(); // Ensure issuedBy is defined
+                
 
                 // Collect updated items
                 $('#edit_request_items tr').each(function() {
@@ -575,7 +565,6 @@ $result = mysqli_query($conn, $query);
 
                 // Debugging: Log the collected data
                 console.log("Request ID:", requestId);
-                console.log("Issued By:", issuedBy);
                 console.log("Updated Items:", updatedItems);
                 console.log("Removed Items:", removedItems);
 
@@ -585,8 +574,6 @@ $result = mysqli_query($conn, $query);
                     type: 'POST',
                     data: {
                         id: requestId, // Ensure requestId is defined and valid
-                        issued_by: issuedBy, // Ensure issuedBy is defined and valid
-                        date_issued: new Date().toISOString().slice(0, 10),
                         items: updatedItems,
                         removed_items: removedItems
                     },
@@ -622,7 +609,6 @@ $result = mysqli_query($conn, $query);
                     }
                 });
             });
-
 
         });
     </script>
