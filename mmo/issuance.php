@@ -168,15 +168,25 @@ $result = mysqli_query($conn, $query);
                                     ?>
                                 </td>
                                 <td class="text-center">
-                                    <button type="button" data-toggle="modal" data-target="#viewRequestModal"
-                                        class="btn btn-sm btn-warning viewrequest-btn"
-                                        data-id="<?php echo $row['req_id']; ?>"
-                                        data-req_number="<?php echo $row['req_number']; ?>"
-                                        data-status="<?php echo $row['status']; ?>">
-                                        <i class="fa-solid fa-eye text-white"></i>
-                                    </button>
+                                    <?php if ($row['status'] == 0): // Pending ?>
+                                        <button type="button" data-toggle="modal" data-target="#viewRequestModal"
+                                            class="btn btn-sm btn-success viewrequest-btn"
+                                            data-id="<?php echo $row['req_id']; ?>"
+                                            data-req_number="<?php echo $row['req_number']; ?>"
+                                            data-status="<?php echo $row['status']; ?>">
+                                            <i class="fa fa-check text-white"></i>
+                                        </button>
+                                    <?php else: // Served or Declined ?>
+                                        <button type="button" data-toggle="modal" data-target="#viewRequestModal"
+                                            class="btn btn-sm btn-warning viewrequest-btn"
+                                            data-id="<?php echo $row['req_id']; ?>"
+                                            data-req_number="<?php echo $row['req_number']; ?>"
+                                            data-status="<?php echo $row['status']; ?>">
+                                            <i class="fa-solid fa-eye text-white"></i>
+                                        </button>
+                                    <?php endif; ?>
 
-                                    <?php if ($row['status'] == 0): ?>
+                                    <?php if ($row['status'] == 0): // If Pending ?>
                                         <button type="button" data-toggle="modal" data-target="#editRequestModal"
                                             class="btn btn-sm btn-primary editrequest-btn"
                                             data-id="<?php echo $row['req_id']; ?>"
@@ -256,10 +266,10 @@ $result = mysqli_query($conn, $query);
                                 $('#issuedDate').val('N/A'); 
                                 $('#declinedBy').val('N/A'); 
                                 $('#declineDate').val('N/A'); 
-                                $('#issuedBy').closest('.row').show(); 
-                                $('#issuedDate').closest('.row').show(); 
-                                $('#declinedBy').closest('.row').show(); 
-                                $('#declineDate').closest('.row').show(); 
+                                $('#issuedBy').closest('.row').hide(); 
+                                $('#issuedDate').closest('.row').hide(); 
+                                $('#declinedBy').closest('.row').hide(); 
+                                $('#declineDate').closest('.row').hide(); 
                                 $('#printRequestBtn').hide(); 
                                 $('#action-buttons').show(); 
                             }
@@ -272,8 +282,8 @@ $result = mysqli_query($conn, $query);
                                                 <td>${item.qty}</td>
                                               </tr>`;
                             });
-                            $('#view_request_items').html(itemsHtml); // Set items in the table
-                            $('#viewRequestModal').data('id', reqId); // Store the request ID in the modal
+                            $('#view_request_items').html(itemsHtml); 
+                            $('#viewRequestModal').data('id', reqId); 
                         } else {
                             console.error("No data returned from the server.");
                         }
@@ -493,9 +503,13 @@ $result = mysqli_query($conn, $query);
             printWindow.close();
             });
 
-            // Edit button handler
+           // Edit button handler
             $('.editrequest-btn').on('click', function() {
                 const reqNumber = $(this).data('req_number');
+                const requestId = $(this).data('id'); // Get requestId from the button
+
+                // Store requestId in the edit modal for later use
+                $('#editRequestModal').data('id', requestId);
 
                 // Fetch request items and details via AJAX
                 $.ajax({
@@ -508,19 +522,19 @@ $result = mysqli_query($conn, $query);
                     success: function(data) {
                         if (data) {
                             // Populate the fields with the fetched data
-                            $('#editRequestedBy').val(data.requester_name); 
-                            $('#editDepartment').val(data.department); 
-                            $('#editRequisitionNumber').val(data.req_number); 
-                            $('#editDate').val(data.date); 
-                            
+                            $('#editRequestedBy').val(data.requester_name);
+                            $('#editDepartment').val(data.department);
+                            $('#editRequisitionNumber').val(data.req_number);
+                            $('#editDate').val(data.date);
+
                             // Populate the items in the table
                             let itemsHtml = '';
                             data.items.forEach(item => {
                                 itemsHtml += `<tr>
-                                                <td>${item.item}</td>
-                                                <td><input type="number" value="${item.qty}" class="form-control qty-input" data-item_id="${item.id}"></td>
-                                                <td><button type="button" class="btn btn-danger btn-sm remove-item-btn">Remove</button></td>
-                                              </tr>`;
+                                                    <td>${item.item}</td>
+                                                    <td><input type="number" value="${item.qty}" class="form-control qty-input" data-item_id="${item.id}"></td>
+                                                    <td><button type="button" class="btn btn-danger btn-sm remove-item-btn">Remove</button></td>
+                                                </tr>`;
                             });
                             $('#edit_request_items').html(itemsHtml); // Set items in the table
                         } else {
@@ -535,7 +549,7 @@ $result = mysqli_query($conn, $query);
 
             // Remove item button handler
             $(document).on('click', '.remove-item-btn', function() {
-                $(this).closest('tr').remove(); // Remove the item row
+                $(this).closest('tr').remove(); // Remove the row from the table
             });
 
             // Save changes button handler
@@ -544,8 +558,7 @@ $result = mysqli_query($conn, $query);
 
                 const updatedItems = [];
                 const removedItems = [];
-                const requestId = $('#viewRequestModal').data('id'); // Ensure requestId is defined
-                
+                const requestId = $('#editRequestModal').data('id'); // Get requestId from the modal
 
                 // Collect updated items
                 $('#edit_request_items tr').each(function() {
@@ -558,9 +571,11 @@ $result = mysqli_query($conn, $query);
                 });
 
                 // Collect removed items
-                $('.remove-item-btn').each(function() {
-                    const itemId = $(this).closest('tr').find('.qty-input').data('item_id'); // Get item ID for removed items
-                    removedItems.push(itemId);
+                $('#edit_request_items tr').each(function() {
+                    if ($(this).find('.remove-item-btn').length === 0){
+                        const itemId = $(this).find('.qty-input').data('item_id');
+                        removedItems.push(itemId);
+                    }
                 });
 
                 // Debugging: Log the collected data
@@ -609,7 +624,6 @@ $result = mysqli_query($conn, $query);
                     }
                 });
             });
-
         });
     </script>
 
