@@ -62,7 +62,7 @@
                 <div id="reports" class="collapse" aria-labelledby="headingUtilities"
                     data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item" href="stockin_report.php">Stock-in Report</a>
+                        <a class="collapse-item" href="stockin_report.php">Inventory Report</a>
                         <a class="collapse-item" href="request_report.php">Request Report</a>
                         <a class="collapse-item" href="issuance_report.php">Issuance Report</a>
                     </div>
