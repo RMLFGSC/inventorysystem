@@ -86,7 +86,7 @@ $result = mysqli_query($conn, $query);
                                                     $itemResult = mysqli_query($conn, $itemQuery);
                                                     while ($itemRow = mysqli_fetch_assoc($itemResult)) {
                                                         $itemName = htmlspecialchars($itemRow['item']);
-                                                        $stockQty = (int)$itemRow['total_stock'];
+                                                        $stockQty = htmlspecialchars($itemRow['total_stock']);
                                                         echo "<option value='$itemName' data-stock='$stockQty'>$itemName (Stock: $stockQty)</option>";
                                                     }
                                                     ?>
@@ -270,14 +270,14 @@ $result = mysqli_query($conn, $query);
                 newItemRow.innerHTML = `
             <div class="form-group col-md-6">
                 <label>Item</label>
-                <select name="stockin_id[]" class="form-control" required>
+                <select name="stockin_id[]" class="form-control item-select" required>
                     <?php
                     $itemQuery = "SELECT item, SUM(qty) as total_stock FROM stock_in WHERE is_posted = 1 GROUP BY item";
                     $itemResult = mysqli_query($conn, $itemQuery);
                     while ($itemRow = mysqli_fetch_assoc($itemResult)) {
                         $itemName = htmlspecialchars($itemRow['item']);
                         $stockQty = htmlspecialchars($itemRow['total_stock']);
-                        echo "<option value='$itemName'>$itemName (Stock: $stockQty)</option>";
+                        echo "<option value='$itemName' data-stock='$stockQty'>$itemName (Stock: $stockQty)</option>";
                     }
                     ?>
                 </select>

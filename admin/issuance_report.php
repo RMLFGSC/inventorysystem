@@ -14,10 +14,7 @@ $query = "
         s.item, 
         s.orig_qty,
         r.issued_by, 
-        r.date_issued, 
-        fa.owner, 
-        fa.location, 
-        r.status 
+        r.date_issued
     FROM 
         request r 
     JOIN 
@@ -27,7 +24,7 @@ $query = "
     LEFT JOIN
         stock_in s ON r.stockin_id = s.stockin_id
     WHERE 
-        1=1"; // Assuming 'requestor_id' in request table corresponds to 'id' in users table
+        1=1 AND r.status != '2'"; 
 
 if ($startDate) {
     $query .= " AND r.date_issued >= '$startDate'"; // Assuming 'date_issued' is the column name for the date
@@ -75,8 +72,8 @@ $result = mysqli_query($conn, $query);
                     </form>
 
                     <div class="card-datatable">
-                        <table class="datatables-basic table table-bordered" id="dataTable" width="100%">
-                            <thead>
+                        <table class="table table-hover table-bordered" id="dataTable" width="100%">
+                            <thead class="thead-light">
                                 <tr>
                                     <th>Req Number</th>
                                     <th>Requestor</th>
@@ -85,8 +82,6 @@ $result = mysqli_query($conn, $query);
                                     <th>Qty</th>
                                     <th>Issued By</th>
                                     <th>Date Issued</th>
-                                    <th>Assigned To</th>
-                                    <th>Location</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -101,8 +96,6 @@ $result = mysqli_query($conn, $query);
                                         <td><?= $row['orig_qty']; ?></td>
                                         <td><?= $row['issued_by']; ?></td>
                                         <td><?= $row['date_issued']; ?></td>
-                                        <td><?= $row['owner']; ?></td>
-                                        <td><?= $row['location']; ?></td>
                                     </tr>
                                 <?php endwhile; ?>
                             </tbody>
