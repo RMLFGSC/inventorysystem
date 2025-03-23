@@ -57,9 +57,10 @@ $result = mysqli_query($conn, $query);
                         </button>
                     </div>
 
-                    <form action="create.php" method="POST">
+                    <form action="create.php" method="POST"  id="requestForm">
                         <div class="modal-body">
                             <div class="card">
+                            <div id="errorMessage" class="alert alert-danger" style="display: none;"></div>
                                 <div class="card-header text-white" style="background-color: #76a73c;">
                                     <strong>Requisition items</strong>
                                 </div>
@@ -70,14 +71,16 @@ $result = mysqli_query($conn, $query);
                                     </div>
                                     <div id="itemFields">
                                         <div class="form-row">
-                                            <div class="form-group col-md-6">
+                                        <div class="form-group col-md-6">
                                                 <label>Item</label>
-                                                <select name="stockin_id[]" class="form-control" required>
+                                                <select name="stockin_id[]" class="form-control item-select" required>
                                                     <?php
-                                                    $itemQuery = "SELECT DISTINCT item FROM stock_in WHERE is_posted = 1 AND category = 'Engineering Equipment'";
+                                                    $itemQuery = "SELECT item, SUM(qty) as total_stock FROM stock_in WHERE is_posted = 1 GROUP BY item";
                                                     $itemResult = mysqli_query($conn, $itemQuery);
                                                     while ($itemRow = mysqli_fetch_assoc($itemResult)) {
-                                                        echo '<option value="' . htmlspecialchars($itemRow['item']) . '">' . htmlspecialchars($itemRow['item']) . '</option>';
+                                                        $itemName = htmlspecialchars($itemRow['item']);
+                                                        $stockQty = htmlspecialchars($itemRow['total_stock']);
+                                                        echo "<option value='$itemName' data-stock='$stockQty'>$itemName (Stock: $stockQty)</option>";
                                                     }
                                                     ?>
                                                 </select>
@@ -253,18 +256,20 @@ $result = mysqli_query($conn, $query);
 
                 newItemRow.innerHTML = `
                 <div class="form-row item-row mb-2">
-                    <div class="form-group col-md-6">
-                        <label>Item</label>
-                        <select name="stockin_id[]" class="form-control" required>
-                        <?php
-                        $itemQuery = "SELECT DISTINCT item FROM stock_in WHERE is_posted = 1 AND category = 'Engineering Equipment'";
-                        $itemResult = mysqli_query($conn, $itemQuery);
-                        while ($itemRow = mysqli_fetch_assoc($itemResult)) {
-                            echo '<option value="' . htmlspecialchars($itemRow['item']) . '">' . htmlspecialchars($itemRow['item']) . '</option>';
-                        }
-                        ?>
-                        </select>
-                    </div>
+                     <div class="form-group col-md-6">
+                                                <label>Item</label>
+                                                <select name="stockin_id[]" class="form-control item-select" required>
+                                                    <?php
+                                                    $itemQuery = "SELECT item, SUM(qty) as total_stock FROM stock_in WHERE is_posted = 1 GROUP BY item";
+                                                    $itemResult = mysqli_query($conn, $itemQuery);
+                                                    while ($itemRow = mysqli_fetch_assoc($itemResult)) {
+                                                        $itemName = htmlspecialchars($itemRow['item']);
+                                                        $stockQty = htmlspecialchars($itemRow['total_stock']);
+                                                        echo "<option value='$itemName' data-stock='$stockQty'>$itemName (Stock: $stockQty)</option>";
+                                                    }
+                                                    ?>
+                                                </select>
+                                            </div>
                     <div class="form-group col-md-6">
                         <label>Quantity</label>
                         <input type="text" name="qty[]" class="form-control" required>
@@ -279,6 +284,39 @@ $result = mysqli_query($conn, $query);
                 newItemRow.querySelector('.removeItem').addEventListener('click', function() {
                     itemFields.removeChild(newItemRow);
                 });
+            });
+
+            document.getElementById('requestForm').addEventListener('submit', function(e) {
+                let valid = true;
+                let errorMsg = '';
+                let itemGroups = document.querySelectorAll('#itemFields .form-row');
+
+                itemGroups.forEach(function(group, index) {
+                    let itemSelect = group.querySelector('.item-select');
+                    let qtyInput = group.querySelector('input[name="qty[]"]');
+
+                    let selectedOption = itemSelect.options[itemSelect.selectedIndex];
+                    let stockAvailable = parseInt(selectedOption.getAttribute('data-stock')) || 0;
+                    let requestedQty = parseInt(qtyInput.value) || 0;
+
+                    if (requestedQty > stockAvailable) {
+                        errorMsg += `<li><strong>${selectedOption.value}:</strong> Requested ${requestedQty}, but only ${stockAvailable} available.</li>`;
+                        valid = false;
+                    }
+                });
+
+                if (!valid) {
+                    e.preventDefault();
+
+                    // Show the message inside the modal
+                    let errorDiv = document.getElementById('errorMessage');
+                    errorDiv.innerHTML = `<ul style="margin:0; padding-left: 18px;">${errorMsg}</ul>`;
+                    errorDiv.style.display = 'block';
+                } else {
+                    // Clear error on success
+                    document.getElementById('errorMessage').style.display = 'none';
+                    document.getElementById('errorMessage').innerHTML = '';
+                }
             });
 
             // Update view modal functionality
@@ -396,6 +434,7 @@ $result = mysqli_query($conn, $query);
                                     text: 'The request has been posted successfully.',
                                     icon: 'success',
                                     timer: 1500,
+                                    width: '300px',
                                     showConfirmButton: false
                                 });
                             },

@@ -5,10 +5,11 @@ include("../includes/navbar_mmo.php");
 $startDate = $_GET['start_date'] ?? null;
 $endDate = $_GET['end_date'] ?? null;
 
-$query = "SELECT req_id, req_number, u.fullname AS requestor, r.qty, s.item, s.category, u.department, r.status, r.date_approved 
+$query = "SELECT req_id, req_number, u.fullname AS requestor, r.qty, s.item, s.category, u.department, r.status, r.date_approved , r.issued_by, r.date_declined, r.declined_by
           FROM request r 
           JOIN users u ON r.user_id = u.user_id 
-          JOIN stock_in s ON r.stockin_id = s.stockin_id WHERE 1=1";
+          JOIN stock_in s ON r.stockin_id = s.stockin_id 
+          WHERE r.status != 0";
 if ($startDate) {
     $query .= " AND date_approved >= '$startDate'"; 
 }
@@ -55,16 +56,19 @@ $result = mysqli_query($conn, $query);
                     </form>
 
                     <div class="card-datatable">
-                        <table class="datatables-basic table table-bordered" id="dataTable" width="100%">
-                            <thead>
+                        <table class="table table-hover table-bordered" id="dataTable" width="100%" cellspacing="0">
+                            <thead class="thead-light">
                                 <tr>
-                                    <th>Request Number</th>
+                                    <th>Request #</th>
                                     <th>Requestor</th>
                                     <th>Department</th>
                                     <th>Item</th>
                                     <th>Category</th>
                                     <th>Qty</th>
                                     <th>Date Approved</th>
+                                    <th>Approved By</th>
+                                    <th>Date Declined</th>
+                                    <th>Declined By</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
@@ -72,7 +76,13 @@ $result = mysqli_query($conn, $query);
                                 <?php
                                 while ($row = mysqli_fetch_assoc($result)):
                                     // Status logic
-                                    $statusText = $row['status'] ? 'Approved' : 'Pending'; 
+                                    if ($row['status'] == 1) {
+                                        $statusText = '<span class="badge badge-success">Approved</span>';
+                                    } elseif ($row['status'] == 2) {
+                                        $statusText = '<span class="badge badge-danger">Declined</span>';
+                                    } else {
+                                        $statusText = '<span class="badge badge-warning">Pending</span>';
+                                    }
                                 ?>
                                     <tr>
                                         <td><?= $row['req_number']; ?></td>
@@ -81,7 +91,10 @@ $result = mysqli_query($conn, $query);
                                         <td><?= $row['item']; ?></td>
                                         <td><?= $row['category']; ?></td>
                                         <td><?= $row['qty']; ?></td>
-                                        <td><?= $row['date_approved']; ?></td>
+                                        <td><?= $row['date_approved']?: 'N/A'; ?></td>
+                                        <td><?= $row['issued_by']?: 'N/A'; ?></td>
+                                        <td><?= $row['date_declined'] ?: 'N/A'; ?></td>
+                                        <td><?= $row['declined_by'] ?: 'N/A'; ?></td>
                                         <td><?= $statusText; ?></td>
                                     </tr>
                                 <?php endwhile; ?>
