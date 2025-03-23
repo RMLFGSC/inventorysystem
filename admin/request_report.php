@@ -8,7 +8,7 @@ $endDate = $_GET['end_date'] ?? null;
 $query = "SELECT req_id, req_number, u.fullname AS requestor, r.qty, s.item, s.category, u.department, r.status, r.date_issued , r.issued_by, r.date_declined, r.declined_by
           FROM request r 
           JOIN users u ON r.user_id = u.user_id 
-          JOIN stock_in s ON r.stockin_id = s.stockin_id WHERE 1=1";
+          JOIN stock_in s ON r.stockin_id = s.stockin_id WHERE r.status IN (1, 2)";
 if ($startDate) {
     $query .= " AND date_issued >= '$startDate'";
 }

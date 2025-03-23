@@ -24,10 +24,10 @@ $query = "
     LEFT JOIN
         stock_in s ON r.stockin_id = s.stockin_id
     WHERE 
-        1=1 AND r.status != '2'"; 
+        r.status = '1'"; // Only show approved
 
 if ($startDate) {
-    $query .= " AND r.date_issued >= '$startDate'"; // Assuming 'date_issued' is the column name for the date
+    $query .= " AND r.date_issued >= '$startDate'";
 }
 if ($endDate) {
     $query .= " AND r.date_issued <= '$endDate'";

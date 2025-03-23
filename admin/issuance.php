@@ -543,7 +543,6 @@ $result = mysqli_query($conn, $query);
                     dataType: 'json',
                     success: function(data) {
                         if (data) {
-                            // Populate the items in the table with editable quantity fields and remove buttons
                             let itemsHtml = '';
                             data.items.forEach(item => {
                                 itemsHtml += `<tr>
@@ -571,18 +570,18 @@ $result = mysqli_query($conn, $query);
                 $('#edit_request_items tr').each(function() {
                     const itemId = $(this).find('input').data('item-id');
                     const quantity = $(this).find('input').val();
-                    const reqNumber = $(this).find('input').data('req-number'); // Ensure req_number is accessible
+                    const reqNumber = $(this).find('input').data('req-number');
 
                     updatedItems.push({
                         id: itemId,
                         qty: quantity,
-                        req_number: reqNumber // Include req_number in the data sent to the server
+                        req_number: reqNumber 
                     });
                 });
 
                 // Send the updated items to the server
                 $.ajax({
-                    url: 'edit_request.php', // Pointing to the new update file
+                    url: 'edit_request.php', 
                     type: 'POST',
                     data: {
                         items: updatedItems
