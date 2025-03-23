@@ -24,10 +24,8 @@ $result = mysqli_query($conn, $query);
 
         <!-- topbar -->
         <?php
-        include("../includes/topbar_eng.php");
+        include("../includes/topbar.php");
         ?>
-
-
 
         <div class="modal fade" id="viewRequestModal" tabindex="-1" role="dialog"
             aria-labelledby="viewRequestModalLabel" aria-hidden="true">
@@ -100,7 +98,6 @@ $result = mysqli_query($conn, $query);
                             <div>
                                 <div id="action-buttons" class="text-right mt-3">
                                     <button id="saveRequest" class="btn btn-sm btn-success">Approve</button>
-                                    <button id="confirmDecline" class="btn btn-sm btn-danger">Decline</button>
                                 </div>
                             </div>
                             <div class="ml-auto d-flex align-items-center gap-2">
@@ -116,6 +113,43 @@ $result = mysqli_query($conn, $query);
             </div>
         </div>
         <!--End of view modal-->
+
+        <!-- Edit Request Modal -->
+        <div class="modal fade" id="editRequestModal" tabindex="-1" role="dialog"
+            aria-labelledby="editRequestModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editRequestModalLabel">Edit Requisition</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Items</th>
+                                        <th>Qty</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="edit_request_items">
+                                    <!-- Rows will be populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button id="updateRequest" class="btn btn-primary">Update</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End of Edit Request Modal -->
+
         <div class="container-fluid">
 
             <!-- Table Card -->
@@ -156,28 +190,32 @@ $result = mysqli_query($conn, $query);
                                             ?>
                                         </td>
                                         <td class="text-center">
-                                            <?php if ($row['status'] == 0): ?>
+                                            <?php if ($row['status'] == 0): // Pending 
+                                            ?>
                                                 <button type="button" data-toggle="modal" data-target="#viewRequestModal"
                                                     class="btn btn-sm btn-success viewrequest-btn"
                                                     data-id="<?php echo $row['req_id']; ?>"
                                                     data-req_number="<?php echo $row['req_number']; ?>"
                                                     data-status="<?php echo $row['status']; ?>">
-                                                    <i class="fa fa-check text-white"></i> 
+                                                    <i class="fa fa-check-circle text-white"></i>
                                                 </button>
-                                            <?php else: ?>
+                                                <button type="button" class="btn btn-sm btn-danger decline-btn"
+                                                    data-req_number="<?php echo $row['req_number']; ?>">
+                                                    <i class="fa fa-times-circle text-white"></i>
+                                                </button>
+                                                <button type="button" data-toggle="modal" data-target="#editRequestModal"
+                                                    class="btn btn-sm btn-primary editrequest-btn"
+                                                    data-req_number="<?php echo $row['req_number']; ?>">
+                                                <i class="fa fa-edit text-white"></i>
+                                                </button>
+                                            <?php else: // Served or Declined 
+                                            ?>
                                                 <button type="button" data-toggle="modal" data-target="#viewRequestModal"
                                                     class="btn btn-sm btn-warning viewrequest-btn"
                                                     data-id="<?php echo $row['req_id']; ?>"
                                                     data-req_number="<?php echo $row['req_number']; ?>"
                                                     data-status="<?php echo $row['status']; ?>">
-                                                    <i class="fa-solid fa-eye text-white"></i> 
-                                                </button>
-                                            <?php endif; ?>
-                                            <?php if ($row['status'] == 0): ?>
-                                                <button type="button" data-toggle="modal" data-target="#editRequestModal"
-                                                    class="btn btn-sm btn-primary editrequest-btn"
-                                                    data-id="<?php echo $row['req_id']; ?>">
-                                                    <i class="fa-solid fa-pencil-alt"></i>
+                                                    <i class="fa-solid fa-eye text-white"></i>
                                                 </button>
                                             <?php endif; ?>
                                         </td>
@@ -211,12 +249,12 @@ $result = mysqli_query($conn, $query);
 
                 // Fetch request items and details via AJAX
                 $.ajax({
-                    url: 'fetch_request_items.php', // Update to the correct PHP file
+                    url: 'fetch_request_items.php',
                     type: 'POST',
                     data: {
                         req_number: reqno
                     },
-                    dataType: 'json', // Expect JSON response
+                    dataType: 'json',
                     success: function(data) {
                         if (data) {
                             $('#requestedBy').val(data.requester_name);
@@ -252,10 +290,10 @@ $result = mysqli_query($conn, $query);
                                 $('#issuedDate').val('N/A');
                                 $('#declinedBy').val('N/A');
                                 $('#declineDate').val('N/A');
-                                $('#issuedBy').closest('.row').show();
-                                $('#issuedDate').closest('.row').show();
-                                $('#declinedBy').closest('.row').show();
-                                $('#declineDate').closest('.row').show();
+                                $('#issuedBy').closest('.row').hide();
+                                $('#issuedDate').closest('.row').hide();
+                                $('#declinedBy').closest('.row').hide();
+                                $('#declineDate').closest('.row').hide();
                                 $('#printRequestBtn').hide();
                                 $('#action-buttons').show();
                             }
@@ -268,8 +306,8 @@ $result = mysqli_query($conn, $query);
                                                 <td>${item.qty}</td>
                                               </tr>`;
                             });
-                            $('#view_request_items').html(itemsHtml); // Set items in the table
-                            $('#viewRequestModal').data('id', reqId); // Store the request ID in the modal
+                            $('#view_request_items').html(itemsHtml);
+                            $('#viewRequestModal').data('id', reqId);
                         } else {
                             console.error("No data returned from the server.");
                         }
@@ -280,141 +318,8 @@ $result = mysqli_query($conn, $query);
                 });
             });
 
-            // Decline button handler
-            $('#confirmDecline').on('click', function() {
-                const requestId = $('#viewRequestModal').data('id');
 
-                // Hide the modal before prompting for the declined by name
-                $('#viewRequestModal').modal('hide');
 
-                Swal.fire({
-                    title: 'Enter Declined By',
-                    input: 'text',
-                    inputPlaceholder: 'Enter name',
-                    showCancelButton: true,
-                    confirmButtonText: 'Submit',
-                    cancelButtonText: 'Cancel',
-                    preConfirm: (declinedBy) => {
-                        if (!declinedBy) {
-                            Swal.showValidationMessage('Please enter a valid name for "Declined By".');
-                        }
-                        return declinedBy;
-                    }
-                }).then((inputResult) => {
-                    if (inputResult.isConfirmed) {
-                        const declinedBy = inputResult.value.trim();
-
-                        Swal.fire({
-                            title: 'Are you sure?',
-                            text: "You want to decline this request?",
-                            icon: 'warning',
-                            showCancelButton: true,
-                            confirmButtonText: 'Yes, Decline',
-                            cancelButtonText: 'Cancel',
-                            width: '300px',
-                            confirmButtonColor: '#d33',
-                            cancelButtonColor: '#6c757d'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                $.ajax({
-                                    url: 'update_status.php',
-                                    type: 'POST',
-                                    data: {
-                                        id: requestId,
-                                        status: 2,
-                                        declined_by: declinedBy,
-                                        date_declined: new Date().toISOString().slice(0, 10)
-                                    },
-                                    success: function(response) {
-                                        Swal.fire({
-                                            icon: 'success',
-                                            title: 'Declined!',
-                                            text: 'The request has been declined by: ' + declinedBy,
-                                            timer: 1500,
-                                            showConfirmButton: false
-                                        }).then(() => {
-                                            location.reload();
-                                        });
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
-            });
-
-            // Approve button handler with SweetAlert
-            $('#saveRequest').on('click', function() {
-                $('#viewRequestModal').modal('hide');
-
-                const requestId = $('#viewRequestModal').data('id');
-                if (!requestId) {
-                    console.error("No request ID found!");
-                    return;
-                }
-
-                Swal.fire({
-                    title: 'Enter Issued By',
-                    input: 'text',
-                    inputPlaceholder: 'Enter name',
-                    showCancelButton: true,
-                    confirmButtonText: 'Submit',
-                    cancelButtonText: 'Cancel',
-                    preConfirm: (issuedBy) => {
-                        if (!issuedBy) {
-                            Swal.showValidationMessage('Please enter a valid name for "Issued By".');
-                        }
-                        return issuedBy;
-                    }
-                }).then((inputResult) => {
-                    if (inputResult.isConfirmed) {
-                        const issuedBy = inputResult.value.trim();
-
-                        const itemsToDeduct = [];
-                        $('#view_request_items tr').each(function() {
-                            const itemId = $(this).data('item_id');
-                            const quantity = $(this).find('td:eq(1)').text().trim();
-                            itemsToDeduct.push({
-                                id: itemId,
-                                qty: quantity
-                            });
-                        });
-
-                        $.ajax({
-                            url: 'update_status.php',
-                            type: 'POST',
-                            data: {
-                                id: requestId,
-                                status: 1,
-                                date_issued: new Date().toISOString().slice(0, 10),
-                                issued_by: issuedBy,
-                                items: itemsToDeduct
-                            },
-                            success: function(response) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Approved!',
-                                    text: 'The request has been approved and issued by: ' + issuedBy,
-                                    timer: 1500,
-                                    showConfirmButton: false
-                                }).then(() => {
-                                    location.reload();
-                                });
-                            },
-                            error: function(xhr, status, error) {
-                                console.error("Error updating status: ", error);
-                            }
-                        });
-                    }
-                });
-
-                // Manually focus on the input field after the modal appears
-                setTimeout(() => {
-                    document.querySelector('#swal2-input').focus();
-                }, 100);
-            });
-
-            // printing
             // Print button functionality
             $('#printRequestBtn').on('click', function() {
                 const reqNumber = $('#requisitionNumber').val();
@@ -487,6 +392,216 @@ $result = mysqli_query($conn, $query);
                 printWindow.document.close();
                 printWindow.print();
                 printWindow.close();
+            });
+
+            // Approve button functionality
+            $('#saveRequest').on('click', function() {
+                $('#viewRequestModal').modal('hide');
+
+                const reqNumber = $('#requisitionNumber').val();
+                if (!reqNumber) {
+                    console.error("No request number found!");
+                    return;
+                }
+
+                Swal.fire({
+                    title: 'Enter Issued By',
+                    input: 'text',
+                    inputPlaceholder: 'Enter name',
+                    showCancelButton: true,
+                    confirmButtonText: 'Submit',
+                    cancelButtonText: 'Cancel',
+                    preConfirm: (issuedBy) => {
+                        if (!issuedBy) {
+                            Swal.showValidationMessage('Please enter a valid name for "Issued By".');
+                        }
+                        return issuedBy;
+                    }
+                }).then((inputResult) => {
+                    if (inputResult.isConfirmed) {
+                        const issuedBy = inputResult.value.trim();
+
+                        const itemsToDeduct = [];
+                        $('#view_request_items tr').each(function() {
+                            const itemId = $(this).data('item_id');
+                            const quantity = $(this).find('td:eq(1)').text().trim();
+                            itemsToDeduct.push({
+                                id: itemId,
+                                qty: quantity
+                            });
+                        });
+
+                        // AJAX
+                        $.ajax({
+                            url: 'approve_request.php',
+                            type: 'POST',
+                            data: {
+                                req_number: reqNumber,
+                                status: 1,
+                                date_issued: new Date().toISOString().slice(0, 10),
+                                issued_by: issuedBy,
+                                items: itemsToDeduct
+                            },
+                            success: function(response) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Approved!',
+                                    text: 'The request has been approved and issued by: ' + issuedBy,
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                }).then(() => {
+                                    location.reload();
+                                });
+                            },
+                            error: function(xhr, status, error) {
+                                console.error("Error approving request: ", error);
+                                Swal.fire("Error", "Something went wrong while approving the request.", "error");
+                            }
+                        });
+                    }
+                });
+
+                setTimeout(() => {
+                    document.querySelector('#swal2-input')?.focus();
+                }, 100);
+            });
+
+            // Decline button functionality
+            $('.decline-btn').on('click', function() {
+                const reqNumber = $(this).data('req_number');
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "This action cannot be undone!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, decline it!',
+                    width: '300px'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Prompt for "Declined By" input
+                        Swal.fire({
+                            title: 'Enter Declined By',
+                            input: 'text',
+                            inputPlaceholder: 'Enter name',
+                            showCancelButton: true,
+                            confirmButtonText: 'Submit',
+                            cancelButtonText: 'Cancel',
+                            preConfirm: (declinedBy) => {
+                                if (!declinedBy) {
+                                    Swal.showValidationMessage('Please enter a name for "Declined By".');
+                                }
+                                return declinedBy;
+                            }
+                        }).then((inputResult) => {
+                            if (inputResult.isConfirmed) {
+                                const declinedBy = inputResult.value.trim();
+
+                                // AJAX call to decline the request
+                                $.ajax({
+                                    url: 'decline_request.php',
+                                    type: 'POST',
+                                    data: {
+                                        req_number: reqNumber,
+                                        declined_by: declinedBy
+                                    },
+                                    success: function(response) {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Declined!',
+                                            text: 'The request has been successfully declined.',
+                                            width: '300px',
+                                            timer: 1500,
+                                            showConfirmButton: false
+                                        }).then(() => {
+                                            location.reload();
+                                        });
+                                    },
+                                    error: function(xhr, status, error) {
+                                        console.error("Error declining request: ", error);
+                                        Swal.fire("Error", "Something went wrong while declining the request.", "error");
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Edit request modal functionality
+            $('.editrequest-btn').on('click', function() {
+                const reqNumber = $(this).data('req_number');
+
+                // Fetch request items and details via AJAX
+                $.ajax({
+                    url: 'edit_request.php',
+                    type: 'POST',
+                    data: {
+                        req_number: reqNumber
+                    },
+                    dataType: 'json',
+                    success: function(data) {
+                        if (data) {
+                            // Populate the items in the table with editable quantity fields and remove buttons
+                            let itemsHtml = '';
+                            data.items.forEach(item => {
+                                itemsHtml += `<tr>
+                                                <td>${item.item}</td>
+                                                <td><input type="number" class="form-control" value="${item.qty}" data-item-id="${item.id}" /></td>
+                                                <td><button class="btn btn-danger remove-item" data-item-id="${item.id}">Remove</button></td>
+                                              </tr>`;
+                            });
+                            $('#edit_request_items').html(itemsHtml);
+                            $('#editRequestModal').modal('show');
+                        } else {
+                            console.error("No data returned from the server.");
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error fetching request items: ", error);
+                    }
+                });
+            });
+
+            // Update request functionality
+            $('#updateRequest').on('click', function() {
+                const updatedItems = [];
+                
+                $('#edit_request_items tr').each(function() {
+                    const itemId = $(this).find('input').data('item-id');
+                    const quantity = $(this).find('input').val();
+                    const reqNumber = $(this).find('input').data('req-number'); // Ensure req_number is accessible
+
+                    updatedItems.push({
+                        id: itemId,
+                        qty: quantity,
+                        req_number: reqNumber // Include req_number in the data sent to the server
+                    });
+                });
+
+                // Send the updated items to the server
+                $.ajax({
+                    url: 'edit_request.php', // Pointing to the new update file
+                    type: 'POST',
+                    data: {
+                        items: updatedItems
+                    },
+                    success: function(response) {
+                        const data = JSON.parse(response);
+                        if (data.success) {
+                            Swal.fire('Success', 'The quantities have been updated.', 'success');
+                            $('#editRequestModal').modal('hide');
+                            location.reload(); // Reload the page or update the table
+                        } else {
+                            Swal.fire('Error', data.message || 'Something went wrong while updating.', 'error');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error updating quantities: ", error);
+                        Swal.fire('Error', 'Something went wrong while updating the quantities.', 'error');
+                    }
+                });
             });
 
         });

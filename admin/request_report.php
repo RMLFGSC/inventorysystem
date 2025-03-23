@@ -5,16 +5,17 @@ include("../includes/navbar_admin.php");
 $startDate = $_GET['start_date'] ?? null;
 $endDate = $_GET['end_date'] ?? null;
 
-$query = "SELECT req_id, req_number, u.fullname AS requestor, r.qty, s.item, s.category, u.department, r.status, r.date_approved , r.issued_by, r.date_declined, r. declined_by
+$query = "SELECT req_id, req_number, u.fullname AS requestor, r.qty, s.item, s.category, u.department, r.status, r.date_issued , r.issued_by, r.date_declined, r.declined_by
           FROM request r 
           JOIN users u ON r.user_id = u.user_id 
           JOIN stock_in s ON r.stockin_id = s.stockin_id WHERE 1=1";
 if ($startDate) {
-    $query .= " AND date_approved >= '$startDate'"; 
+    $query .= " AND date_issued >= '$startDate'";
 }
 if ($endDate) {
-    $query .= " AND date_approved <= '$endDate'";
+    $query .= " AND date_issued <= '$endDate'";
 }
+$query .= " ORDER BY r.status ASC";
 
 $result = mysqli_query($conn, $query);
 ?>
@@ -90,8 +91,8 @@ $result = mysqli_query($conn, $query);
                                         <td><?= $row['item']; ?></td>
                                         <td><?= $row['category']; ?></td>
                                         <td><?= $row['qty']; ?></td>
-                                        <td><?= $row['date_approved']?: 'N/A'; ?></td>
-                                        <td><?= $row['issued_by']?: 'N/A'; ?></td>
+                                        <td><?= $row['date_issued'] ?: 'N/A'; ?></td>
+                                        <td><?= $row['issued_by'] ?: 'N/A'; ?></td>
                                         <td><?= $row['date_declined'] ?: 'N/A'; ?></td>
                                         <td><?= $row['declined_by'] ?: 'N/A'; ?></td>
                                         <td><?= $statusText; ?></td>

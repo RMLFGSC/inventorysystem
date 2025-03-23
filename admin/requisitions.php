@@ -449,7 +449,6 @@ $result = mysqli_query($conn, $query);
                     cancelButtonText: 'Cancel',
                     confirmButtonColor: '#28a745',
                     width: '300px',
-                    reverseButtons: true
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
@@ -468,6 +467,7 @@ $result = mysqli_query($conn, $query);
                                     text: 'The request has been posted successfully.',
                                     icon: 'success',
                                     timer: 1500,
+                                    width:'300px',
                                     showConfirmButton: false
                                 });
                             },
