@@ -55,7 +55,7 @@ $result = mysqli_query($conn, $query);
         <!-- ADD MODAL -->
         <div class="modal fade" id="GMCaddRequest" tabindex="-1" role="dialog" aria-labelledby="RequestModalLabel"
             aria-hidden="true">
-            <div class="modal-dialog" role="document">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="RequestModalLabel">Add Request</h5>
@@ -78,19 +78,9 @@ $result = mysqli_query($conn, $query);
                                     </div>
                                     <div id="itemFields">
                                         <div class="form-row">
-                                            <div class="form-group col-md-6">
+                                        <div class="form-group col-md-6">
                                                 <label>Item</label>
-                                                <select name="stockin_id[]" class="form-control item-select" required>
-                                                    <?php
-                                                    $itemQuery = "SELECT item, SUM(qty) as total_stock FROM stock_in WHERE is_posted = 1 GROUP BY item";
-                                                    $itemResult = mysqli_query($conn, $itemQuery);
-                                                    while ($itemRow = mysqli_fetch_assoc($itemResult)) {
-                                                        $itemName = htmlspecialchars($itemRow['item']);
-                                                        $stockQty = htmlspecialchars($itemRow['total_stock']);
-                                                        echo "<option value='$itemName' data-stock='$stockQty'>$itemName (Stock: $stockQty)</option>";
-                                                    }
-                                                    ?>
-                                                </select>
+                                                <input type="text" name="item_request[]" class="form-control" required>
                                             </div>
                                             <div class="form-group col-md-6">
                                                 <label>Quantity</label>
@@ -268,25 +258,15 @@ $result = mysqli_query($conn, $query);
                 newItemRow.classList.add('form-row', 'item-row', 'mb-2');
 
                 newItemRow.innerHTML = `
-            <div class="form-group col-md-6">
-                <label>Item</label>
-                <select name="stockin_id[]" class="form-control item-select" required>
-                    <?php
-                    $itemQuery = "SELECT item, SUM(qty) as total_stock FROM stock_in WHERE is_posted = 1 GROUP BY item";
-                    $itemResult = mysqli_query($conn, $itemQuery);
-                    while ($itemRow = mysqli_fetch_assoc($itemResult)) {
-                        $itemName = htmlspecialchars($itemRow['item']);
-                        $stockQty = htmlspecialchars($itemRow['total_stock']);
-                        echo "<option value='$itemName' data-stock='$stockQty'>$itemName (Stock: $stockQty)</option>";
-                    }
-                    ?>
-                </select>
-            </div>
-            <div class="form-group col-md-6">
-                <label>Quantity</label>
-                <input type="text" name="qty[]" class="form-control" required>
-            </div>
-            <button type="button" class="btn btn-danger btn-sm removeItem">X</button>`;
+                <div class="form-group col-md-6">
+                    <label>Item</label>
+                    <input type="text" name="item_request[]" class="form-control" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>Quantity</label>
+                    <input type="text" name="qty[]" class="form-control" required>
+                </div>
+                <button type="button" class="btn btn-danger btn-sm removeItem">X</button>`;
 
                 itemFields.appendChild(newItemRow);
 
@@ -294,40 +274,6 @@ $result = mysqli_query($conn, $query);
                     itemFields.removeChild(newItemRow);
                 });
             });
-
-            document.getElementById('requestForm').addEventListener('submit', function(e) {
-                let valid = true;
-                let errorMsg = '';
-                let itemGroups = document.querySelectorAll('#itemFields .form-row');
-
-                itemGroups.forEach(function(group, index) {
-                    let itemSelect = group.querySelector('.item-select');
-                    let qtyInput = group.querySelector('input[name="qty[]"]');
-
-                    let selectedOption = itemSelect.options[itemSelect.selectedIndex];
-                    let stockAvailable = parseInt(selectedOption.getAttribute('data-stock')) || 0;
-                    let requestedQty = parseInt(qtyInput.value) || 0;
-
-                    if (requestedQty > stockAvailable) {
-                        errorMsg += `<li><strong>${selectedOption.value}:</strong> Requested ${requestedQty}, but only ${stockAvailable} available.</li>`;
-                        valid = false;
-                    }
-                });
-
-                if (!valid) {
-                    e.preventDefault();
-
-                    // Show the message inside the modal
-                    let errorDiv = document.getElementById('errorMessage');
-                    errorDiv.innerHTML = `<ul style="margin:0; padding-left: 18px;">${errorMsg}</ul>`;
-                    errorDiv.style.display = 'block';
-                } else {
-                    // Clear error on success
-                    document.getElementById('errorMessage').style.display = 'none';
-                    document.getElementById('errorMessage').innerHTML = '';
-                }
-            });
-
 
             // View request details
             $('.viewrequest-btn').on('click', function() {
@@ -351,10 +297,10 @@ $result = mysqli_query($conn, $query);
 
                             // Populate the items in the table
                             let itemsHtml = '';
-                            data.items.forEach(item => {
+                            data.items.forEach(item_request => {
                                 itemsHtml += `<tr>
-                                            <td>${item.item}</td>
-                                            <td>${item.qty}</td>
+                                            <td>${item_request.item_request}</td>
+                                            <td>${item_request.qty}</td>
                                           </tr>`;
                             });
                             $('#requestDetailsBody').html(itemsHtml); // Set items in the table

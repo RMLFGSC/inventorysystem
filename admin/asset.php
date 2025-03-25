@@ -19,9 +19,8 @@ include("../includes/navbar_admin.php");
 
         // Query for unassigned fixed assets with quantity greater than zero
         $unassignedQuery = "
-            SELECT s.item, r.unassigned_qty
-            FROM stock_in s
-            JOIN request r ON s.stockin_id = r.stockin_id
+            SELECT r.item_request AS item, r.unassigned_qty
+            FROM request r
             WHERE r.status = '1' AND r.date_issued IS NOT NULL AND r.unassigned_qty > 0
         ";
         $unassignedResult = mysqli_query($conn, $unassignedQuery);
@@ -116,90 +115,94 @@ include("../includes/navbar_admin.php");
     ?>
 </div>
 
+<!-- Bootstrap Modal for Assignment -->
+<div class="modal fade" id="assignModal" tabindex="-1" role="dialog" aria-labelledby="assignModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="assignModalLabel">Assign Item</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group text-left">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label>Item</label>
+                            <input id="modal-item" name="item" class="form-control" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label>Quantity</label>
+                            <input id="modal-qty" name="qty" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group text-left">
+                    <label>Owner Name</label>
+                    <input id="modal-owner" name="owner" class="form-control" placeholder="Enter Owner Name">
+                </div>
+                <div class="form-group text-left">
+                    <label>Location</label>
+                    <input id="modal-department" name="department" class="form-control" placeholder="Enter Equipment location">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="confirmAssign">Assign</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     $(document).ready(function() {
         $('.assign-btn').click(function() {
             let item = $(this).data('item');
             let qty = $(this).data('qty');
+            let serial = $(this).closest('tr').find('td:first').text();
 
-            Swal.fire({
-                title: 'Assign Item',
-                html: `
-                <div class="form-group text-left">
-                    <div class="row">
-                    <div class="col-md-6">
-                        <label>Item</label>
-                        <input id="swal-item" name="item" class="form-control" value="${item}" readonly>
-                    </div>
-                    <div class="col-md-6">
-                        <label>Quantity</label>
-                        <input id="swal-qty" name="qty" class="form-control" value="${qty}">
-                    </div>
-                    </div>
-                </div>
-                <div class="form-group text-left">
-                    <label>Serial Number</label>
-                    <input id="swal-serial" name="serial_number" class="form-control" placeholder="Enter Serial Number">
-                </div>
-                <div class="form-group text-left">
-                    <label>Owner Name</label>
-                    <input id="swal-owner" name="owner" class="form-control" placeholder="Enter Owner Name">
-                </div>
-                <div class="form-group text-left">
-                    <label>Department</label>
-                    <input id="swal-department" name="department" class="form-control" placeholder="Enter Department">
-                </div>
-                `,
+            // Set values in the modal
+            $('#modal-item').val(item);
+            $('#modal-qty').val(qty);
+            $('#modal-owner').val('');
+            $('#modal-department').val('');
+            $('#assignModal').modal('show');
 
-                showCancelButton: true,
-                confirmButtonText: 'Assign',
-                preConfirm: () => {
-                    const serial = document.getElementById('swal-serial').value.trim();
-                    const owner = document.getElementById('swal-owner').value.trim();
-                    const department = document.getElementById('swal-department').value.trim();
-                    const modifiedQty = document.getElementById('swal-qty').value.trim();
+            $('#confirmAssign').off('click').on('click', function() {
+                const owner = $('#modal-owner').val().trim();
+                const department = $('#modal-department').val().trim();
+                const modifiedQty = $('#modal-qty').val().trim();
 
-                    if (!serial || !owner || !department || !modifiedQty) {
-                        Swal.showValidationMessage('Please fill in all fields');
-                        return false;
-                    }
+                if (!serial || !owner || !department || !modifiedQty) {
+                    alert('Please fill in all fields');
+                    return;
+                }
 
-                    // Return data to the .then() block
-                    return {
-                        item: item,
+                // Send to PHP using AJAX
+                $.ajax({
+                    url: 'assign.php',
+                    method: 'POST',
+                    data: {
+                        stockin_item: item,
                         qty: modifiedQty,
                         serial: serial,
                         owner: owner,
                         department: department
-                    };
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const formData = result.value;
+                    },
+                    success: function(response) {
+                        Swal.fire('Assigned!', 'The item has been assigned successfully.', 'success')
+                            .then(() => {
+                                location.reload(); // Optional: refresh to update table
+                            });
+                    },
+                    error: function(xhr, status, error) {
+                        Swal.fire('Error', 'Something went wrong. Try again.', 'error');
+                        console.error(error);
+                    }
+                });
 
-                    // Send to PHP using AJAX
-                    $.ajax({
-                        url: 'assign.php',
-                        method: 'POST',
-                        data: {
-                            stockin_item: formData.item,
-                            qty: formData.qty,
-                            serial: formData.serial,
-                            owner: formData.owner,
-                            department: formData.department
-                        },
-                        success: function(response) {
-                            Swal.fire('Assigned!', 'The item has been assigned successfully.', 'success')
-                                .then(() => {
-                                    location.reload(); // Optional: refresh to update table
-                                });
-                        },
-                        error: function(xhr, status, error) {
-                            Swal.fire('Error', 'Something went wrong. Try again.', 'error');
-                            console.error(error);
-                        }
-                    });
-                }
+                $('#assignModal').modal('hide');
             });
         });
     });

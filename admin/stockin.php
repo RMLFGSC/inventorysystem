@@ -49,13 +49,17 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
                                 <div class="card-body">
                                     <div id="itemFields">
                                         <div class="form-row item-row mb-3">
-                                            <div class="form-group col-md-6 col-12">
+                                            <div class="form-group col-md-4 col-12">
                                                 <label>Item</label>
                                                 <input type="text" name="item[]" class="form-control" required>
                                             </div>
-                                            <div class="form-group col-md-6 col-12">
+                                            <div class="form-group col-md-4 col-12">
                                                 <label>Quantity</label>
                                                 <input type="number" name="qty[]" class="form-control" required>
+                                            </div>
+                                            <div class="form-group col-md-4 col-12">
+                                                <label>Serial Number</label>
+                                                <input type="text" name="serialNO[]" class="form-control" required>
                                             </div>
                                             <div class="form-group col-md-12">
                                                 <div class="form-check">
@@ -63,6 +67,7 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
                                                     <label class="form-check-label" for="warranty1">With Warranty?</label>
                                                 </div>
                                             </div>
+
                                         </div>
                                     </div>
                                 </div>
@@ -129,6 +134,7 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
                                 <thead>
                                     <tr>
                                         <th>Control #</th>
+                                        <th>Serial #</th>
                                         <th>Item</th>
                                         <th>Quantity</th>
                                         <th>Category</th>
@@ -151,25 +157,53 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
         </div>
         <!--End of view modal-->
 
+        <!--Edit Modal-->
+        <div class="modal fade" id="GMCeditStockin" tabindex="-1" role="dialog" aria-labelledby="EditItemModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="EditItemModalLabel">Edit Stock-in</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form action="update.php" method="POST">
+                        <div class="modal-body">
+                            <!-- Form fields will be populated via JavaScript -->
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" name="updateStockin" class="btn btn-primary">Update</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!--End of Edit Modal-->
+
 
 
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                // Add Item Fields Dynamically
-                document.getElementById('addItem').addEventListener('click', function() {
-                    const itemFields = document.getElementById('itemFields');
+                        // Add Item Fields Dynamically
+                        document.getElementById('addItem').addEventListener('click', function() {
+                            const itemFields = document.getElementById('itemFields');
 
-                    const newItemRow = document.createElement('div');
-                    newItemRow.classList.add('form-row', 'item-row', 'mb-3');
+                            const newItemRow = document.createElement('div');
+                            newItemRow.classList.add('form-row', 'item-row', 'mb-3');
 
-                    newItemRow.innerHTML = `
-                    <div class="form-group col-md-6 col-12">
+                            newItemRow.innerHTML = `
+                    <div class="form-group col-md-4 col-12">
                         <label>Item</label>
                         <input type="text" name="item[]" class="form-control" required>
                     </div>
-                    <div class="form-group col-md-6 col-12">
+                    <div class="form-group col-md-4 col-12">
                         <label>Quantity</label>
                         <input type="number" name="qty[]" class="form-control" required>
+                    </div>
+                    <div class="form-group col-md-4 col-12">
+                        <label>Serial Number</label>
+                        <input type="text" name="serialNO[]" class="form-control" required>
                     </div>
                     <div class="form-group col-md-12">
                         <div class="form-check">
@@ -180,55 +214,73 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
                     <button type="button" class="btn btn-danger btn-sm removeItem">X</button>
             `;
 
-                    itemFields.appendChild(newItemRow);
+                            itemFields.appendChild(newItemRow);
 
-                    // Remove Item Row
-                    newItemRow.querySelector('.removeItem').addEventListener('click', function() {
-                        itemFields.removeChild(newItemRow);
-                    });
-                });
-
-                // View Modal Stock-in Details via AJAX
-                $('.view-btn').on('click', function() {
-                    const controlno = $(this).data('controlno');
-
-                    $.ajax({
-                        url: 'fetch_stockin_details.php',
-                        type: 'POST',
-                        data: {
-                            controlNO: controlno
-                        },
-                        success: function(data) {
-                            $('#stockinDetailsBody').html(data);
-                        },
-                        error: function(xhr, status, error) {
-                            console.error("Error fetching stock-in details: ", error);
-                        }
-                    });
-                });
-
-                // SweetAlert for Post Stock-in Confirmation
-                document.querySelectorAll('.postStockBtn').forEach(button => {
-                    button.addEventListener('click', function() {
-                        const stockinId = this.getAttribute('data-stockin-id');
-
-                        Swal.fire({
-                            title: 'Are you sure?',
-                            text: "You are about to post this stock-in.",
-                            icon: 'warning',
-                            showCancelButton: true,
-                            confirmButtonColor: '#3085d6',
-                            cancelButtonColor: '#d33',
-                            confirmButtonText: 'Yes, post it!',
-                            width: '300px'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                window.location.href = `post_stockin.php?stockin_id=${stockinId}`;
-                            }
+                            // Remove Item Row
+                            newItemRow.querySelector('.removeItem').addEventListener('click', function() {
+                                itemFields.removeChild(newItemRow);
+                            });
                         });
-                    });
-                });
-            });
+
+                        // View Modal Stock-in Details via AJAX
+                        $('.view-btn').on('click', function() {
+                            const controlno = $(this).data('controlno');
+
+                            $.ajax({
+                                url: 'fetch_stockin_details.php',
+                                type: 'POST',
+                                data: {
+                                    controlNO: controlno
+                                },
+                                success: function(data) {
+                                    $('#stockinDetailsBody').html(data);
+                                },
+                                error: function(xhr, status, error) {
+                                    console.error("Error fetching stock-in details: ", error);
+                                }
+                            });
+                        });
+
+                        $(document).ready(function() {
+                            $('.editStockinBtn').on('click', function() {
+                                var stockin_id = $(this).data('id');
+                                $.ajax({
+                                    url: 'fetch_stockin.php',
+                                    type: 'POST',
+                                    data: {
+                                        stockin_id: stockin_id
+                                    },
+                                    success: function(response) {
+                                        $('.modal-body').html(response);
+                                        $('#GMCeditStockin').modal('show');
+                                    }
+                                });
+                            });
+                        });
+
+
+                            // SweetAlert for Post Stock-in Confirmation
+                            document.querySelectorAll('.postStockBtn').forEach(button => {
+                                button.addEventListener('click', function() {
+                                    const stockinId = this.getAttribute('data-stockin-id');
+
+                                    Swal.fire({
+                                        title: 'Are you sure?',
+                                        text: "You are about to post this stock-in.",
+                                        icon: 'warning',
+                                        showCancelButton: true,
+                                        confirmButtonColor: '#3085d6',
+                                        cancelButtonColor: '#d33',
+                                        confirmButtonText: 'Yes, post it!',
+                                        width: '300px'
+                                    }).then((result) => {
+                                        if (result.isConfirmed) {
+                                            window.location.href = `post_stockin.php?stockin_id=${stockinId}`;
+                                        }
+                                    });
+                                });
+                            });
+                        });
         </script>
 
 
@@ -248,6 +300,7 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
                             <thead class="thead-light">
                                 <tr>
                                     <th>Control #</th>
+                                    <th>Serial Number</th>
                                     <th>Item</th>
                                     <th>Category</th>
                                     <th>Qty</th>
@@ -259,13 +312,14 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
                                 <?php while ($row = mysqli_fetch_assoc($result)): ?>
                                     <tr>
                                         <td><?php echo $row['controlNO']; ?></td>
+                                        <td><?php echo $row['serialNO']; ?></td>
                                         <td><?php echo $row['item']; ?></td>
                                         <td><?php echo $row['category']; ?></td>
                                         <td><?php echo $row['orig_qty']; ?></td>
                                         <td><?php echo $row['dr']; ?></td>
                                         <td class="text-center">
                                             <?php if ($row['is_posted'] == 0): ?>
-                                                <button type="button" data-bs-toggle="modal" data-bs-target="#GMCeditStockin" class="btn btn-sm btn-success edit-btn" title="Edit">
+                                                <button type="button" data-bs-toggle="modal" data-bs-target="#GMCeditStockin" class="btn btn-sm btn-success editStockinBtn" title="Edit">
                                                     <i class="fa-solid fa-edit"></i>
                                                 </button>
                                             <?php endif; ?>

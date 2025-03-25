@@ -6,17 +6,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Retrieve and sanitize input data
     $item = $_POST['stockin_item'] ?? '';
     $qty = isset($_POST['qty']) ? intval($_POST['qty']) : 0;
-    $serial = $_POST['serial'] ?? '';
+    $serial = '';
     $owner = $_POST['owner'] ?? '';
     $department = $_POST['department'] ?? '';
 
     // Validate inputs
-    if (empty($item) || $qty < 1 || empty($serial) || empty($owner) || empty($department)) {
+    if (empty($item) || $qty < 1 || empty($owner) || empty($department)) {
         http_response_code(400);
         echo json_encode(['error' => 'Invalid input', 'data' => [
             'item' => $item,
             'qty' => $qty,
-            'serial_number' => $serial,
             'owner' => $owner,
             'department' => $department
         ]]);
@@ -28,8 +27,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         // Insert into fixed_assets table
-        $stmt = $conn->prepare("INSERT INTO fixed_assets (stockin_item, qty, serial_number, owner, department) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param('sisss', $item, $qty, $serial, $owner, $department);
+        $stmt = $conn->prepare("INSERT INTO fixed_assets (stockin_item, qty, owner, department) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param('isss', $item, $qty, $owner, $department);
         if (!$stmt->execute()) {
             throw new Exception("Error inserting into fixed_assets: " . $stmt->error);
         }

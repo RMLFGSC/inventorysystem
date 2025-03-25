@@ -99,7 +99,8 @@ $result = mysqli_query($conn, $query);
                                     <th>Item</th>
                                     <th>Qty</th>
                                     <th>User</th>
-                                    <th>Department</th>
+                                    <th>Location</th>
+                                    <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>

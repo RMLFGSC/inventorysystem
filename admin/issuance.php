@@ -3,10 +3,9 @@ include("../includes/header.php");
 include("../includes/navbar_admin.php");
 
 //query
-$query = "SELECT request.*, users.fullname AS requester_name, users.department, stock_in.item
+$query = "SELECT request.*, users.fullname AS requester_name, users.department, request.item_request
           FROM request 
           JOIN users ON request.user_id = users.user_id
-          JOIN stock_in ON request.stockin_id = stock_in.stockin_id
           WHERE req_id IN (SELECT MIN(req_id) FROM request GROUP BY req_number) 
           AND request.is_posted = 1
           ORDER BY status ASC, req_number DESC";
@@ -300,10 +299,10 @@ $result = mysqli_query($conn, $query);
 
                             // Populate the items in the table
                             let itemsHtml = '';
-                            data.items.forEach(item => {
+                            data.items.forEach(item_request => {
                                 itemsHtml += `<tr>
-                                                <td>${item.item}</td>
-                                                <td>${item.qty}</td>
+                                                <td>${item_request.item_request}</td>
+                                                <td>${item_request.qty}</td>
                                               </tr>`;
                             });
                             $('#view_request_items').html(itemsHtml);
