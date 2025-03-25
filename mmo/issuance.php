@@ -583,17 +583,18 @@ $result = mysqli_query($conn, $query);
 
             // Update request functionality
             $('#updateRequest').on('click', function() {
+                $('#editRequestModal').modal('hide');
                 const updatedItems = [];
                 
                 $('#edit_request_items tr').each(function() {
                     const itemId = $(this).find('input').data('item-id');
                     const quantity = $(this).find('input').val();
-                    const reqNumber = $(this).find('input').data('req-number'); // Ensure req_number is accessible
+                    const reqNumber = $(this).find('input').data('req-number'); 
 
                     updatedItems.push({
                         id: itemId,
                         qty: quantity,
-                        req_number: reqNumber // Include req_number in the data sent to the server
+                        req_number: reqNumber 
                     });
                 });
 
@@ -609,17 +610,16 @@ $result = mysqli_query($conn, $query);
                     if (result.isConfirmed) {
                         // Send the updated items to the server
                         $.ajax({
-                            url: 'edit_request.php', // Pointing to the new update file
+                            url: 'edit_request.php', 
                             type: 'POST',
                             data: {
                                 items: updatedItems
                             },
                             success: function(response) {
                                 const data = JSON.parse(response);
-                                console.log(data); // Debugging line to check the response
+                                console.log(data); 
                                 if (data.success) {
                                     Swal.fire('Success', 'The quantities have been updated.', 'success').then(() => {
-                                        $('#editRequestModal').modal('hide'); 
                                         location.reload(); 
                                     });
                                 } else {

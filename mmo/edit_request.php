@@ -44,7 +44,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stockin_id = $item['id']; 
 
             $stmt->bind_param("isi", $qty, $req_number, $stockin_id);
-            $stmt->execute();
+            if (!$stmt->execute()) {
+                echo json_encode(['success' => false, 'message' => 'Error updating item: ' . $stmt->error]);
+                exit;
+            }
         }
 
         $stmt->close();
