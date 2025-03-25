@@ -116,8 +116,6 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
         </div>
         <!-- end of add modal -->
 
-
-
         <!-- View Product Modal -->
         <div class="modal fade" id="viewModal" tabindex="-1" role="dialog" aria-labelledby="viewStockinModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
@@ -185,14 +183,14 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
 
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                        // Add Item Fields Dynamically
-                        document.getElementById('addItem').addEventListener('click', function() {
-                            const itemFields = document.getElementById('itemFields');
+                // Add Item Fields Dynamically
+                document.getElementById('addItem').addEventListener('click', function() {
+                    const itemFields = document.getElementById('itemFields');
 
-                            const newItemRow = document.createElement('div');
-                            newItemRow.classList.add('form-row', 'item-row', 'mb-3');
+                    const newItemRow = document.createElement('div');
+                    newItemRow.classList.add('form-row', 'item-row', 'mb-3');
 
-                            newItemRow.innerHTML = `
+                    newItemRow.innerHTML = `
                     <div class="form-group col-md-4 col-12">
                         <label>Item</label>
                         <input type="text" name="item[]" class="form-control" required>
@@ -214,73 +212,72 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
                     <button type="button" class="btn btn-danger btn-sm removeItem">X</button>
             `;
 
-                            itemFields.appendChild(newItemRow);
+                    itemFields.appendChild(newItemRow);
 
-                            // Remove Item Row
-                            newItemRow.querySelector('.removeItem').addEventListener('click', function() {
-                                itemFields.removeChild(newItemRow);
-                            });
+                    // Remove Item Row
+                    newItemRow.querySelector('.removeItem').addEventListener('click', function() {
+                        itemFields.removeChild(newItemRow);
+                    });
+                });
+
+                // View Modal Stock-in Details via AJAX
+                $('.view-btn').on('click', function() {
+                    const controlno = $(this).data('controlno');
+
+                    $.ajax({
+                        url: 'fetch_stockin_details.php',
+                        type: 'POST',
+                        data: {
+                            controlNO: controlno
+                        },
+                        success: function(data) {
+                            $('#stockinDetailsBody').html(data);
+                        },
+                        error: function(xhr, status, error) {
+                            console.error("Error fetching stock-in details: ", error);
+                        }
+                    });
+                });
+
+                $(document).ready(function() {
+                    $('.editStockinBtn').on('click', function() {
+                        var stockin_id = $(this).data('id');
+                        $.ajax({
+                            url: 'fetch_stockin.php',
+                            type: 'POST',
+                            data: {
+                                stockin_id: stockin_id
+                            },
+                            success: function(response) {
+                                $('.modal-body').html(response);
+                                $('#GMCeditStockin').modal('show');
+                            }
                         });
+                    });
+                });
 
-                        // View Modal Stock-in Details via AJAX
-                        $('.view-btn').on('click', function() {
-                            const controlno = $(this).data('controlno');
+                // SweetAlert for Post Stock-in Confirmation
+                document.querySelectorAll('.postStockBtn').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const stockinId = this.getAttribute('data-stockin-id');
 
-                            $.ajax({
-                                url: 'fetch_stockin_details.php',
-                                type: 'POST',
-                                data: {
-                                    controlNO: controlno
-                                },
-                                success: function(data) {
-                                    $('#stockinDetailsBody').html(data);
-                                },
-                                error: function(xhr, status, error) {
-                                    console.error("Error fetching stock-in details: ", error);
-                                }
-                            });
+                        Swal.fire({
+                            title: 'Are you sure?',
+                            text: "You are about to post this stock-in.",
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'Yes, post it!',
+                            width: '300px'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = `post_stockin.php?stockin_id=${stockinId}`;
+                            }
                         });
-
-                        $(document).ready(function() {
-                            $('.editStockinBtn').on('click', function() {
-                                var stockin_id = $(this).data('id');
-                                $.ajax({
-                                    url: 'fetch_stockin.php',
-                                    type: 'POST',
-                                    data: {
-                                        stockin_id: stockin_id
-                                    },
-                                    success: function(response) {
-                                        $('.modal-body').html(response);
-                                        $('#GMCeditStockin').modal('show');
-                                    }
-                                });
-                            });
-                        });
-
-
-                            // SweetAlert for Post Stock-in Confirmation
-                            document.querySelectorAll('.postStockBtn').forEach(button => {
-                                button.addEventListener('click', function() {
-                                    const stockinId = this.getAttribute('data-stockin-id');
-
-                                    Swal.fire({
-                                        title: 'Are you sure?',
-                                        text: "You are about to post this stock-in.",
-                                        icon: 'warning',
-                                        showCancelButton: true,
-                                        confirmButtonColor: '#3085d6',
-                                        cancelButtonColor: '#d33',
-                                        confirmButtonText: 'Yes, post it!',
-                                        width: '300px'
-                                    }).then((result) => {
-                                        if (result.isConfirmed) {
-                                            window.location.href = `post_stockin.php?stockin_id=${stockinId}`;
-                                        }
-                                    });
-                                });
-                            });
-                        });
+                    });
+                });
+            });
         </script>
 
 
