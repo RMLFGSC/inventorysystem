@@ -589,12 +589,12 @@ $result = mysqli_query($conn, $query);
                 $('#edit_request_items tr').each(function() {
                     const itemId = $(this).find('input').data('item-id');
                     const quantity = $(this).find('input').val();
-                    const reqNumber = $(this).find('input').data('req-number'); 
+                    const reqNumber = $('#requisitionNumber').val();
 
                     updatedItems.push({
                         id: itemId,
                         qty: quantity,
-                        req_number: reqNumber 
+                        req_number: reqNumber
                     });
                 });
 
