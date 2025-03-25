@@ -10,6 +10,12 @@
                     <span>Dashboard</span></a>
             </li>
 
+            <li class="nav-item">
+                <a class="nav-link" href="asset.php">
+                <i class="fas fa-fw fa-boxes"></i>
+                    <span>Fixed Asset</span></a>
+            </li>
+
 
             <li class="nav-item">
                 <a class="nav-link" href="stockin.php">
