@@ -79,6 +79,12 @@ $result = mysqli_query($conn, $query);
                                 <input type="text" id="declineDate" name="decline_date" class="form-control" readonly>
                             </div>
                         </div>
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label>Decline Reason</label>
+                                <input type="text" id="declineReason" name="decline_reason" class="form-control" readonly>
+                            </div>
+                        </div>
                         <div class="table-responsive">
                             <table class="table table-bordered">
                                 <thead>
@@ -268,19 +274,23 @@ $result = mysqli_query($conn, $query);
                                 $('#issuedDate').val(data.date_issued || 'N/A');
                                 $('#declinedBy').val('N/A');
                                 $('#declineDate').val('N/A');
+                                $('#declineReason').val('N/A');
                                 $('#issuedBy').closest('.row').show();
                                 $('#issuedDate').closest('.row').show();
                                 $('#declinedBy').closest('.row').hide();
                                 $('#declineDate').closest('.row').hide();
+                                $('#declineReason').closest('.row').hide();
                                 $('#printRequestBtn').show();
                                 $('#action-buttons').hide();
                             } else if (status == 2) { // If the status is "Declined"
                                 $('#declinedBy').val(data.declined_by || 'N/A');
                                 $('#declineDate').val(data.date_declined || 'N/A');
+                                $('#declineReason').val(data.decline_reason || 'N/A');
                                 $('#issuedBy').val('N/A');
                                 $('#issuedDate').val('N/A');
                                 $('#declinedBy').closest('.row').show();
                                 $('#declineDate').closest('.row').show();
+                                $('#declineReason').closest('.row').show();
                                 $('#issuedBy').closest('.row').hide();
                                 $('#issuedDate').closest('.row').hide();
                                 $('#printRequestBtn').hide();
@@ -290,10 +300,12 @@ $result = mysqli_query($conn, $query);
                                 $('#issuedDate').val('N/A');
                                 $('#declinedBy').val('N/A');
                                 $('#declineDate').val('N/A');
+                                $('#declineReason').val('N/A');
                                 $('#issuedBy').closest('.row').hide();
                                 $('#issuedDate').closest('.row').hide();
                                 $('#declinedBy').closest('.row').hide();
                                 $('#declineDate').closest('.row').hide();
+                                $('#declineReason').closest('.row').hide();
                                 $('#printRequestBtn').hide();
                                 $('#action-buttons').show();
                             }
@@ -477,10 +489,16 @@ $result = mysqli_query($conn, $query);
                     confirmButtonColor: '#d33',
                     cancelButtonColor: '#3085d6',
                     confirmButtonText: 'Yes, decline it!',
-                    width: '300px'
+                    width: '300px',
+                    input: 'text',
+                    inputPlaceholder: 'Enter reason for decline'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // Prompt for "Declined By" input
+                        const declineReason = result.value;
+                        if (!declineReason) {
+                            Swal.showValidationMessage('Please enter a reason for declining.');
+                            return;
+                        }
                         Swal.fire({
                             title: 'Enter Declined By',
                             input: 'text',
@@ -498,13 +516,13 @@ $result = mysqli_query($conn, $query);
                             if (inputResult.isConfirmed) {
                                 const declinedBy = inputResult.value.trim();
 
-                                // AJAX call to decline the request
                                 $.ajax({
                                     url: 'decline_request.php',
                                     type: 'POST',
                                     data: {
                                         req_number: reqNumber,
-                                        declined_by: declinedBy
+                                        declined_by: declinedBy,
+                                        decline_reason: declineReason
                                     },
                                     success: function(response) {
                                         Swal.fire({
