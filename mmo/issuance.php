@@ -75,13 +75,13 @@ $result = mysqli_query($conn, $query);
                                 <input type="text" id="declinedBy" name="declined_by" class="form-control" readonly>
                             </div>
                             <div class="col-md-6">
-                                <label>Decline Date</label>
+                                <label>Declined Date</label>
                                 <input type="text" id="declineDate" name="decline_date" class="form-control" readonly>
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-md-12">
-                                <label>Decline Reason</label>
+                                <label>Declined Reason</label>
                                 <input type="text" id="declineReason" name="decline_reason" class="form-control" readonly>
                             </div>
                         </div>
@@ -561,12 +561,12 @@ $result = mysqli_query($conn, $query);
                     dataType: 'json',
                     success: function(data) {
                         if (data) {
-                            // Populate the items in the table with editable quantity fields and remove buttons
+                            // Populate the items in the table with editable quantity fields
                             let itemsHtml = '';
                             data.items.forEach(item => {
                                 itemsHtml += `<tr>
                                                 <td>${item.item}</td>
-                                                <td><input type="number" class="form-control" value="${item.qty}" data-item-id="${item.id}" /></td>
+                                                <td><input type="number" class="form-control" value="${item.qty}" data-item-id="${item.stockin_id}" /></td>
                                               </tr>`;
                             });
                             $('#edit_request_items').html(itemsHtml);
@@ -597,26 +597,40 @@ $result = mysqli_query($conn, $query);
                     });
                 });
 
-                // Send the updated items to the server
-                $.ajax({
-                    url: 'edit_request.php', // Pointing to the new update file
-                    type: 'POST',
-                    data: {
-                        items: updatedItems
-                    },
-                    success: function(response) {
-                        const data = JSON.parse(response);
-                        if (data.success) {
-                            Swal.fire('Success', 'The quantities have been updated.', 'success');
-                            $('#editRequestModal').modal('hide');
-                            location.reload(); // Reload the page or update the table
-                        } else {
-                            Swal.fire('Error', data.message || 'Something went wrong while updating.', 'error');
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error("Error updating quantities: ", error);
-                        Swal.fire('Error', 'Something went wrong while updating the quantities.', 'error');
+                // SweetAlert confirmation
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You are about to update the quantities!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, update it!',
+                    cancelButtonText: 'No, cancel!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Send the updated items to the server
+                        $.ajax({
+                            url: 'edit_request.php', // Pointing to the new update file
+                            type: 'POST',
+                            data: {
+                                items: updatedItems
+                            },
+                            success: function(response) {
+                                const data = JSON.parse(response);
+                                console.log(data); // Debugging line to check the response
+                                if (data.success) {
+                                    Swal.fire('Success', 'The quantities have been updated.', 'success').then(() => {
+                                        $('#editRequestModal').modal('hide'); 
+                                        location.reload(); 
+                                    });
+                                } else {
+                                    Swal.fire('Error', data.message || 'Something went wrong while updating.', 'error');
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                console.error("Error updating quantities: ", error);
+                                Swal.fire('Error', 'Something went wrong while updating the quantities.', 'error');
+                            }
+                        });
                     }
                 });
             });
