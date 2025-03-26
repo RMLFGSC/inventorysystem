@@ -5,10 +5,10 @@ include("../includes/navbar_mmo.php");
 $startDate = $_GET['start_date'] ?? null;
 $endDate = $_GET['end_date'] ?? null;
 
-$query = "SELECT req_id, req_number, u.fullname AS requestor, r.qty, s.item, s.category, u.department, r.status, r.date_approved , r.issued_by, r.date_declined, r.declined_by
+$query = "SELECT req_id, req_number, u.fullname AS requestor, r.qty, r.item_request, 
+          r.status, r.date_issued, r.issued_by, r.date_declined, r.declined_by
           FROM request r 
           JOIN users u ON r.user_id = u.user_id 
-          JOIN stock_in s ON r.stockin_id = s.stockin_id 
           WHERE r.status != 0";
 if ($startDate) {
     $query .= " AND date_approved >= '$startDate'"; 
@@ -61,9 +61,7 @@ $result = mysqli_query($conn, $query);
                                 <tr>
                                     <th>Request #</th>
                                     <th>Requestor</th>
-                                    <th>Department</th>
                                     <th>Item</th>
-                                    <th>Category</th>
                                     <th>Qty</th>
                                     <th>Date Approved</th>
                                     <th>Approved By</th>
@@ -87,11 +85,9 @@ $result = mysqli_query($conn, $query);
                                     <tr>
                                         <td><?= $row['req_number']; ?></td>
                                         <td><?= $row['requestor']; ?></td>
-                                        <td><?= $row['department']; ?></td>
-                                        <td><?= $row['item']; ?></td>
-                                        <td><?= $row['category']; ?></td>
+                                        <td><?= $row['item_request']; ?></td>
                                         <td><?= $row['qty']; ?></td>
-                                        <td><?= $row['date_approved']?: 'N/A'; ?></td>
+                                        <td><?= $row['date_issued']?: 'N/A'; ?></td>
                                         <td><?= $row['issued_by']?: 'N/A'; ?></td>
                                         <td><?= $row['date_declined'] ?: 'N/A'; ?></td>
                                         <td><?= $row['declined_by'] ?: 'N/A'; ?></td>

@@ -3,7 +3,7 @@
 $host = "localhost";
 $username = "root";
 $password = "";
-$database = "newgmc";
+$database = "inventorygmc";
 
 $conn = mysqli_connect("$host", "$username", "$password", "$database");
 

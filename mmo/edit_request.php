@@ -1,63 +1,32 @@
 <?php
-include("../conn.php");
+// backend-endpoint.php
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['req_number'])) {
-        $req_number = $_POST['req_number'];
+// Include database connection
+include '../conn.php'; // Assuming $conn is established here
 
-        $query = "SELECT s.item, r.qty, r.stockin_id 
-                  FROM request r 
-                  JOIN stock_in s ON r.stockin_id = s.stockin_id 
-                  WHERE r.req_number = ?"; 
+// Get req_number from the POST request
+$reqNumber = $_POST['req_number'];
 
-        $stmt = $conn->prepare($query);
-        $stmt->bind_param("s", $req_number); 
-        $stmt->execute();
-        $result = $stmt->get_result();
+// SQL query to retrieve items
+$sql = "SELECT item_request, qty FROM request WHERE req_number = ?"; // Replace 'your_items_table'
 
-        $items = [];
-        if ($result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                $items[] = $row; 
-            }
-            
-            echo json_encode([
-                'items' => $items 
-            ]);
-        } else {
-            echo json_encode([
-                'items' => [] 
-            ]);
-        }
+// Prepare and execute the statement
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $reqNumber); // "s" indicates a string
+$stmt->execute();
+$result = $stmt->get_result();
 
-        $stmt->close();
-    } elseif (isset($_POST['items'])) {
-        $items = $_POST['items'];
-
-        $query = "UPDATE request SET qty = ? WHERE req_number = ? AND stockin_id = ?"; 
-
-        $stmt = $conn->prepare($query);
-
-        foreach ($items as $item) {
-            $qty = $item['qty'];
-            $req_number = $item['req_number'];
-            $stockin_id = $item['id']; 
-
-            $stmt->bind_param("isi", $qty, $req_number, $stockin_id);
-            if (!$stmt->execute()) {
-                echo json_encode(['success' => false, 'message' => 'Error updating item: ' . $stmt->error]);
-                exit;
-            }
-        }
-
-        $stmt->close();
-        echo json_encode(['success' => true]);
-    } else {
-        echo json_encode(['success' => false, 'message' => 'No items provided.']);
+$items = [];
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $items[] = $row;
     }
-} else {
-    echo json_encode(['success' => false, 'message' => 'Invalid request method.']);
-}
+}   
 
-$conn->close();
+// Send the JSON response
+header('Content-Type: application/json');
+echo json_encode($items);
+
+$stmt->close();
+$conn->close(); // Close the connection if it's not handled elsewhere.
 ?>

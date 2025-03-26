@@ -3,15 +3,15 @@ include("../includes/header.php");
 include("../includes/navbar_mmo.php");
 
 //query
-$query = "SELECT request.*, users.fullname AS requester_name, users.department, stock_in.item
+$query = "SELECT request.*, users.fullname AS requester_name, users.department, request.item_request
           FROM request 
           JOIN users ON request.user_id = users.user_id
-          JOIN stock_in ON request.stockin_id = stock_in.stockin_id
           WHERE req_id IN (SELECT MIN(req_id) FROM request GROUP BY req_number) 
           AND request.is_posted = 1
           ORDER BY status ASC, req_number DESC";
 $result = mysqli_query($conn, $query);
 ?>
+
 
 
 
@@ -120,13 +120,13 @@ $result = mysqli_query($conn, $query);
         </div>
         <!--End of view modal-->
 
-        <!-- Edit Request Modal -->
+        <!--Edit modal-->
         <div class="modal fade" id="editRequestModal" tabindex="-1" role="dialog"
             aria-labelledby="editRequestModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="editRequestModalLabel">Edit Requisition</h5>
+                        <h5 class="modal-title" id="editRequestModalLabel">Edit Requisition Items</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -138,23 +138,22 @@ $result = mysqli_query($conn, $query);
                                     <tr>
                                         <th>Items</th>
                                         <th>Qty</th>
-                                        
                                     </tr>
                                 </thead>
                                 <tbody id="edit_request_items">
-                                    <!-- Rows will be populated dynamically -->
                                 </tbody>
                             </table>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button id="updateRequest" class="btn btn-primary">Update</button>
+                        <button id="saveEditRequest" class="btn btn-sm btn-success">Save Changes</button>
+                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- End of Edit Request Modal -->
+
+
 
         <div class="container-fluid">
 
@@ -211,8 +210,9 @@ $result = mysqli_query($conn, $query);
                                                 </button>
                                                 <button type="button" data-toggle="modal" data-target="#editRequestModal"
                                                     class="btn btn-sm btn-primary editrequest-btn"
-                                                    data-req_number="<?php echo $row['req_number']; ?>">
-                                                <i class="fa fa-edit text-white"></i>
+                                                    data-req_number="<?php echo $row['req_number']; ?>"
+                                                    data-id="<?php echo $row['req_id']; ?>">
+                                                    <i class="fa fa-edit text-white"></i>
                                                 </button>
                                             <?php else: // Served or Declined 
                                             ?>
@@ -312,10 +312,10 @@ $result = mysqli_query($conn, $query);
 
                             // Populate the items in the table
                             let itemsHtml = '';
-                            data.items.forEach(item => {
+                            data.items.forEach(item_request => {
                                 itemsHtml += `<tr>
-                                                <td>${item.item}</td>
-                                                <td>${item.qty}</td>
+                                                <td>${item_request.item_request}</td>
+                                                <td>${item_request.qty}</td>
                                               </tr>`;
                             });
                             $('#view_request_items').html(itemsHtml);
@@ -330,6 +330,77 @@ $result = mysqli_query($conn, $query);
                 });
             });
 
+
+            //Edit button Function
+            $(document).ready(function() {
+                // Function to populate the edit modal with data
+                function populateEditModal(items) {
+                    let rows = '';
+                    items.forEach(item => {
+                        rows += `
+                <tr>
+                    <td>${item.item_request}</td>
+                    <td><input type="number" class="form-control edit-qty" value="${item.qty}"></td>
+                </tr>
+            `;
+                    });
+                    $('#edit_request_items').html(rows);
+                }
+
+                // Edit button click event
+                $(document).on('click', '.editrequest-btn', function() {
+                    let reqNumber = $(this).data('req_number');
+
+                    // Fetch items from the server
+                    $.ajax({
+                        url: 'edit_request.php',
+                        method: 'POST',
+                        data: {
+                            req_number: reqNumber
+                        },
+                        success: function(response) {
+                            populateEditModal(response);
+                            $('#editRequestModal').modal('show');
+                        },
+                        error: function(error) {
+                            console.error('Error fetching items:', error);
+                        }
+                    });
+                });
+
+                // to save edited request qty
+                $('#saveEditRequest').click(function() {
+                    let editedItems = [];
+                    $('#edit_request_items tr').each(function() {
+                        let item_request = $(this).find('td:first-child').text();
+                        let qty = $(this).find('.edit-qty').val();
+                        editedItems.push({
+                            item_request: item_request,
+                            qty: qty
+                        });
+                    });
+
+                    let reqNumber = $('.editrequest-btn').data('req_number');
+
+                    $.ajax({
+                        url: 'update_request.php',
+                        method: 'POST',
+                        data: {
+                            req_number: reqNumber,
+                            items: editedItems
+                        },
+                        success: function(response) {
+                            console.log('Items saved successfully:', response);
+                            $('#editRequestModal').modal('hide');
+                            // Update the view modal if needed.
+                        },
+                        error: function(error) {
+                            console.error('Error saving items:', error);
+                            // Handle error (e.g., display an error message)
+                        }
+                    });
+                });
+            });
 
 
             // Print button functionality
@@ -545,103 +616,6 @@ $result = mysqli_query($conn, $query);
                         });
                     }
                 });
-            });
-
-            // Edit request modal functionality
-            $('.editrequest-btn').on('click', function() {
-                const reqNumber = $(this).data('req_number');
-
-                // Fetch request items and details via AJAX
-                $.ajax({
-                    url: 'edit_request.php',
-                    type: 'POST',
-                    data: {
-                        req_number: reqNumber
-                    },
-                    dataType: 'json',
-                    success: function(data) {
-                        if (data) {
-                            // Populate the items in the table with editable quantity fields
-                            let itemsHtml = '';
-                            data.items.forEach(item => {
-                                itemsHtml += `<tr>
-                                                <td>${item.item}</td>
-                                                <td><input type="number" class="form-control" value="${item.qty}" data-item-id="${item.stockin_id}" /></td>
-                                              </tr>`;
-                            });
-                            $('#edit_request_items').html(itemsHtml);
-                            $('#editRequestModal').modal('show');
-                        } else {
-                            console.error("No data returned from the server.");
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error("Error fetching request items: ", error);
-                    }
-                });
-            });
-
-            // Update request functionality
-            $('#updateRequest').on('click', function() {
-                $('#editRequestModal').modal('hide');
-                const updatedItems = [];
-                
-                $('#edit_request_items tr').each(function() {
-                    const itemId = $(this).find('input').data('item-id');
-                    const quantity = $(this).find('input').val();
-                    const reqNumber = $('#requisitionNumber').val();
-
-                    updatedItems.push({
-                        id: itemId,
-                        qty: quantity,
-                        req_number: reqNumber
-                    });
-                });
-
-                // SweetAlert confirmation
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You are about to update the quantities!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes, update it!',
-                    cancelButtonText: 'No, cancel!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Send the updated items to the server
-                        $.ajax({
-                            url: 'edit_request.php', 
-                            type: 'POST',
-                            data: {
-                                items: updatedItems
-                            },
-                            success: function(response) {
-                                const data = JSON.parse(response);
-                                console.log(data); 
-                                if (data.success) {
-                                    Swal.fire('Success', 'The quantities have been updated.', 'success').then(() => {
-                                        location.reload(); 
-                                    });
-                                } else {
-                                    Swal.fire('Error', data.message || 'Something went wrong while updating.', 'error');
-                                }
-                            },
-                            error: function(xhr, status, error) {
-                                console.error("Error updating quantities: ", error);
-                                Swal.fire('Error', 'Something went wrong while updating the quantities.', 'error');
-                            }
-                        });
-                    }
-                });
-            });
-
-            $(document).on('click', '.edit-stockin-btn', function() {
-                const itemName = $(this).data('item-name');
-                const quantity = $(this).data('quantity');
-
-                // Populate the modal fields
-                $('#editItemName').val(itemName);
-                $('#editQuantity').val(quantity);
             });
 
         });

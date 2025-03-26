@@ -11,32 +11,24 @@ $query = "
         r.req_number, 
         u.fullname AS requestor, 
         u.department, 
-        s.item, 
-        s.orig_qty,
+        r.item_request, 
         r.issued_by, 
-        r.date_issued, 
-        fa.assigned_to, 
-        au.fullname AS assigned_to_name,
-        fa.location, 
-        r.status 
+        r.date_issued,
+        r.qty
     FROM 
         request r 
     JOIN 
         users u ON r.user_id = u.user_id 
     LEFT JOIN 
         fixed_assets fa ON r.req_number = fa.req_id 
-    LEFT JOIN
-        stock_in s ON r.stockin_id = s.stockin_id
-    LEFT JOIN
-        users au ON fa.assigned_to = au.user_id
     WHERE 
-        1=1"; // Assuming 'requestor_id' in request table corresponds to 'id' in users table
+        r.status = '1'"; // Only show approved
 
 if ($startDate) {
-    $query .= " AND r.date_issued >= '$startDate'"; // Assuming 'date_issued' is the column name for the date
+    $query .= " AND ra.date_issued >= '$startDate'";
 }
 if ($endDate) {
-    $query .= " AND r.date_issued <= '$endDate'";
+    $query .= " AND ra.date_issued <= '$endDate'";
 }
 
 $result = mysqli_query($conn, $query);
@@ -64,8 +56,8 @@ $result = mysqli_query($conn, $query);
                     <form method="GET" action="" class="mb-4">
                         <div class="form-row align-items-end">
                             <div class="form-group col-md-5">
-                                <label for="start_date">Start Date:</label>
-                                <input type="date" id="start_date" name="start_date" class="form-control" value="<?= htmlspecialchars($startDate); ?>" required>
+                                <label for="start">Start Date:</label>
+                                <input type="date" id="start" name="start_date" class="form-control" value="<?= htmlspecialchars($startDate); ?>" required>
                             </div>
                             <div class="form-group col-md-5">
                                 <label for="end_date">End Date:</label>
@@ -78,34 +70,30 @@ $result = mysqli_query($conn, $query);
                     </form>
 
                     <div class="card-datatable">
-                        <table class="datatables-basic table table-bordered" id="dataTable" width="100%">
-                            <thead>
+                        <table class="table table-hover table-bordered" id="dataTable" width="100%">
+                            <thead class="thead-light">
                                 <tr>
                                     <th>Req Number</th>
                                     <th>Requestor</th>
                                     <th>Department</th>
-                                    <th>Item</th>
+                                    <th>Item</th> 
                                     <th>Qty</th>
                                     <th>Issued By</th>
                                     <th>Date Issued</th>
-                                    <th>Assigned To</th>
-                                    <th>Location</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php
-                                while ($row = mysqli_fetch_assoc($result)):
+                                while ($row = mysqli_fetch_assoc($results)):
                                 ?>
                                     <tr>
                                         <td><?= $row['req_number']; ?></td>
                                         <td><?= $row['requestor']; ?></td>
                                         <td><?= $row['department']; ?></td>
-                                        <td><?= $row['item']; ?></td>
-                                        <td><?= $row['orig_qty']; ?></td>
+                                        <td><?= $row['item_request']; ?></td>
+                                        <td><?= $row['qty']; ?></td>
                                         <td><?= $row['issued_by']; ?></td>
                                         <td><?= $row['date_issued']; ?></td>
-                                        <td><?= $row['assigned_to_name']; ?></td>
-                                        <td><?= $row['location']; ?></td>
                                     </tr>
                                 <?php endwhile; ?>
                             </tbody>
@@ -120,7 +108,7 @@ $result = mysqli_query($conn, $query);
     <!-- End of Main Content -->
 
     <?php
-    include("../includes/scripts.php");
+    include("../includes/scropts.php");
     include("../includes/footer.php");
     ?>
 </div>

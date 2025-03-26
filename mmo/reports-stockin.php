@@ -60,15 +60,13 @@ $result = mysqli_query($conn, $query);
                                 <tr>
                                     <th>Item</th>
                                     <th>Category</th>
-                                    <th>Initial Qty</th>
-                                    <th>Current Qty</th>
+                                    <th>Total Equipments</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php while ($row = mysqli_fetch_assoc($result)): ?>
                                     <?php
-                                        $fixedQty = $row['total_orig_qty'];
                                         $currentQty = $row['total_qty'];
 
                                         if ($currentQty == 0) {
@@ -85,7 +83,6 @@ $result = mysqli_query($conn, $query);
                                     <tr>
                                         <td><?= htmlspecialchars($row['item']); ?></td>
                                         <td><?= htmlspecialchars($row['category']); ?></td>
-                                        <td><?= $fixedQty; ?></td>
                                         <td><?= $currentQty; ?></td>
                                         <td><span class="<?= $badgeClass ?>"><?= $status ?></span></td>
                                     </tr>
@@ -102,7 +99,8 @@ $result = mysqli_query($conn, $query);
                                     <th>Item</th>
                                     <th>Qty</th>
                                     <th>User</th>
-                                    <th>Department</th>
+                                    <th>Location</th>
+                                    <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>

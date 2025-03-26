@@ -49,13 +49,17 @@ $result = mysqli_query($conn, $query);
                                 <div class="card-body">
                                     <div id="itemFields">
                                         <div class="form-row item-row mb-3">
-                                            <div class="form-group col-md-6 col-12">
+                                            <div class="form-group col-md-4 col-12">
                                                 <label>Item</label>
                                                 <input type="text" name="item[]" class="form-control" required>
                                             </div>
-                                            <div class="form-group col-md-6 col-12">
+                                            <div class="form-group col-md-4 col-12">
                                                 <label>Quantity</label>
                                                 <input type="number" name="qty[]" class="form-control" required>
+                                            </div>
+                                            <div class="form-group col-md-4 col-12">
+                                                <label>Serial Number</label>
+                                                <input type="text" name="serialNO[]" class="form-control" required>
                                             </div>
                                             <div class="form-group col-md-12">
                                                 <div class="form-check">
@@ -63,6 +67,7 @@ $result = mysqli_query($conn, $query);
                                                     <label class="form-check-label" for="warranty1">With Warranty?</label>
                                                 </div>
                                             </div>
+
                                         </div>
                                     </div>
                                 </div>
@@ -127,6 +132,7 @@ $result = mysqli_query($conn, $query);
                                 <thead>
                                     <tr>
                                         <th>Control #</th>
+                                        <th>Serial #</th>
                                         <th>Item</th>
                                         <th>Quantity</th>
                                         <th>Category</th>
@@ -153,7 +159,7 @@ $result = mysqli_query($conn, $query);
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
+             document.addEventListener('DOMContentLoaded', function() {
                 // Add Item Fields Dynamically
                 document.getElementById('addItem').addEventListener('click', function() {
                     const itemFields = document.getElementById('itemFields');
@@ -162,21 +168,25 @@ $result = mysqli_query($conn, $query);
                     newItemRow.classList.add('form-row', 'item-row', 'mb-3');
 
                     newItemRow.innerHTML = `
-                <div class="form-group col-md-6 col-12">
-                    <label>Item</label>
-                    <input type="text" name="item[]" class="form-control" required>
-                </div>
-                <div class="form-group col-md-6 col-12">
-                    <label>Quantity</label>
-                    <input type="number" name="qty[]" class="form-control" required>
-                </div>
-                <div class="form-group col-md-12">
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input" name="warranty[]" value="1">
-                        <label class="form-check-label">With Warranty?</label>
+                    <div class="form-group col-md-4 col-12">
+                        <label>Item</label>
+                        <input type="text" name="item[]" class="form-control" required>
                     </div>
-                </div>
-                <button type="button" class="btn btn-danger btn-sm removeItem">X</button>
+                    <div class="form-group col-md-4 col-12">
+                        <label>Quantity</label>
+                        <input type="number" name="qty[]" class="form-control" required>
+                    </div>
+                    <div class="form-group col-md-4 col-12">
+                        <label>Serial Number</label>
+                        <input type="text" name="serialNO[]" class="form-control" required>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" name="warranty[]" value="1">
+                            <label class="form-check-label">With Warranty?</label>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-danger btn-sm removeItem">X</button>
             `;
 
                     itemFields.appendChild(newItemRow);
@@ -243,46 +253,44 @@ $result = mysqli_query($conn, $query);
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                    <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
                             <thead class="thead-light">
                                 <tr>
                                     <th>Control #</th>
+                                    <th>Serial Number</th>
                                     <th>Item</th>
                                     <th>Category</th>
                                     <th>Qty</th>
                                     <th>Date Received</th>
-                                    <th>Action</th>
+                                    <th class="text-center">Actions</th>
                                 </tr>
                             </thead>
-
                             <tbody>
-                                <?php
-
-                                while ($row = mysqli_fetch_assoc($result)): ?>
+                                <?php while ($row = mysqli_fetch_assoc($result)): ?>
                                     <tr>
                                         <td><?php echo $row['controlNO']; ?></td>
+                                        <td><?php echo $row['serialNO']; ?></td>
                                         <td><?php echo $row['item']; ?></td>
                                         <td><?php echo $row['category']; ?></td>
                                         <td><?php echo $row['orig_qty']; ?></td>
                                         <td><?php echo $row['dr']; ?></td>
-                                        <td>
+                                        <td class="text-center">
                                             <?php if ($row['is_posted'] == 0): ?>
-                                                <button type="button" data-bs-toggle="modal" data-bs-target="#GMCeditStockin" class="btn btn-sm btn-success edit-btn">
+                                                <button type="button" data-bs-toggle="modal" data-bs-target="#GMCeditStockin" class="btn btn-sm btn-success editStockinBtn" title="Edit">
                                                     <i class="fa-solid fa-edit"></i>
                                                 </button>
                                             <?php endif; ?>
 
-                                            <button type="button" data-toggle="modal" data-target="#viewModal" class="btn btn-sm btn-warning view-btn" data-controlno="<?php echo htmlspecialchars($row['controlNO']); ?>">
+                                            <button type="button" data-toggle="modal" data-target="#viewModal" class="btn btn-sm btn-warning view-btn" title="View" data-controlno="<?php echo htmlspecialchars($row['controlNO']); ?>">
                                                 <i class="fa-solid fa-eye text-white"></i>
                                             </button>
 
                                             <?php if ($row['is_posted'] == 0): ?>
-                                                <button type="button" class="btn btn-sm btn-info postStockBtn" data-stockin-id="<?php echo $row['stockin_id']; ?>">
+                                                <button type="button" class="btn btn-sm btn-info postStockBtn" title="Post Stock" data-stockin-id="<?php echo $row['stockin_id']; ?>">
                                                     <i class="fas fa-square-check"></i>
                                                 </button>
                                             <?php endif; ?>
                                         </td>
-
                                     </tr>
                                 <?php endwhile; ?>
                             </tbody>
