@@ -155,31 +155,86 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
         </div>
         <!--End of view modal-->
 
-        <!--Edit Modal-->
-        <div class="modal fade" id="GMCeditStockin" tabindex="-1" role="dialog" aria-labelledby="EditItemModalLabel" aria-hidden="true">
+        <!-- Edit Modal -->
+        <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="EditItemModalLabel">Edit Stock-in</h5>
+                        <h5 class="modal-title" id="editModalLabel">Edit Stock-in</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <form action="update.php" method="POST">
+                    <form id="editStockinForm" action="update.php" method="POST">
                         <div class="modal-body">
-                            <!-- Form fields will be populated via JavaScript -->
+                            <div class="card">
+                                <div class="card-header text-white" style="background-color: #76a73c;">
+                                    <strong>Stock-in Items</strong>
+                                </div>
+                                <div class="card-body">
+                                    <input type="hidden" name="stockin_id" id="editStockinId">
+                                    <div id="editItemFields">
+                                        <div class="form-row item-row mb-3">
+                                            <div class="form-group col-md-4 col-12">
+                                                <label>Item</label>
+                                                <input type="text" name="item[]" id="editItemName" class="form-control" required>
+                                            </div>
+                                            <div class="form-group col-md-4 col-12">
+                                                <label>Quantity</label>
+                                                <input type="number" name="qty[]" id="editQty" class="form-control" required>
+                                            </div>
+                                            <div class="form-group col-md-4 col-12">
+                                                <label>Serial Number</label>
+                                                <input type="text" name="serialNO[]" id="editSerialNo" class="form-control" required>
+                                            </div>
+                                            <div class="form-group col-md-12">
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input" id="editWarranty" name="warranty[]" value="1">
+                                                    <label class="form-check-label" for="editWarranty">With Warranty?</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-3 text-center">
+                                        <button type="button" class="btn btn-sm btn-secondary" id="addItemEdit">Add Item</button>
+                                    </div>
+
+                                    <hr>
+
+                                    <div class="form-row">
+                                        <div class="form-group col-md-6 col-12">
+                                            <label for="category">Category</label>
+                                            <select class="custom-select" id="editCategory" name="category" aria-label="Default select example" required>
+                                                <option value="" selected disabled>Select Category</option>
+                                                <option value="IT Equipment">IT Equipment</option>
+                                                <option value="Engineering Equipment">Engineering Equipment</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group col-md-6 col-12">
+                                            <label>Date of Purchase</label>
+                                            <input type="date" name="dop" id="editDop" class="form-control" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row">
+                                        <div class="form-group col-md-6 col-12">
+                                            <label>Date Received</label>
+                                            <input type="date" name="dr" id="editDr" class="form-control" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            <button type="submit" name="updateStockin" class="btn btn-primary">Update</button>
+                            <button type="submit" class="btn btn-primary">Update</button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
-        <!--End of Edit Modal-->
-
-
+        <!-- End of Edit Modal -->
 
         <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -239,18 +294,22 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
                     });
                 });
 
-                $(document).ready(function() {
-                    $('.editStockinBtn').on('click', function() {
-                        var stockin_id = $(this).data('id');
+                // Event listener for edit buttons
+                document.querySelectorAll('.editStockinBtn').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const stockinId = this.getAttribute('data-stockin-id');
+
+                        // Fetch existing data using AJAX
                         $.ajax({
-                            url: 'fetch_stockin.php',
+                            url: 'fetch_stockin_details.php',
                             type: 'POST',
-                            data: {
-                                stockin_id: stockin_id
+                            data: { controlNO: stockinId }, // Change to controlNO
+                            success: function(data) {
+                                $('#stockinDetailsBody').html(data); // Populate the modal with fetched data
+                                $('#editModal').modal('show'); // Show the modal
                             },
-                            success: function(response) {
-                                $('.modal-body').html(response);
-                                $('#GMCeditStockin').modal('show');
+                            error: function(xhr, status, error) {
+                                console.error("Error fetching stock-in details: ", error);
                             }
                         });
                     });
@@ -275,6 +334,42 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
                                 window.location.href = `post_stockin.php?stockin_id=${stockinId}`;
                             }
                         });
+                    });
+                });
+
+                // Event listener for the "Add Item" button in the Edit Modal
+                document.getElementById('addItemEdit').addEventListener('click', function() {
+                    const itemFields = document.getElementById('editItemFields'); // Ensure this ID is correct
+
+                    const newItemRow = document.createElement('div');
+                    newItemRow.classList.add('form-row', 'item-row', 'mb-3');
+
+                    newItemRow.innerHTML = `
+                        <div class="form-group col-md-4 col-12">
+                            <label>Item</label>
+                            <input type="text" name="item[]" class="form-control" required>
+                        </div>
+                        <div class="form-group col-md-4 col-12">
+                            <label>Quantity</label>
+                            <input type="number" name="qty[]" class="form-control" required>
+                        </div>
+                        <div class="form-group col-md-4 col-12">
+                            <label>Serial Number</label>
+                            <input type="text" name="serialNO[]" class="form-control" required>
+                        </div>
+                        <div class="form-group col-md-12">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="warranty[]" value="1">
+                                <label class="form-check-label">With Warranty?</label>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-danger btn-sm removeItem">Remove</button>
+                    `;
+
+                    itemFields.appendChild(newItemRow);
+
+                    newItemRow.querySelector('.removeItem').addEventListener('click', function() {
+                        itemFields.removeChild(newItemRow); // Remove the item row
                     });
                 });
             });
