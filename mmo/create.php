@@ -6,6 +6,7 @@ include("../conn.php");
 //start of stockin
 if (isset($_POST['addStockin'])) {
     $controlNO = $_POST['controlNO'];
+    $serialNOs = $_POST['serialNO'];
     $cat_name = $_POST['category'];
     $dop = $_POST['dop'];
     $dr = $_POST['dr'];
@@ -15,14 +16,15 @@ if (isset($_POST['addStockin'])) {
 
     for ($i = 0; $i < count($item_names); $i++) {
         $item = mysqli_real_escape_string($conn, $item_names[$i]);
+        $serialNO = mysqli_real_escape_string($conn, $serialNOs[$i]);
         $qty = intval($qtys[$i]);
-        $orig_qty = $qty; 
+        $orig_qty = $qty;
 
-        $warranty = in_array($i + 1, $warranties) ? 1 : 0; 
+        $warranty = in_array($i + 1, $warranties) ? 1 : 0;
 
-        $query = "INSERT INTO stock_in (controlNO, item, qty, orig_qty, category, dop, dr, warranty) 
-                  VALUES ('$controlNO', '$item', '$qty', '$orig_qty', '$cat_name', '$dop', '$dr', '$warranty')";
-        
+        $query = "INSERT INTO stock_in (controlNO, serialNO, item, qty, orig_qty, category, dop, dr, warranty) 
+                  VALUES ('$controlNO', '$serialNO', '$item', '$qty', '$orig_qty', '$cat_name', '$dop', '$dr', '$warranty')";
+
         $query_run = mysqli_query($conn, $query);
 
         if (!$query_run) {
@@ -34,8 +36,6 @@ if (isset($_POST['addStockin'])) {
     exit();
 }
 //end of stockin
-
-
 
 //start of request
 

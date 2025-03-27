@@ -90,6 +90,7 @@ $result = mysqli_query($conn, $query);
                                         <option value="" selected disabled>Select Category</option>
                                         <option value="IT Equipment">IT Equipment</option>
                                         <option value="Engineering Equipment">Engineering Equipment</option>
+                                        <option value="Fixed Asset">Fixed Asset</option>
                                     </select>
                                 </div>
                             </div>

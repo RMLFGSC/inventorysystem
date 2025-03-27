@@ -19,9 +19,7 @@ include("../includes/navbar_mmo.php");
 
         // Query for unassigned fixed assets with quantity greater than zero
         $unassignedQuery = "
-            SELECT r.item_request AS item, r.unassigned_qty
-            FROM request r
-            WHERE r.status = '1' AND r.date_issued IS NOT NULL AND r.unassigned_qty > 0
+            SELECT item, qty FROM stock_in WHERE category = 'Fixed Asset' AND is_posted='1' AND qty > 0
         ";
         $unassignedResult = mysqli_query($conn, $unassignedQuery);
         ?>
@@ -29,21 +27,23 @@ include("../includes/navbar_mmo.php");
 
         <!-- CONTENT -->
         <div class="container-fluid">
-        <div class="card shadow mb-4">
-                <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                    <h6 class="m-0 font-weight-bold text-primary">Fixed Asset</h6>
-                    <button type="button" data-toggle="modal" data-target="#GMCaddAsset" class="btn btn-sm btn-primary assign-btn"><i class="fas fa-plus"></i> Add</button>
-                </div>
-                <div class="card-body">
-                    <div class="table">
-                        <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
-                            <thead class="thead-light">
+            <div class="row">
+                <!-- Fixed Assets Table (Left side - larger) -->
+                <div class="col-md-8">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                            <h6 class="m-0 font-weight-bold text-primary">Fixed Assets</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                                    <thead class="thead-light">
                                         <tr>
                                             <th>Serial Number</th>
                                             <th>Item</th>
                                             <th>Qty</th>
                                             <th>User</th>
-                                            <th>Department</th>
+                                            <th>location</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -54,7 +54,7 @@ include("../includes/navbar_mmo.php");
                                                 <td><?php echo $row['qty']; ?></td>
                                                 <td><?php echo htmlspecialchars($row['assigned_name']); ?></td>
                                                 <td><?php echo $row['department']; ?></td>
-                                                
+
                                             </tr>
                                         <?php endwhile; ?>
                                     </tbody>
@@ -64,7 +64,84 @@ include("../includes/navbar_mmo.php");
                     </div>
                 </div>
 
-                
+                <!-- Unassigned Fixed Assets Table -->
+                <div class="col-md-4">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                            <h6 class="m-0 font-weight-bold text-primary">Unassigned items</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                                <table class="table table-bordered table-sm">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th>Item</th>
+                                            <th>Qty</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php while ($row = mysqli_fetch_assoc($unassignedResult)): ?>
+                                            <tr>
+                                                <td><?php echo htmlspecialchars($row['item']); ?></td>
+                                                <td><?php echo htmlspecialchars($row['qty']); ?></td>
+                                                <td>
+                                                    <button type="button" class="btn btn-primary btn-sm assign-btn"
+                                                        data-item="<?php echo htmlspecialchars($row['item']); ?>"
+                                                        data-qty="<?php echo htmlspecialchars($row['qty']); ?>">
+                                                        Assign
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        <?php endwhile; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bootstrap Modal for Assignment -->
+                <div class="modal fade" id="assignModal" tabindex="-1" role="dialog" aria-labelledby="assignModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="assignModalLabel">Assign Item</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="form-group text-left">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label>Item</label>
+                                            <input id="modal-item" name="item" class="form-control" readonly>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label>Quantity</label>
+                                            <input id="modal-qty" name="qty" class="form-control">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group text-left">
+                                    <label>Owner Name</label>
+                                    <input id="modal-owner" name="owner" class="form-control" placeholder="Enter Owner Name">
+                                </div>
+                                <div class="form-group text-left">
+                                    <label>Location</label>
+                                    <input id="modal-department" name="department" class="form-control" placeholder="Enter Equipment location">
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary" id="confirmAssign">Assign</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
             </div> <!-- /.row -->
         </div>
         <!-- /.container-fluid -->
@@ -78,45 +155,6 @@ include("../includes/navbar_mmo.php");
     ?>
 </div>
 
-<!-- Bootstrap Modal for Assignment -->
-<div class="modal fade" id="GMCaddAsset" tabindex="-1" role="dialog" aria-labelledby="assignModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="assignModalLabel">Assign Item</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group text-left">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label>Item</label>
-                            <input id="modal-item" name="item" class="form-control" readonly>
-                        </div>
-                        <div class="col-md-6">
-                            <label>Quantity</label>
-                            <input id="modal-qty" name="qty" class="form-control">
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group text-left">
-                    <label>Owner Name</label>
-                    <input id="modal-owner" name="owner" class="form-control" placeholder="Enter Owner Name">
-                </div>
-                <div class="form-group text-left">
-                    <label>Location</label>
-                    <input id="modal-department" name="department" class="form-control" placeholder="Enter Equipment location">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="confirmAssign">Assign</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 <script>
     $(document).ready(function() {
@@ -165,7 +203,7 @@ include("../includes/navbar_mmo.php");
                     }
                 });
 
-                $('#GMCaddAsset').modal('hide');
+                $('#assignModal').modal('hide');
             });
         });
     });

@@ -78,7 +78,7 @@ $result = mysqli_query($conn, $query);
                                     </div>
                                     <div id="itemFields">
                                         <div class="form-row">
-                                        <div class="form-group col-md-6">
+                                            <div class="form-group col-md-6">
                                                 <label>Item</label>
                                                 <input type="text" name="item_request[]" class="form-control" required>
                                             </div>
@@ -281,7 +281,7 @@ $result = mysqli_query($conn, $query);
 
                 // AJAX call to fetch the requisition details
                 $.ajax({
-                    url: 'fetch_request_items.php', // Ensure this points to the correct file
+                    url: 'fetch_request_items.php', 
                     type: 'POST',
                     data: {
                         req_number: reqno
@@ -413,7 +413,7 @@ $result = mysqli_query($conn, $query);
                                     text: 'The request has been posted successfully.',
                                     icon: 'success',
                                     timer: 1500,
-                                    width:'300px',
+                                    width: '300px',
                                     showConfirmButton: false
                                 });
                             },
