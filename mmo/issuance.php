@@ -360,6 +360,7 @@ $result = mysqli_query($conn, $query);
                         },
                         success: function(response) {
                             populateEditModal(response);
+                            $('#editRequestModal').data('req_number', reqNumber);
                             $('#editRequestModal').modal('show');
                         },
                         error: function(error) {
@@ -380,23 +381,28 @@ $result = mysqli_query($conn, $query);
                         });
                     });
 
-                    let reqNumber = $('.editrequest-btn').data('req_number');
+                    let reqNumber = $('#editRequestModal').data('req_number');
+
+                    // Debugging: Log the data being sent
+                    console.log('Sending data:', {
+                        req_number: reqNumber,
+                        items: editedItems
+                    });
 
                     $.ajax({
                         url: 'update_request.php',
                         method: 'POST',
-                        data: {
+                        contentType: 'application/json',
+                        data: JSON.stringify({
                             req_number: reqNumber,
                             items: editedItems
-                        },
+                        }),
                         success: function(response) {
                             console.log('Items saved successfully:', response);
                             $('#editRequestModal').modal('hide');
-                            // Update the view modal if needed.
                         },
                         error: function(error) {
                             console.error('Error saving items:', error);
-                            // Handle error (e.g., display an error message)
                         }
                     });
                 });

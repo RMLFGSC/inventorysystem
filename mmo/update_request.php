@@ -4,27 +4,35 @@
 include '../conn.php'; // Include database connection
 
 // Get data from POST request
-$reqNumber = $_POST['req_number'];
-$items = $_POST['items'];
+$input = json_decode(file_get_contents('php://input'), true);
+$reqNumber = $input['req_number'] ?? null;
+$items = $input['items'] ?? [];
+
+// Check for missing data
+if (empty($reqNumber) || empty($items)) {
+    echo json_encode(['success' => false, 'error' => 'Request number or items are missing.']);
+    exit;
+}
 
 // Begin transaction (for atomicity)
 $conn->begin_transaction();
 
 $success = true;
+$errors = []; // Array to hold error messages
 
 foreach ($items as $item) {
     $itemRequest = $item['item_request'];
     $qty = $item['qty'];
 
     // SQL query to update quantity
-    $sql = "UPDATE request SET qty = ? WHERE req_number = ? AND item_request = ?"; // Replace 'your_items_table'
+    $sql = "UPDATE request SET qty = ? WHERE req_number = ? AND item_request = ?"; 
 
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("isi", $qty, $reqNumber, $itemRequest); // "isi" indicates integer, string, integer
+    $stmt->bind_param("isi", $qty, $reqNumber, $itemRequest); 
 
     if (!$stmt->execute()) {
         $success = false;
-        // Do not break here. Instead, log the error or handle it differently
+        $errors[] = "Error updating item $itemRequest: " . $stmt->error; // Log error
     }
     $stmt->close();
 }
@@ -34,7 +42,7 @@ if ($success) {
     echo json_encode(['success' => true]);
 } else {
     $conn->rollback();
-    echo json_encode(['success' => false, 'error' => 'Error updating items']);
+    echo json_encode(['success' => false, 'errors' => $errors]); // Return all errors
 }
 
 $conn->close();
