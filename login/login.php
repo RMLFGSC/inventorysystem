@@ -60,7 +60,7 @@ if (isset($row) && isset($row['fullname'])) {
                             <img src="../img/gmc-logo.jpg" alt="GMC Logo" class="rounded-circle" style="width: 80px; height: 80px; margin-bottom: 10px;">
                             <h1 class="h4 text-dark">GENSANMED</h1>
                         </div>
-                        <form action="logincode.php" method="POST">
+                        <form action="logincode" method="POST">
                             <div class="form-group">
                                 <input type="text" name="username" class="form-control form-control-user" placeholder="Username" required>
                             </div>

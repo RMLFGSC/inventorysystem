@@ -4,39 +4,52 @@ include("../conn.php");
 
 
 
-//start of stockin
+// Start of stockin
 if (isset($_POST['addStockin'])) {
     $controlNO = $_POST['controlNO'];
-    $serialNOs = $_POST['serialNO'];
     $cat_name = $_POST['category'];
     $dop = $_POST['dop'];
     $dr = $_POST['dr'];
     $item_names = $_POST['item'];
-    $qtys = $_POST['qty'];
+    $qtys = $_POST['qty'];  
+    $serialNOs = $_POST['serialNO'];
     $warranties = isset($_POST['warranty']) ? $_POST['warranty'] : [];
 
     for ($i = 0; $i < count($item_names); $i++) {
         $item = mysqli_real_escape_string($conn, $item_names[$i]);
-        $serialNO = mysqli_real_escape_string($conn, $serialNOs[$i]);
-        $qty = intval($qtys[$i]);
-        $orig_qty = $qty;
+        $qty = intval($qtys[$i]);  
 
-        $warranty = in_array($i + 1, $warranties) ? 1 : 0;
+        // Check if warranty exists for the current item
+        $warranty = in_array($i, $warranties) ? 1 : 0;
 
-        $query = "INSERT INTO stock_in (controlNO, serialNO, item, qty, orig_qty, category, dop, dr, warranty) 
-                  VALUES ('$controlNO', '$serialNO', '$item', '$qty', '$orig_qty', '$cat_name', '$dop', '$dr', '$warranty')";
+        // Separate the serial numbers using commas
+        $serialArray = array_map('trim', explode(',', $serialNOs[$i]));
 
-        $query_run = mysqli_query($conn, $query);
+        // Check if the number of serial numbers matches the qty
+        if (count($serialArray) !== $qty) {
+            echo "Error: The number of serial numbers must match the quantity.";
+            exit();
+        }
 
-        if (!$query_run) {
-            echo "Error: " . mysqli_error($conn);
+        foreach ($serialArray as $serialNO) {
+            $serialNO = mysqli_real_escape_string($conn, $serialNO);
+
+            // Insert each serial number as a separate entry with qty = 1
+            $query = "INSERT INTO stock_in (controlNO, item, qty, orig_qty, serialNO, category, dop, dr, warranty) 
+                      VALUES ('$controlNO', '$item', 1, 1, '$serialNO', '$cat_name', '$dop', '$dr', '$warranty')";
+
+            if (!mysqli_query($conn, $query)) {
+                echo "Error: " . mysqli_error($conn);
+            }
         }
     }
 
     header("Location: stockin.php");
     exit();
 }
-//end of stockin
+
+
+// End of stockin
 
 
 
@@ -71,8 +84,8 @@ if (isset($_POST['addRequest'])) {
         $unassigned_quantity = $quantity;
 
         // Insert each item with the same req_number
-        $query = "INSERT INTO request (req_number, user_id, item_request, qty, unassigned_qty, department, date, status) 
-                  VALUES ('$formatted_req_number', '$user_id', '$item', '$quantity', '$unassigned_quantity', '$department', '$date', '$status')";
+        $query = "INSERT INTO request (req_number, user_id, item_request, qty, department, date, status) 
+                  VALUES ('$formatted_req_number', '$user_id', '$item', '$quantity', '$department', '$date', '$status')";
 
         if (!mysqli_query($conn, $query)) {
             echo "Error: " . mysqli_error($conn);

@@ -64,7 +64,7 @@ $result = mysqli_query($conn, $query);
                         </button>
                     </div>
 
-                    <form action="create.php" method="POST" id="requestForm">
+                    <form action="create" method="POST" id="requestForm">
                         <div class="modal-body">
                             <div class="card">
                                 <div id="errorMessage" class="alert alert-danger" style="display: none;"></div>
@@ -281,7 +281,7 @@ $result = mysqli_query($conn, $query);
 
                 // AJAX call to fetch the requisition details
                 $.ajax({
-                    url: 'fetch_request_items.php', 
+                    url: 'fetch_request_items', 
                     type: 'POST',
                     data: {
                         req_number: reqno
@@ -398,7 +398,7 @@ $result = mysqli_query($conn, $query);
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: 'post_request.php',
+                            url: 'post_request',
                             type: 'POST',
                             data: {
                                 req_number: reqno,

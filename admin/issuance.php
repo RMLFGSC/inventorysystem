@@ -248,7 +248,7 @@ $result = mysqli_query($conn, $query);
 
                 // Fetch request items and details via AJAX
                 $.ajax({
-                    url: 'fetch_request_items.php',
+                    url: 'fetch_request_items',
                     type: 'POST',
                     data: {
                         req_number: reqno
@@ -432,7 +432,7 @@ $result = mysqli_query($conn, $query);
 
                         // AJAX
                         $.ajax({
-                            url: 'approve_request.php',
+                            url: 'approve_request',
                             type: 'POST',
                             data: {
                                 req_number: reqNumber,
@@ -499,7 +499,7 @@ $result = mysqli_query($conn, $query);
 
                                 // AJAX call to decline the request
                                 $.ajax({
-                                    url: 'decline_request.php',
+                                    url: 'decline_request',
                                     type: 'POST',
                                     data: {
                                         req_number: reqNumber,
@@ -534,7 +534,7 @@ $result = mysqli_query($conn, $query);
 
                 // Fetch request items and details via AJAX
                 $.ajax({
-                    url: 'edit_request.php',
+                    url: 'edit_request',
                     type: 'POST',
                     data: {
                         req_number: reqNumber
@@ -580,7 +580,7 @@ $result = mysqli_query($conn, $query);
 
                 // Send the updated items to the server
                 $.ajax({
-                    url: 'edit_request.php', 
+                    url: 'edit_request', 
                     type: 'POST',
                     data: {
                         items: updatedItems

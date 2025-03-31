@@ -30,7 +30,7 @@ include("../includes/navbar_admin.php");
                         </button>
                     </div>
 
-                    <form action="create.php" method="POST">
+                    <form action="create" method="POST">
                         <div class="modal-body">
                             <div class="form-row">
                                 <div class="form-group col-md-6">

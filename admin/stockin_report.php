@@ -60,14 +60,14 @@ $result = mysqli_query($conn, $query);
                                 <tr>
                                     <th>Item</th>
                                     <th>Category</th>
-                                    <th>Available Stocks</th>
+                                    <th>Total Equipments</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php while ($row = mysqli_fetch_assoc($result)): ?>
                                     <?php
-                                        $currentQty = $row['total_qty'];
+                                        $currentQty = $row['total_orig_qty'];
 
                                         if ($currentQty == 0) {
                                             $status = 'Out of Stock';
@@ -95,7 +95,6 @@ $result = mysqli_query($conn, $query);
                         <table class="table table-bordered table-hover">
                             <thead class="thead-light">
                                 <tr>
-                                    <th>Serial Number</th>
                                     <th>Item</th>
                                     <th>Qty</th>
                                     <th>User</th>
@@ -111,7 +110,7 @@ $result = mysqli_query($conn, $query);
                                         fa.stockin_item AS item,
                                         fa.qty,
                                         fa.owner AS user,
-                                        fa.department
+                                        fa.location
                                     FROM fixed_assets fa
                                 ";
 
@@ -124,11 +123,11 @@ $result = mysqli_query($conn, $query);
                                     while ($drow = mysqli_fetch_assoc($detailedResult)):
                                 ?>
                                     <tr>
-                                        <td><?= htmlspecialchars($drow['serial_number']); ?></td>
                                         <td><?= htmlspecialchars($drow['item']); ?></td>
                                         <td><?= htmlspecialchars($drow['qty']); ?></td>
                                         <td><?= htmlspecialchars($drow['user']); ?></td>
-                                        <td><?= htmlspecialchars($drow['department']); ?></td>
+                                        <td><?= htmlspecialchars($drow['location']); ?></td>
+                                        <td><?= htmlspecialchars($drow['location']); ?></td>
                                     </tr>
                                 <?php endwhile; ?>
                             </tbody>

@@ -2,7 +2,6 @@
 include("../includes/header.php");
 include("../includes/navbar_admin.php");
 
-// Modify the SQL query to include date filtering and join with users and fixed_assets tables
 $startDate = $_GET['start_date'] ?? null;
 $endDate = $_GET['end_date'] ?? null;
 
@@ -11,18 +10,14 @@ $query = "
         r.req_number, 
         u.fullname AS requestor, 
         u.department, 
-        s.item, 
-        s.orig_qty,
+        r.item_request, 
+        r.qty,
         r.issued_by, 
         r.date_issued
     FROM 
         request r 
     JOIN 
         users u ON r.user_id = u.user_id 
-    LEFT JOIN 
-        fixed_assets fa ON r.req_number = fa.req_id 
-    LEFT JOIN
-        stock_in s ON r.stockin_id = s.stockin_id
     WHERE 
         r.status = '1'"; // Only show approved
 
@@ -92,8 +87,8 @@ $result = mysqli_query($conn, $query);
                                         <td><?= $row['req_number']; ?></td>
                                         <td><?= $row['requestor']; ?></td>
                                         <td><?= $row['department']; ?></td>
-                                        <td><?= $row['item']; ?></td>
-                                        <td><?= $row['orig_qty']; ?></td>
+                                        <td><?= $row['item_request']; ?></td>
+                                        <td><?= $row['qty']; ?></td>
                                         <td><?= $row['issued_by']; ?></td>
                                         <td><?= $row['date_issued']; ?></td>
                                     </tr>

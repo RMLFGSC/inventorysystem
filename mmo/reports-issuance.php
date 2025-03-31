@@ -11,10 +11,10 @@ $query = "
         r.req_number, 
         u.fullname AS requestor, 
         u.department, 
-        r.item_request, 
+        s.item, 
+        s.orig_qty,
         r.issued_by, 
-        r.date_issued,
-        r.qty
+        r.date_issued
     FROM 
         request r 
     JOIN 
@@ -25,10 +25,10 @@ $query = "
         r.status = '1'"; // Only show approved
 
 if ($startDate) {
-    $query .= " AND ra.date_issued >= '$startDate'";
+    $query .= " AND r.date_issued >= '$startDate'";
 }
 if ($endDate) {
-    $query .= " AND ra.date_issued <= '$endDate'";
+    $query .= " AND r.date_issued <= '$endDate'";
 }
 
 $result = mysqli_query($conn, $query);
@@ -56,8 +56,8 @@ $result = mysqli_query($conn, $query);
                     <form method="GET" action="" class="mb-4">
                         <div class="form-row align-items-end">
                             <div class="form-group col-md-5">
-                                <label for="start">Start Date:</label>
-                                <input type="date" id="start" name="start_date" class="form-control" value="<?= htmlspecialchars($startDate); ?>" required>
+                                <label for="start_date">Start Date:</label>
+                                <input type="date" id="start_date" name="start_date" class="form-control" value="<?= htmlspecialchars($startDate); ?>" required>
                             </div>
                             <div class="form-group col-md-5">
                                 <label for="end_date">End Date:</label>
@@ -76,7 +76,7 @@ $result = mysqli_query($conn, $query);
                                     <th>Req Number</th>
                                     <th>Requestor</th>
                                     <th>Department</th>
-                                    <th>Item</th> 
+                                    <th>Item</th>
                                     <th>Qty</th>
                                     <th>Issued By</th>
                                     <th>Date Issued</th>
@@ -84,14 +84,14 @@ $result = mysqli_query($conn, $query);
                             </thead>
                             <tbody>
                                 <?php
-                                while ($row = mysqli_fetch_assoc($results)):
+                                while ($row = mysqli_fetch_assoc($result)):
                                 ?>
                                     <tr>
                                         <td><?= $row['req_number']; ?></td>
                                         <td><?= $row['requestor']; ?></td>
                                         <td><?= $row['department']; ?></td>
-                                        <td><?= $row['item_request']; ?></td>
-                                        <td><?= $row['qty']; ?></td>
+                                        <td><?= $row['item']; ?></td>
+                                        <td><?= $row['orig_qty']; ?></td>
                                         <td><?= $row['issued_by']; ?></td>
                                         <td><?= $row['date_issued']; ?></td>
                                     </tr>
@@ -108,7 +108,7 @@ $result = mysqli_query($conn, $query);
     <!-- End of Main Content -->
 
     <?php
-    include("../includes/scropts.php");
+    include("../includes/scripts.php");
     include("../includes/footer.php");
     ?>
 </div>

@@ -40,7 +40,7 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
                         </button>
                     </div>
 
-                    <form action="create.php" method="POST">
+                    <form action="create" method="POST">
                         <div class="modal-body">
                             <div class="card">
                                 <div class="card-header text-white" style="background-color: #76a73c;">
@@ -49,17 +49,17 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
                                 <div class="card-body">
                                     <div id="itemFields">
                                         <div class="form-row item-row mb-3">
-                                            <div class="form-group col-md-4 col-12">
+                                            <div class="form-group col-md-6 col-12">
                                                 <label>Item</label>
                                                 <input type="text" name="item[]" class="form-control" required>
                                             </div>
-                                            <div class="form-group col-md-4 col-12">
+                                            <div class="form-group col-md-6 col-12">
                                                 <label>Quantity</label>
                                                 <input type="number" name="qty[]" class="form-control" required>
                                             </div>
-                                            <div class="form-group col-md-4 col-12">
-                                                <label>Serial Number</label>
-                                                <input type="text" name="serialNO[]" class="form-control" required>
+                                            <div class="form-group col-md-12">
+                                                <label>Serial Numbers</label>
+                                                <textarea name="serialNO[]" class="form-control" rows="3" placeholder="Enter serial numbers separated by commas" required></textarea>
                                             </div>
                                             <div class="form-group col-md-12">
                                                 <div class="form-check">
@@ -165,7 +165,7 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <form id="editStockinForm" action="update.php" method="POST">
+                    <form id="editStockinForm" action="update" method="POST">
                         <div class="modal-body">
                             <div class="card">
                                 <div class="card-header text-white" style="background-color: #76a73c;">
@@ -246,17 +246,17 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
                     newItemRow.classList.add('form-row', 'item-row', 'mb-3');
 
                     newItemRow.innerHTML = `
-                    <div class="form-group col-md-4 col-12">
+                    <div class="form-group col-md-6 col-12">
                         <label>Item</label>
                         <input type="text" name="item[]" class="form-control" required>
                     </div>
-                    <div class="form-group col-md-4 col-12">
+                    <div class="form-group col-md-6 col-12">
                         <label>Quantity</label>
                         <input type="number" name="qty[]" class="form-control" required>
                     </div>
-                    <div class="form-group col-md-4 col-12">
-                        <label>Serial Number</label>
-                        <input type="text" name="serialNO[]" class="form-control" required>
+                    <div class="form-group col-md-12">
+                        <label>Serial Numbers</label>
+                        <textarea name="serialNO[]" class="form-control" rows="3" placeholder="Enter serial numbers separated by commas" required></textarea>
                     </div>
                     <div class="form-group col-md-12">
                         <div class="form-check">
@@ -280,7 +280,7 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
                     const controlno = $(this).data('controlno');
 
                     $.ajax({
-                        url: 'fetch_stockin_details.php',
+                        url: 'fetch_stockin_details',
                         type: 'POST',
                         data: {
                             controlNO: controlno
@@ -301,9 +301,11 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
 
                         // Fetch existing data using AJAX
                         $.ajax({
-                            url: 'fetch_stockin_details.php',
+                            url: 'fetch_stockin_details',
                             type: 'POST',
-                            data: { controlNO: stockinId }, // Change to controlNO
+                            data: {
+                                controlNO: stockinId
+                            }, // Change to controlNO
                             success: function(data) {
                                 $('#stockinDetailsBody').html(data); // Populate the modal with fetched data
                                 $('#editModal').modal('show'); // Show the modal
@@ -331,7 +333,7 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
                             width: '300px'
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                window.location.href = `post_stockin.php?stockin_id=${stockinId}`;
+                                window.location.href = `post_stockin?stockin_id=${stockinId}`;
                             }
                         });
                     });

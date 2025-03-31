@@ -30,11 +30,10 @@ if (isset($_POST['addRequest'])) {
     foreach ($items as $index => $item) {
         $item = mysqli_real_escape_string($conn, $item);
         $quantity = intval($qtys[$index]);
-        $unassigned_quantity = $quantity;
 
         // Insert each item with the same req_number
-        $query = "INSERT INTO request (req_number, user_id, item_request, qty, unassigned_qty, department, date, status) 
-                  VALUES ('$formatted_req_number', '$user_id', '$item', '$quantity', '$unassigned_quantity', '$department', '$date', '$status')";
+        $query = "INSERT INTO request (req_number, user_id, item_request, qty, department, date, status) 
+                  VALUES ('$formatted_req_number', '$user_id', '$item', '$quantity', '$department', '$date', '$status')";
 
         if (!mysqli_query($conn, $query)) {
             echo "Error: " . mysqli_error($conn);

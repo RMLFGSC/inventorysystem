@@ -17,7 +17,7 @@ if (isset($_POST['controlNO'])) {
                 <td>" . htmlspecialchars($controlNO) . "</td>
                 <td>" . htmlspecialchars($row['serialNO']) . "</td>
                 <td>" . htmlspecialchars($row['item']) . "</td>
-                <td>" . htmlspecialchars($row['qty']) . "</td>
+                <td>" . htmlspecialchars($row['orig_qty']) . "</td>
                 <td>" . htmlspecialchars($row['category']) . "</td>
                 <td>" . htmlspecialchars($row['dop']) . "</td>
                 <td>" . htmlspecialchars($row['dr']) . "</td>
