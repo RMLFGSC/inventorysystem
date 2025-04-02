@@ -19,7 +19,6 @@ $categories_json = json_encode($categories);
 $totals_json = json_encode($totals);
 ?>
 
-?>
 
 
 <!-- Content Wrapper -->
