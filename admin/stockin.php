@@ -90,6 +90,8 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
                                         <option value="" selected disabled>Select Category</option>
                                         <option value="IT Equipment">IT Equipment</option>
                                         <option value="Engineering Equipment">Engineering Equipment</option>
+                                        <option value="IT Fixed Asset">IT Fixed Asset</option>
+                                        <option value="Engineering Fixed Asset">Engineering Fixed Asset</option>
                                     </select>
                                 </div>
                             </div>
@@ -131,10 +133,8 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
                             <table class="table table-bordered">
                                 <thead>
                                     <tr>
-                                        <th>Control #</th>
                                         <th>Serial #</th>
                                         <th>Item</th>
-                                        <th>Quantity</th>
                                         <th>Category</th>
                                         <th>Date of Purchase</th>
                                         <th>Date Received</th>
@@ -375,6 +375,7 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
                     });
                 });
             });
+
         </script>
 
 
