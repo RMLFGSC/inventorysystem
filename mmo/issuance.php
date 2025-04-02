@@ -121,37 +121,34 @@ $result = mysqli_query($conn, $query);
         <!--End of view modal-->
 
         <!--Edit modal-->
-        <div class="modal fade" id="editRequestModal" tabindex="-1" role="dialog"
-            aria-labelledby="editRequestModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="editRequestModalLabel">Edit Requisition Items</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="table-responsive">
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>Items</th>
-                                        <th>Qty</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="edit_request_items">
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button id="saveEditRequest" class="btn btn-sm btn-success">Save Changes</button>
-                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
-                    </div>
+        <div class="modal fade" id="editRequestModal" tabindex="-1" role="dialog" aria-labelledby="editRequestModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editRequestModalLabel">Edit Requisition Items</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th style="width: 60%;">Items</th> <th style="width: 40%;">Qty</th>   </tr>
+                        </thead>
+                        <tbody id="edit_request_items">
+                        </tbody>
+                    </table>
                 </div>
             </div>
+            <div class="modal-footer">
+                <button id="saveEditRequest" class="btn btn-sm btn-success">Save Changes</button>
+                <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+            </div>
         </div>
+    </div>
+</div>
 
 
 
@@ -255,7 +252,7 @@ $result = mysqli_query($conn, $query);
 
                 // Fetch request items and details via AJAX
                 $.ajax({
-                    url: 'fetch_request_items.php',
+                    url: 'fetch_request_items',
                     type: 'POST',
                     data: {
                         req_number: reqno
@@ -353,7 +350,7 @@ $result = mysqli_query($conn, $query);
 
                     // Fetch items from the server
                     $.ajax({
-                        url: 'edit_request.php',
+                        url: 'edit_request',
                         method: 'POST',
                         data: {
                             req_number: reqNumber
@@ -390,7 +387,7 @@ $result = mysqli_query($conn, $query);
                     });
 
                     $.ajax({
-                        url: 'update_request.php',
+                        url: 'update_request',
                         method: 'POST',
                         contentType: 'application/json',
                         data: JSON.stringify({
@@ -522,7 +519,7 @@ $result = mysqli_query($conn, $query);
 
                         // AJAX
                         $.ajax({
-                            url: 'approve_request.php',
+                            url: 'approve_request',
                             type: 'POST',
                             data: {
                                 req_number: reqNumber,
@@ -594,7 +591,7 @@ $result = mysqli_query($conn, $query);
                                 const declinedBy = inputResult.value.trim();
 
                                 $.ajax({
-                                    url: 'decline_request.php',
+                                    url: 'decline_request',
                                     type: 'POST',
                                     data: {
                                         req_number: reqNumber,

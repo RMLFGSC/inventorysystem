@@ -182,7 +182,7 @@ include("../includes/navbar_mmo.php");
 
                 // Send to PHP using AJAX
                 $.ajax({
-                    url: 'assign.php',
+                    url: 'assign',
                     method: 'POST',
                     data: {
                         stockin_item: item,
