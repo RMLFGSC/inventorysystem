@@ -67,18 +67,18 @@ $result = mysqli_query($conn, $query);
                             <tbody>
                                 <?php while ($row = mysqli_fetch_assoc($result)): ?>
                                     <?php
-                                        $currentQty = $row['total_qty'];
+                                    $currentQty = $row['total_orig_qty'];
 
-                                        if ($currentQty == 0) {
-                                            $status = 'Out of Stock';
-                                            $badgeClass = 'badge bg-danger text-white';
-                                        } elseif ($currentQty <= 5) {
-                                            $status = 'Low Stock';
-                                            $badgeClass = 'badge bg-warning text-white';
-                                        } else {
-                                            $status = 'Available';
-                                            $badgeClass = 'badge bg-success text-white';
-                                        }
+                                    if ($currentQty == 0) {
+                                        $status = 'Out of Stock';
+                                        $badgeClass = 'badge bg-danger text-white';
+                                    } elseif ($currentQty <= 5) {
+                                        $status = 'Low Stock';
+                                        $badgeClass = 'badge bg-warning text-white';
+                                    } else {
+                                        $status = 'Available';
+                                        $badgeClass = 'badge bg-success text-white';
+                                    }
                                     ?>
                                     <tr>
                                         <td><?= htmlspecialchars($row['item']); ?></td>
@@ -95,7 +95,6 @@ $result = mysqli_query($conn, $query);
                         <table class="table table-bordered table-hover">
                             <thead class="thead-light">
                                 <tr>
-                                    <th>Serial Number</th>
                                     <th>Item</th>
                                     <th>Qty</th>
                                     <th>User</th>
@@ -105,30 +104,41 @@ $result = mysqli_query($conn, $query);
                             </thead>
                             <tbody>
                                 <?php
-                                    $detailedQuery = "
+                                // Query to get all items from stock_in and their assignment status from fixed_assets
+                                 $detailedQuery = "
                                     SELECT 
-                                        fa.serial_number,
-                                        fa.stockin_item AS item,
-                                        fa.qty,
-                                        fa.owner AS user,
-                                        fa.department
-                                    FROM fixed_assets fa
+                                        si.item, 
+                                        CASE 
+                                            WHEN si.qty > 0 THEN SUM(si.qty)
+                                            ELSE fa.qty
+                                        END AS qty,
+                                        si.orig_qty,
+                                        IF(si.qty = 0, IFNULL(fa.owner, 'N/A'), 'N/A') AS user,
+                                        IF(si.qty = 0, IFNULL(fa.location, 'Stockroom'), 'Stockroom') AS location,
+                                        CASE 
+                                            WHEN si.qty = 0 THEN 'Assigned'
+                                            ELSE 'Unassigned'
+                                        END AS status
+                                    FROM stock_in si
+                                    LEFT JOIN fixed_assets fa ON si.item = fa.stockin_item
+                                    WHERE is_posted=1
+                                    GROUP BY si.item, status
                                 ";
 
-                                    // Apply date filter if provided
-                                    if (!empty($startDate) && !empty($endDate)) {
-                                        $detailedQuery .= " AND si.dr >= '$startDate' AND si.dr <= '$endDate'";
-                                    }
+                                // Apply date filter if provided
+                                if (!empty($startDate) && !empty($endDate)) {
+                                    $detailedQuery .= " WHERE si.dr >= '$startDate' AND si.dr <= '$endDate'";
+                                }
 
-                                    $detailedResult = mysqli_query($conn, $detailedQuery);
-                                    while ($drow = mysqli_fetch_assoc($detailedResult)):
+                                $detailedResult = mysqli_query($conn, $detailedQuery);
+                                while ($drow = mysqli_fetch_assoc($detailedResult)):
                                 ?>
                                     <tr>
-                                        <td><?= htmlspecialchars($drow['serial_number']); ?></td>
                                         <td><?= htmlspecialchars($drow['item']); ?></td>
                                         <td><?= htmlspecialchars($drow['qty']); ?></td>
                                         <td><?= htmlspecialchars($drow['user']); ?></td>
-                                        <td><?= htmlspecialchars($drow['department']); ?></td>
+                                        <td><?= htmlspecialchars($drow['location']); ?></td>
+                                        <td><?= htmlspecialchars($drow['status']); ?></td>
                                     </tr>
                                 <?php endwhile; ?>
                             </tbody>
@@ -142,4 +152,3 @@ $result = mysqli_query($conn, $query);
 
     <?php include("../includes/scripts.php"); ?>
     <?php include("../includes/footer.php"); ?>
-

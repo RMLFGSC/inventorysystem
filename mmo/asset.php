@@ -17,136 +17,117 @@ include("../includes/navbar_mmo.php");
         ";
         $result = mysqli_query($conn, $query);
 
-        // Query for unassigned fixed assets with quantity greater than zero
-        $unassignedQuery = "
-            SELECT item, qty FROM stock_in WHERE category = 'Fixed Asset' AND is_posted='1' AND qty > 0
-        ";
-        $unassignedResult = mysqli_query($conn, $unassignedQuery);
         ?>
 
 
         <!-- CONTENT -->
         <div class="container-fluid">
-            <div class="row">
-                <!-- Fixed Assets Table (Left side - larger) -->
-                <div class="col-md-8">
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                            <h6 class="m-0 font-weight-bold text-primary">Fixed Assets</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
-                                    <thead class="thead-light">
-                                        <tr>
-                                            <th>Serial Number</th>
-                                            <th>Item</th>
-                                            <th>Qty</th>
-                                            <th>User</th>
-                                            <th>location</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php while ($row = mysqli_fetch_assoc($result)): ?>
-                                            <tr>
-                                                <td><?php echo $row['serial_number']; ?></td>
-                                                <td><?php echo $row['stockin_item']; ?></td>
-                                                <td><?php echo $row['qty']; ?></td>
-                                                <td><?php echo htmlspecialchars($row['assigned_name']); ?></td>
-                                                <td><?php echo $row['department']; ?></td>
-
-                                            </tr>
-                                        <?php endwhile; ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Fixed Assets</h6>
+                    <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#GMCAssign">
+                        <i class="fas fa-plus fa-sm text-white-50"></i> Add
+                    </button>
                 </div>
 
-                <!-- Unassigned Fixed Assets Table -->
-                <div class="col-md-4">
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                            <h6 class="m-0 font-weight-bold text-primary">Unassigned items</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                                <table class="table table-bordered table-sm">
-                                    <thead class="thead-light">
-                                        <tr>
-                                            <th>Item</th>
-                                            <th>Qty</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php while ($row = mysqli_fetch_assoc($unassignedResult)): ?>
-                                            <tr>
-                                                <td><?php echo htmlspecialchars($row['item']); ?></td>
-                                                <td><?php echo htmlspecialchars($row['qty']); ?></td>
-                                                <td>
-                                                    <button type="button" class="btn btn-primary btn-sm assign-btn"
-                                                        data-item="<?php echo htmlspecialchars($row['item']); ?>"
-                                                        data-qty="<?php echo htmlspecialchars($row['qty']); ?>">
-                                                        Assign
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        <?php endwhile; ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Serial Number</th>
+                                    <th>Item</th>
+                                    <th>Qty</th>
+                                    <th>User</th>
+                                    <th>Location</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php while ($row = mysqli_fetch_assoc($result)): ?>
+                                    <tr>
+                                        <td><?php echo $row['serial_number']; ?></td>
+                                        <td><?php echo $row['stockin_item']; ?></td>
+                                        <td><?php echo $row['qty']; ?></td>
+                                        <td><?php echo $row['owner']; ?></td>
+                                        <td><?php echo $row['location']; ?></td>
+                                        <td><button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#viewModal">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                <?php endwhile; ?>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <!-- Bootstrap Modal for Assignment -->
-                <div class="modal fade" id="assignModal" tabindex="-1" role="dialog" aria-labelledby="assignModalLabel" aria-hidden="true">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="assignModalLabel">Assign Item</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
+        <!-- Modal Structure -->
+        <div class="modal fade" id="GMCAssign" tabindex="-1" role="dialog" aria-labelledby="GMCAssignLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="GMCAssignLabel">Add Fixed Asset</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <!-- Error Message Display -->
+                        <div id="errorMsg" class="alert alert-danger" style="display: none;"></div>
+                        <form action="assign" method="POST">
+                            <div class="form-row">
+                                <div class="form-group col-md-8 col-12">
+                                    <label for="item">Item</label>
+                                    <select name="item" class="form-control" required>
+                                        <option value="" disabled selected>Select Item</option>
+                                        <?php
+                                        $query = "SELECT item FROM stock_in WHERE qty > 0 GROUP BY item";
+                                        $result = $conn->query($query);
+                                        while ($row = $result->fetch_assoc()) {
+                                            echo "<option value='" . $row['item'] . "'>" . $row['item'] . "</option>";
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-4 col-12">
+                                    <label for="qty">Quantity</label>
+                                    <input type="number" class="form-control" id="qty" name="qty" placeholder="Qty" required>
+                                </div>
                             </div>
-                            <div class="modal-body">
-                                <div class="form-group text-left">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <label>Item</label>
-                                            <input id="modal-item" name="item" class="form-control" readonly>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label>Quantity</label>
-                                            <input id="modal-qty" name="qty" class="form-control">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group text-left">
-                                    <label>Owner Name</label>
-                                    <input id="modal-owner" name="owner" class="form-control" placeholder="Enter Owner Name">
-                                </div>
-                                <div class="form-group text-left">
-                                    <label>Location</label>
-                                    <input id="modal-department" name="department" class="form-control" placeholder="Enter Equipment location">
-                                </div>
+
+                            <!-- Hidden Serial Number Input -->
+        <input type="hidden" id="serialNumber" name="serial">
+
+                            <div class="form-group">
+                                <label for="user">User</label>
+                                <input type="text" class="form-control" id="user" name="user" placeholder="Enter user" required>
                             </div>
+
+                            <div class="form-group">
+                                <label for="location">Location</label>
+                                <input type="text" class="form-control" id="location" name="location" placeholder="Enter location" required>
+                            </div>
+
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                <button type="button" class="btn btn-primary" id="confirmAssign">Assign</button>
+                                <button type="submit" class="btn btn-primary">Save</button>
                             </div>
-                        </div>
+                        </form>
                     </div>
                 </div>
-
-
-            </div> <!-- /.row -->
+            </div>
         </div>
-        <!-- /.container-fluid -->
 
     </div>
+
+
+    <!-- /.container-fluid -->
+
+
     <!-- End of Main Content -->
 
     <?php
@@ -155,56 +136,78 @@ include("../includes/navbar_mmo.php");
     ?>
 </div>
 
-
+<!-- JavaScript to add more item rows -->
 <script>
-    $(document).ready(function() {
-        $('.assign-btn').click(function() {
-            let item = $(this).data('item');
-            let qty = $(this).data('qty');
-            let serial = $(this).closest('tr').find('td:first').text();
+    document.getElementById('addItem').addEventListener('click', function() {
+        var container = document.getElementById('itemContainer');
 
-            // Set values in the modal
-            $('#modal-item').val(item);
-            $('#modal-qty').val(qty);
-            $('#modal-owner').val('');
-            $('#modal-department').val('');
-            $('#assignModal').modal('show');
+        var newRow = document.createElement('div');
+        newRow.classList.add('form-row', 'item-row', 'mb-3');
 
-            $('#confirmAssign').off('click').on('click', function() {
-                const owner = $('#modal-owner').val().trim();
-                const department = $('#modal-department').val().trim();
-                const modifiedQty = $('#modal-qty').val().trim();
+        newRow.innerHTML = `
+            <div class="form-group col-md-8 col-12">
+                <label for="item">Item</label>
+                <select class="form-control" name="item[]" required>
+                    <option value="" selected disabled>Select item</option>
+                    <?php
+                    $sql = "SELECT DISTINCT item FROM stock_in";
+                    $result = $conn->query($sql);
 
-                if (!serial || !owner || !department || !modifiedQty) {
-                    alert('Please fill in all fields');
-                    return;
-                }
-
-                // Send to PHP using AJAX
-                $.ajax({
-                    url: 'assign',
-                    method: 'POST',
-                    data: {
-                        stockin_item: item,
-                        qty: modifiedQty,
-                        serial: serial,
-                        owner: owner,
-                        department: department
-                    },
-                    success: function(response) {
-                        Swal.fire('Assigned!', 'The item has been assigned successfully.', 'success')
-                            .then(() => {
-                                location.reload(); // Optional: refresh to update table
-                            });
-                    },
-                    error: function(xhr, status, error) {
-                        Swal.fire('Error', 'Something went wrong. Try again.', 'error');
-                        console.error(error);
+                    if ($result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+                            echo "<option value='" . $row['item'] . "'>" . $row['item'] . "</option>";
+                        }
+                    } else {
+                        echo "<option value='' disabled>No items available</option>";
                     }
-                });
+                    ?>
+                </select>
+            </div>
+            <div class="form-group col-md-4 col-12">
+                <label for="qty">Quantity</label>
+                <input type="number" class="form-control" name="qty[]" placeholder="Qty" required>
+            </div>
+            <div class="form-group col-md-2 col-12 d-flex align-items-end">
+                <button type="button" class="btn btn-danger btn-sm removeItem">X</button>
+            </div>
+        `;
 
-                $('#assignModal').modal('hide');
-            });
+        container.insertBefore(newRow, container.lastElementChild);
+    });
+
+    // Remove item row on button click
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.classList.contains('removeItem')) {
+            e.target.closest('.item-row').remove();
+        }
+    });
+
+    $('#saveButton').click(function(e) {
+        e.preventDefault(); // Prevent the form from submitting
+
+        var formData = $('#assignForm').serialize();
+
+        $.ajax({
+            url: 'assign.php',
+            method: 'POST',
+            data: formData,
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    alert(response.success);
+                    $('#assignForm')[0].reset();
+                    $('#addModal').modal('hide'); // Close the modal
+                    location.reload(); // Refresh to update the table
+                } else if (response.error) {
+                    // Display the error inside the modal
+                    $('#errorMsg').text(response.error).show();
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error(xhr.responseText);
+                $('#errorMsg').text('Something went wrong. Please try again.').show();
+            }
         });
     });
+    
 </script>
