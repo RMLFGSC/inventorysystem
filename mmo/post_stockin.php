@@ -20,11 +20,11 @@ if (isset($_GET['stockin_id'])) {
     $conn->close();
 
     // Redirect back to stock-in page
-    header("Location: stockin.php");
+    header("Location: stockin");
     exit();
 } else {
     $_SESSION['error_message'] = "Invalid stock-in request.";
-    header("Location: stockin.php");
+    header("Location: stockin");
     exit();
 }
 
