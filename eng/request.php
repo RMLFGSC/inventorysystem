@@ -155,6 +155,40 @@ $result = mysqli_query($conn, $query);
         </div>
         <!-- End of View Modal -->
 
+        <!--Edit modal-->
+        <div class="modal fade" id="editRequestModal" tabindex="-1" role="dialog" aria-labelledby="editRequestModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editRequestModalLabel">Edit Requisition Items</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 60%;">Items</th>
+                                        <th style="width: 40%;">Qty</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="edit_request_items">
+                                    <!-- Rows will be populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="saveEditRequest" class="btn btn-sm btn-success">Save Changes</button>
+                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--End of edit modal-->
+
         <div class="container-fluid">
             <!-- Table Card -->
             <div class="card shadow mb-4">
@@ -199,7 +233,7 @@ $result = mysqli_query($conn, $query);
 
                                         <td>
                                             <?php if ($row['status'] == 0 && $row['is_posted'] == 0): ?>
-                                                <button type="button" data-toggle="modal" data-target="#GMCeditRequest"
+                                                <button type="button" data-toggle="modal" data-target="#editRequestModal"
                                                     class="btn btn-sm btn-success editRequest"
                                                     data-req_number="<?php echo htmlspecialchars($row['req_number']); ?>">
                                                     <i class="fas fa-edit"></i>
@@ -392,6 +426,83 @@ $result = mysqli_query($conn, $query);
                             }
                         });
                     }
+                });
+            });
+
+            $(document).ready(function() {
+                // Edit button click event
+                $(document).on('click', '.editRequest', function() {
+                    let reqNumber = $(this).data('req_number');
+
+                    // Fetch items from the server
+                    $.ajax({
+                        url: 'edit_request',
+                        method: 'POST',
+                        data: {
+                            req_number: reqNumber
+                        },
+                        success: function(response) {
+                            console.log("Response: ", response); // Debugging line
+                            populateEditModal(response); // Ensure this function is defined correctly
+                            $('#editRequestModal').data('req_number', reqNumber);
+                            $('#editRequestModal').modal('show'); // Show the modal after populating
+                        },
+                        error: function(error) {
+                            console.error('Error fetching items:', error);
+                        }
+                    });
+                });
+
+                // Function to populate the edit modal with data
+                function populateEditModal(items) {
+                    let rows = '';
+                    items.forEach(item => {
+                        rows += `
+                <tr>
+                    <td>${item.item_request}</td>
+                    <td><input type="number" class="form-control edit-qty" value="${item.qty}"></td>
+                </tr>
+            `;
+                    });
+                    $('#edit_request_items').html(rows); // Populate the table with items
+                }
+
+                // to save edited request qty
+                $('#saveEditRequest').click(function() {
+                    let editedItems = [];
+                    $('#edit_request_items tr').each(function() {
+                        let item_request = $(this).find('td:first-child').text();
+                        let qty = $(this).find('.edit-qty').val();
+                        editedItems.push({
+                            item_request: item_request,
+                            qty: qty
+                        });
+                    });
+
+                    let reqNumber = $('#editRequestModal').data('req_number');
+
+                    // Debugging: Log the data being sent
+                    console.log('Sending data:', {
+                        req_number: reqNumber,
+                        items: editedItems
+                    });
+
+                    $.ajax({
+                        url: 'update_request',
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({
+                            req_number: reqNumber,
+                            items: editedItems
+                        }),
+                        success: function(response) {
+                            console.log('Items saved successfully:', response);
+                            $('#editRequestModal').modal('hide');
+                        },
+                        error: function(error) {
+                            console.error('Error saving items:', error);
+                        }
+                    });
                 });
             });
         });

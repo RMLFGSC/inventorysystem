@@ -1,7 +1,24 @@
 <?php
 include("../includes/header.php");
 include("../includes/navbar_mmo.php");
+
+// Fetch total items per category
+$query = "SELECT category, COUNT(*) AS total FROM stock_in GROUP BY category";
+$result = mysqli_query($conn, $query);
+
+$categories = [];
+$totals = [];
+
+while ($row = mysqli_fetch_assoc($result)) {
+    $categories[] = $row['category'];
+    $totals[] = $row['total'];
+}
+
+// Encode the data as JSON for use in JavaScript
+$categories_json = json_encode($categories);
+$totals_json = json_encode($totals);
 ?>
+
 
 
 <!-- Content Wrapper -->
@@ -88,7 +105,7 @@ include("../includes/navbar_mmo.php");
                                             $row = $result->fetch_assoc();
                                             echo $row['total'];
                                         } else {
-                                            echo "0"; 
+                                            echo "0";
                                         }
                                         ?>
                                     </div>
@@ -154,6 +171,22 @@ include("../includes/navbar_mmo.php");
 
             <!-- Content Row -->
 
+            <!-- Bar Chart for Total Items per Category -->
+            <div class="row">
+                <div class="col-xl-6 col-lg-7">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Total Items per Category</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-bar">
+                                <canvas id="categoryBarChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
         <!-- /.container-fluid -->
 
@@ -166,3 +199,41 @@ include("../includes/navbar_mmo.php");
     include("../includes/footer.php");
 
     ?>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Get data from PHP
+    const categories = <?php echo $categories_json; ?>;
+    const totals = <?php echo $totals_json; ?>;
+
+    // Create the bar chart
+    const ctx = document.getElementById('categoryBarChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: categories,
+            datasets: [{
+                label: 'Total Items per Category',
+                data: totals,
+                backgroundColor: ['#4e73df', '#1cc88a'],
+                borderColor: ['#4e73df', '#1cc88a'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: true },
+                title: {
+                    display: true,
+                    text: 'Total Items per Category'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
