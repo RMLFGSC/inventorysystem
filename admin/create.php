@@ -34,7 +34,6 @@ if (isset($_POST['addStockin'])) {
         foreach ($serialArray as $serialNO) {
             $serialNO = mysqli_real_escape_string($conn, $serialNO);
 
-            // Insert each serial number as a separate entry with qty = 1
             $query = "INSERT INTO stock_in (controlNO, item, qty, orig_qty, serialNO, category, dop, dr, warranty) 
                       VALUES ('$controlNO', '$item', 1, 1, '$serialNO', '$cat_name', '$dop', '$dr', '$warranty')";
 
@@ -99,7 +98,7 @@ if (isset($_POST['addRequest'])) {
 }
 
 
-
+//start of user
 if (isset($_POST['adduser'])) {
     $fname = mysqli_real_escape_string($conn, $_POST['fullname']);
     $pword = mysqli_real_escape_string($conn, $_POST['pword']);
