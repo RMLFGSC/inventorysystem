@@ -35,22 +35,18 @@ include("../includes/navbar_admin.php");
                         <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
                             <thead class="thead-light">
                                 <tr>
-                                    <th>Serial Number</th>
-                                    <th>Item</th>
-                                    <th>Qty</th>
                                     <th>User</th>
-                                    <th>Location</th>
+                                    <th>Department</th>
+                                    <th>Item count</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php while ($row = mysqli_fetch_assoc($result)): ?>
                                     <tr>
-                                        <td><?php echo $row['serial_number']; ?></td>
-                                        <td><?php echo $row['stockin_item']; ?></td>
-                                        <td><?php echo $row['qty']; ?></td>
                                         <td><?php echo $row['owner']; ?></td>
                                         <td><?php echo $row['location']; ?></td>
+                                        <td><?php echo $row['qty']; ?></td>
                                         <td><button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#viewModal">
                                                 <i class="fas fa-eye"></i>
                                             </button>
@@ -196,8 +192,8 @@ include("../includes/navbar_admin.php");
                 if (response.success) {
                     alert(response.success);
                     $('#assignForm')[0].reset();
-                    $('#addModal').modal('hide'); // Close the modal
-                    location.reload(); // Refresh to update the table
+                    $('#addModal').modal('hide'); 
+                    location.reload(); 
                 } else if (response.error) {
                     // Display the error inside the modal
                     $('#errorMsg').text(response.error).show();

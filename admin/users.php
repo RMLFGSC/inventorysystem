@@ -87,7 +87,7 @@ include("../includes/navbar_admin.php");
                         </button>
                     </div>
 
-                    <form id="editUserForm" method="POST" action="edit.php">
+                    <form id="editUserForm" method="POST" action="edit_user.php">
                         <div class="modal-body">
                             <!-- Hidden ID Field -->
                             <input type="hidden" name="edit_id" id="edit_id">

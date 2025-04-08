@@ -10,10 +10,14 @@ $nextControlNo = isset($lastControlNo['controlNO']) ? intval(substr($lastControl
 $controlNumber = 'CN-' . $nextControlNo;
 
 //query
-$query = "SELECT * FROM stock_in WHERE stockin_id IN 
-         (SELECT MIN(stockin_id) FROM stock_in GROUP BY controlNO) ORDER BY stockin_id DESC";
-$result = mysqli_query($conn, $query) or die(mysqli_error($conn));
-
+$query = "SELECT *, 
+            (SELECT COUNT(*) FROM stock_in AS si WHERE si.controlNO = stock_in.controlNO) AS item_count
+            FROM stock_in 
+            WHERE stockin_id IN (
+            SELECT MIN(stockin_id) FROM stock_in GROUP BY controlNO
+            )
+            ORDER BY stockin_id DESC";
+$result = mysqli_query($conn, $query);
 ?>
 
 
@@ -395,6 +399,7 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
                             <thead class="thead-light">
                                 <tr>
                                     <th>Control #</th>
+                                    <th>Item count</th>
                                     <th>Serial Number</th>
                                     <th>Item</th>
                                     <th>Category</th>
@@ -407,6 +412,7 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
                                 <?php while ($row = mysqli_fetch_assoc($result)): ?>
                                     <tr>
                                         <td><?php echo $row['controlNO']; ?></td>
+                                        <td><?php echo $row['item_count']; ?></td>
                                         <td><?php echo $row['serialNO']; ?></td>
                                         <td><?php echo $row['item']; ?></td>
                                         <td><?php echo $row['category']; ?></td>
