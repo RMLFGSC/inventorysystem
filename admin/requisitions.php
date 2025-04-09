@@ -314,6 +314,19 @@ $result = mysqli_query($conn, $query);
                 });
             });
 
+            <?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: 'Stock-in successfully added.',
+                        confirmButtonColor: '#3085d6',
+                        width: '300px'
+                    });
+                    if (window.history.replaceState) {
+                        window.history.replaceState(null, null, window.location.pathname);
+                    }
+                <?php endif; ?>
+
             // Print request
             document.getElementById('printRequest').addEventListener('click', function() {
                 const reqNumber = $('#requisitionNumber').val();

@@ -343,6 +343,19 @@ $result = mysqli_query($conn, $query);
                     });
                 });
 
+                <?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: 'Stock-in successfully added.',
+                        confirmButtonColor: '#3085d6',
+                        width: '300px'
+                    });
+                    if (window.history.replaceState) {
+                        window.history.replaceState(null, null, window.location.pathname);
+                    }
+                <?php endif; ?>
+
                 // Event listener for the "Add Item" button in the Edit Modal
                 document.getElementById('addItemEdit').addEventListener('click', function() {
                     const itemFields = document.getElementById('editItemFields'); // Ensure this ID is correct
@@ -379,7 +392,6 @@ $result = mysqli_query($conn, $query);
                     });
                 });
             });
-
         </script>
 
 
@@ -399,7 +411,6 @@ $result = mysqli_query($conn, $query);
                             <thead class="thead-light">
                                 <tr>
                                     <th>Control #</th>
-                                    <th>Item count</th>
                                     <th>Serial Number</th>
                                     <th>Item</th>
                                     <th>Category</th>
@@ -412,7 +423,6 @@ $result = mysqli_query($conn, $query);
                                 <?php while ($row = mysqli_fetch_assoc($result)): ?>
                                     <tr>
                                         <td><?php echo $row['controlNO']; ?></td>
-                                        <td><?php echo $row['item_count']; ?></td>
                                         <td><?php echo $row['serialNO']; ?></td>
                                         <td><?php echo $row['item']; ?></td>
                                         <td><?php echo $row['category']; ?></td>

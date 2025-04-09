@@ -43,7 +43,7 @@ if (isset($_POST['addStockin'])) {
         }
     }
 
-    header("Location: stockin.php");
+    header("Location: stockin?success=1");
     exit();
 }
 
@@ -93,7 +93,7 @@ if (isset($_POST['addRequest'])) {
     }
 
     $_SESSION['toast_message'] = "Request Added Successfully";
-    header("Location: requisitions.php");
+    header("Location: requisitions?success=1");
     exit();
 }
 
