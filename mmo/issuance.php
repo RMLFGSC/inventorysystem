@@ -369,6 +369,7 @@ $result = mysqli_query($conn, $query);
                 // to save edited request qty
                 $('#saveEditRequest').click(function() {
                     let editedItems = [];
+                    let isUpdated = false; // Flag to check if any quantity is updated
                     $('#edit_request_items tr').each(function() {
                         let item_request = $(this).find('td:first-child').text();
                         let qty = $(this).find('.edit-qty').val();
@@ -376,6 +377,12 @@ $result = mysqli_query($conn, $query);
                             item_request: item_request,
                             qty: qty
                         });
+
+                        // Check if the quantity has changed (assuming you have the original quantity stored)
+                        let originalQty = $(this).data('original-qty'); // Assuming original qty is stored in a data attribute
+                        if (qty != originalQty) {
+                            isUpdated = true; // Set flag to true if any quantity is updated
+                        }
                     });
 
                     let reqNumber = $('#editRequestModal').data('req_number');
@@ -397,6 +404,16 @@ $result = mysqli_query($conn, $query);
                         success: function(response) {
                             console.log('Items saved successfully:', response);
                             $('#editRequestModal').modal('hide');
+                            // Show success message only if quantities were updated
+                            if (isUpdated) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Updated!',
+                                    text: 'The quantities have been successfully updated.',
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                });
+                            }
                         },
                         error: function(error) {
                             console.error('Error saving items:', error);

@@ -40,7 +40,7 @@ $result = mysqli_query($conn, $query);
 
         <!-- topbar -->
         <?php
-        include("../includes/topbar_user.php");
+        include("../includes/topbar_eng.php");
         ?>
 
 
@@ -59,18 +59,19 @@ $result = mysqli_query($conn, $query);
                     <form action="create" method="POST">
                         <div class="modal-body">
                             <div class="card">
-                            <div id="errorMessage" class="alert alert-danger" style="display: none;"></div>
+                                <div id="errorMessage" class="alert alert-danger" style="display: none;"></div>
                                 <div class="card-header text-white" style="background-color: #76a73c;">
                                     <strong>Requisition items</strong>
                                 </div>
                                 <div class="card-body">
-                                <div class="form-group">
+                                    <div id="message" class="alert alert-info" style="display: none;">Please fill in the item details below.</div>
+                                    <div class="form-group">
                                         <label>Requisition #</label>
                                         <input type="text" name="req_number" class="form-control" value="<?php echo $formatted_req_number; ?>" readonly>
                                     </div>
                                     <div id="itemFields">
                                         <div class="form-row">
-                                        <div class="form-group col-md-6">
+                                            <div class="form-group col-md-6">
                                                 <label>Item</label>
                                                 <input type="text" name="item_request[]" class="form-control" required>
                                             </div>
@@ -326,7 +327,7 @@ $result = mysqli_query($conn, $query);
                                                 <td>${item_request.qty}</td>
                                               </tr>`;
                             });
-                            $('#requestDetailsBody').html(itemsHtml); // Set items in the table
+                            $('#requestDetailsBody').html(itemsHtml); 
                         } else {
                             console.error("No data returned from the server.");
                         }
@@ -469,38 +470,62 @@ $result = mysqli_query($conn, $query);
 
                 // to save edited request qty
                 $('#saveEditRequest').click(function() {
-                    let editedItems = [];
-                    $('#edit_request_items tr').each(function() {
-                        let item_request = $(this).find('td:first-child').text();
-                        let qty = $(this).find('.edit-qty').val();
-                        editedItems.push({
-                            item_request: item_request,
-                            qty: qty
-                        });
-                    });
+                    $('#editRequestModal').modal('hide');
+                    // SweetAlert confirmation
+                    Swal.fire({
+                        title: 'Save Changes?',
+                        text: 'Are you sure you want to save the changes made to this request?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, save it!',
+                        cancelButtonText: 'Cancel',
+                        confirmButtonColor: '#28a745',
+                        width: '300px',
+                        reverseButtons: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            let editedItems = [];
+                            $('#edit_request_items tr').each(function() {
+                                let item_request = $(this).find('td:first-child').text();
+                                let qty = $(this).find('.edit-qty').val();
+                                editedItems.push({
+                                    item_request: item_request,
+                                    qty: qty
+                                });
+                            });
 
-                    let reqNumber = $('#editRequestModal').data('req_number');
+                            let reqNumber = $('#editRequestModal').data('req_number');
 
-                    // Debugging: Log the data being sent
-                    console.log('Sending data:', {
-                        req_number: reqNumber,
-                        items: editedItems
-                    });
+                            // Debugging: Log the data being sent
+                            console.log('Sending data:', {
+                                req_number: reqNumber,
+                                items: editedItems
+                            });
 
-                    $.ajax({
-                        url: 'update_request',
-                        method: 'POST',
-                        contentType: 'application/json',
-                        data: JSON.stringify({
-                            req_number: reqNumber,
-                            items: editedItems
-                        }),
-                        success: function(response) {
-                            console.log('Items saved successfully:', response);
-                            $('#editRequestModal').modal('hide');
-                        },
-                        error: function(error) {
-                            console.error('Error saving items:', error);
+                            $.ajax({
+                                url: 'update_request',
+                                method: 'POST',
+                                contentType: 'application/json',
+                                data: JSON.stringify({
+                                    req_number: reqNumber,
+                                    items: editedItems
+                                }),
+                                success: function(response) {
+                                    console.log('Items saved successfully:', response);
+                                    $('#editRequestModal').modal('hide');
+                                    // Show success message
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Success!',
+                                        text: 'The request has been successfully updated.',
+                                        timer: 1500,
+                                        showConfirmButton: false
+                                    });
+                                },
+                                error: function(error) {
+                                    console.error('Error saving items:', error);
+                                }
+                            });
                         }
                     });
                 });
