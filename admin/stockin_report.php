@@ -6,7 +6,6 @@ $startDate = $_GET['start_date'] ?? '';
 $endDate = $_GET['end_date'] ?? '';
 $viewMode = $_GET['view_mode'] ?? 'summary';
 
-// Build main query
 $query = "SELECT item, category, SUM(orig_qty) AS total_orig_qty, SUM(qty) AS total_qty FROM stock_in WHERE is_posted = 1";
 
 // Only filter by date if both are provided
@@ -90,69 +89,68 @@ $result = mysqli_query($conn, $query);
                             </tbody>
                         </table>
 
-                        <?php elseif ($viewMode === 'detailed'): ?>
-    <!-- DETAILED VIEW -->
-    <table class="table table-bordered table-hover">
-        <thead class="thead-light">
-            <tr>
-                <th>Item</th>
-                <th>Qty</th>
-                <th>User</th>
-                <th>Location</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-        <?php
-        // UNASSIGNED ITEMS - from stock_in table only
-        $unassignedQuery = "
-            SELECT item, COUNT(*) AS qty
-            FROM stock_in
-            WHERE is_posted = 1
-            GROUP BY item
-        ";
+                    <?php elseif ($viewMode === 'detailed'): ?>
+                        <!-- DETAILED VIEW -->
+                        <table class="table table-bordered table-hover">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Qty</th>
+                                    <th>User</th>
+                                    <th>Location</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                // UNASSIGNED ITEMS - from stock_in table only
+                                $unassignedQuery = "
+                                    SELECT item, COUNT(*) AS qty
+                                    FROM stock_in
+                                    WHERE is_posted = 1
+                                    GROUP BY item
+                                ";
 
-        $unassignedResult = mysqli_query($conn, $unassignedQuery);
-        while ($row = mysqli_fetch_assoc($unassignedResult)) {
-            // Get how many are assigned from fixed_assets
-            $item = $row['item'];
-            $qty = $row['qty'];
+                                $unassignedResult = mysqli_query($conn, $unassignedQuery);
+                                while ($row = mysqli_fetch_assoc($unassignedResult)) {
+                                    // Get how many are assigned from fixed_assets
+                                    $item = $row['item'];
+                                    $qty = $row['qty'];
 
-            $assignedQuery = "SELECT SUM(qty) AS assigned_qty FROM fixed_assets WHERE stockin_item = '$item'";
-            $assignedResult = mysqli_query($conn, $assignedQuery);
-            $assignedRow = mysqli_fetch_assoc($assignedResult);
-            $assignedQty = $assignedRow['assigned_qty'] ?? 0;
+                                    $assignedQuery = "SELECT SUM(qty) AS assigned_qty FROM fixed_assets WHERE stockin_item = '$item'";
+                                    $assignedResult = mysqli_query($conn, $assignedQuery);
+                                    $assignedRow = mysqli_fetch_assoc($assignedResult);
+                                    $assignedQty = $assignedRow['assigned_qty'] ?? 0;
 
-            $unassignedQty = $qty - $assignedQty;
+                                    $unassignedQty = $qty - $assignedQty;
 
-            if ($unassignedQty > 0) {
-                echo "<tr>
-                    <td>" . htmlspecialchars($item) . "</td>
-                    <td>" . $unassignedQty . "</td>
-                    <td>N/A</td>
-                    <td>Stockroom</td>
-                    <td>Unassigned</td>
-                </tr>";
-            }
-        }
+                                    if ($unassignedQty > 0) {
+                                        echo "<tr>
+                                        <td>" . htmlspecialchars($item) . "</td>
+                                        <td>" . $unassignedQty . "</td>
+                                        <td>N/A</td>
+                                        <td>Stockroom</td>
+                                        <td>Unassigned</td>
+                                    </tr>";
+                                    }
+                                }
 
-        // ASSIGNED ITEMS - from fixed_assets table only
-        $assignedQuery = "SELECT stockin_item AS item, qty, owner, location FROM fixed_assets";
-        $assignedResult = mysqli_query($conn, $assignedQuery);
-            while ($drow = mysqli_fetch_assoc($assignedResult)):
-            ?>
-                <tr>
-                    <td><?= htmlspecialchars($drow['item']); ?></td>
-                    <td><?= htmlspecialchars($drow['qty']); ?></td>
-                    <td><?= htmlspecialchars($drow['owner']); ?></td>
-                    <td><?= htmlspecialchars($drow['location']); ?></td>
-                    <td>Assigned</td>                </tr>
-            <?php endwhile; ?>
-        </tbody>
-    </table>
-<?php endif; ?>
-
-
+                                // ASSIGNED ITEMS - from fixed_assets table only
+                                $assignedQuery = "SELECT stockin_item AS item, qty, owner, location FROM fixed_assets";
+                                $assignedResult = mysqli_query($conn, $assignedQuery);
+                                while ($drow = mysqli_fetch_assoc($assignedResult)):
+                                ?>
+                                    <tr>
+                                        <td><?= htmlspecialchars($drow['item']); ?></td>
+                                        <td><?= htmlspecialchars($drow['qty']); ?></td>
+                                        <td><?= htmlspecialchars($drow['owner']); ?></td>
+                                        <td><?= htmlspecialchars($drow['location']); ?></td>
+                                        <td>Assigned</td>
+                                    </tr>
+                                <?php endwhile; ?>
+                            </tbody>
+                        </table>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
