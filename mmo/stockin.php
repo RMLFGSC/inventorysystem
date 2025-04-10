@@ -305,10 +305,10 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
                             type: 'POST',
                             data: {
                                 controlNO: stockinId
-                            }, // Change to controlNO
+                            }, 
                             success: function(data) {
-                                $('#stockinDetailsBody').html(data); // Populate the modal with fetched data
-                                $('#editModal').modal('show'); // Show the modal
+                                $('#stockinDetailsBody').html(data); 
+                                $('#editModal').modal('show'); 
                             },
                             error: function(xhr, status, error) {
                                 console.error("Error fetching stock-in details: ", error);
@@ -341,7 +341,7 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
 
                 // Event listener for the "Add Item" button in the Edit Modal
                 document.getElementById('addItemEdit').addEventListener('click', function() {
-                    const itemFields = document.getElementById('editItemFields'); // Ensure this ID is correct
+                    const itemFields = document.getElementById('editItemFields');
 
                     const newItemRow = document.createElement('div');
                     newItemRow.classList.add('form-row', 'item-row', 'mb-3');
@@ -371,7 +371,7 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
                     itemFields.appendChild(newItemRow);
 
                     newItemRow.querySelector('.removeItem').addEventListener('click', function() {
-                        itemFields.removeChild(newItemRow); // Remove the item row
+                        itemFields.removeChild(newItemRow); 
                     });
                 });
             });

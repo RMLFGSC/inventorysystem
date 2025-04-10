@@ -19,20 +19,14 @@ $categories_json = json_encode($categories);
 $totals_json = json_encode($totals);
 ?>
 
-
-
 <!-- Content Wrapper -->
 <div id="content-wrapper" class="d-flex flex-column">
 
     <!-- Main Content -->
     <div id="content">
 
-
-        <!-- topbar -->
-        <?php
-        include("../includes/topbar.php");
-        ?>
-
+        <!-- Topbar -->
+        <?php include("../includes/topbar.php"); ?>
 
         <!-- Begin Page Content -->
         <div class="container-fluid">
@@ -45,23 +39,24 @@ $totals_json = json_encode($totals);
             <!-- Content Row -->
             <div class="row">
 
-                <!-- Earnings (Monthly) Card Example -->
+                <!-- Total Equipment Card -->
                 <div class="col-xl-3 col-md-6 mb-4">
                     <div class="card border-left-primary shadow h-100 py-2">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                        Total Equipment</div>
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Equipment</div>
                                     <div class="h6 mb-0 font-weight-bold text-gray-800">
                                         <?php
                                         // Query to get total equipment for both categories
-                                        $sql = "SELECT category, SUM(qty) AS total FROM stock_in WHERE category IN ('IT Equipment', 'Engineering Equipment') GROUP BY category";
+                                        $sql = "SELECT category, SUM(qty) AS total FROM stock_in WHERE category IN ('IT Equipment', 'Engineering Equipment', 'IT Fixed Asset', 'Engineering Fixed Asset') GROUP BY category";
                                         $result = $conn->query($sql);
 
                                         // Initialize totals
                                         $totalIT = 0;
                                         $totalEngineering = 0;
+                                        $totalITFixed = 0;
+                                        $totalEngineeringFixed = 0;
 
                                         // Fetch totals for each category
                                         while ($row = $result->fetch_assoc()) {
@@ -69,12 +64,16 @@ $totals_json = json_encode($totals);
                                                 $totalIT = $row['total'];
                                             } elseif ($row['category'] == 'Engineering Equipment') {
                                                 $totalEngineering = $row['total'];
+                                            } elseif ($row['category'] == 'IT Fixed Asset') {
+                                                $totalITFixed = $row['total'];
+                                            } elseif ($row['category'] == 'Engineering Fixed Asset') {
+                                                $totalEngineeringFixed = $row['total'];
                                             }
                                         }
 
                                         // Display totals
-                                        echo "IT Equipment: " . $totalIT . "<br>";
-                                        echo "Engineering Equipment: " . $totalEngineering;
+                                        $totalCombined = $totalIT + $totalEngineering + $totalITFixed + $totalEngineeringFixed; 
+                                        echo "$totalCombined"; 
                                         ?>
                                     </div>
                                 </div>
@@ -86,14 +85,13 @@ $totals_json = json_encode($totals);
                     </div>
                 </div>
 
-                <!-- Total Pending Request Card Example -->
+                <!-- Total Pending Request Card -->
                 <div class="col-xl-3 col-md-6 mb-4">
                     <div class="card border-left-success shadow h-100 py-2">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                        Total Pending Request</div>
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Pending Request</div>
                                     <div class="h5 mb-0 font-weight-bold text-gray-800">
                                         <?php
                                         // Query to get total pending requests
@@ -101,12 +99,7 @@ $totals_json = json_encode($totals);
                                         $result = $conn->query($sql);
 
                                         // Fetch total pending requests
-                                        if ($result->num_rows > 0) {
-                                            $row = $result->fetch_assoc();
-                                            echo $row['total'];
-                                        } else {
-                                            echo "0";
-                                        }
+                                        echo $result->num_rows > 0 ? $result->fetch_assoc()['total'] : "0";
                                         ?>
                                     </div>
                                 </div>
@@ -118,14 +111,13 @@ $totals_json = json_encode($totals);
                     </div>
                 </div>
 
-                <!-- Total Issued Card Example -->
+                <!-- Total Issued Card -->
                 <div class="col-xl-3 col-md-6 mb-4">
                     <div class="card border-left-danger shadow h-100 py-2">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
-                                        Total Issued</div>
+                                    <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Total Issued</div>
                                     <div class="h5 mb-0 font-weight-bold text-gray-800">
                                         <?php
                                         // Query to get total issued requests
@@ -133,12 +125,7 @@ $totals_json = json_encode($totals);
                                         $result = $conn->query($sql);
 
                                         // Fetch total issued requests
-                                        if ($result->num_rows > 0) {
-                                            $row = $result->fetch_assoc();
-                                            echo $row['total'];
-                                        } else {
-                                            echo "0"; // Default value if no data
-                                        }
+                                        echo $result->num_rows > 0 ? $result->fetch_assoc()['total'] : "0"; // Default value if no data
                                         ?>
                                     </div>
                                 </div>
@@ -150,14 +137,13 @@ $totals_json = json_encode($totals);
                     </div>
                 </div>
 
-                <!-- Pending Requests Card Example -->
+                <!-- Low Stock Alerts Card -->
                 <div class="col-xl-3 col-md-6 mb-4">
                     <div class="card border-left-warning shadow h-100 py-2">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                        Low stock alerts</div>
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Low stock alerts</div>
                                     <div class="h5 mb-0 font-weight-bold text-gray-800">18</div>
                                 </div>
                                 <div class="col-auto">
@@ -169,11 +155,9 @@ $totals_json = json_encode($totals);
                 </div>
             </div>
 
-            <!-- Content Row -->
-
-            <!-- Bar Chart for Total Items per Category -->
+            <!-- Bar Chart for Total Items per Category and Assigned Fixed Assets Section -->
             <div class="row">
-                <div class="col-xl-6 col-lg-7">
+                <div class="col-xl-6 col-lg-6">
                     <div class="card shadow mb-4">
                         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                             <h6 class="m-0 font-weight-bold text-primary">Total Items per Category</h6>
@@ -181,6 +165,49 @@ $totals_json = json_encode($totals);
                         <div class="card-body">
                             <div class="chart-bar">
                                 <canvas id="categoryBarChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-6 col-lg-6">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Assigned Fixed Assets</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover" id="assignedAssetsTable" width="100%" cellspacing="0">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th>Item</th>
+                                            <th>Quantity</th>
+                                            <th>User</th>
+                                            <th>Location</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        // Query to fetch assigned fixed assets
+                                        $query = "SELECT stockin_item, qty, owner, location FROM fixed_assets";
+                                        $result = $conn->query($query);
+
+                                        // Check if there are results and display them
+                                        if ($result->num_rows > 0) {
+                                            while ($row = $result->fetch_assoc()) {
+                                                echo "<tr>
+                                                        <td>{$row['stockin_item']}</td>
+                                                        <td>{$row['qty']}</td>
+                                                        <td>{$row['owner']}</td>
+                                                        <td>{$row['location']}</td>
+                                                      </tr>";
+                                            }
+                                        } else {
+                                            echo "<tr><td colspan='4' class='text-center'>No assigned fixed assets found.</td></tr>";
+                                        }
+                                        ?>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -193,11 +220,9 @@ $totals_json = json_encode($totals);
     </div>
     <!-- End of Main Content -->
 
-
     <?php
     include("../includes/scripts.php");
     include("../includes/footer.php");
-
     ?>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -206,32 +231,41 @@ $totals_json = json_encode($totals);
     const categories = <?php echo $categories_json; ?>;
     const totals = <?php echo $totals_json; ?>;
 
+    // Create datasets for each category
+    const datasets = [{
+        label: 'Total Items per Category',
+        data: totals, // Use the totals array directly
+        backgroundColor: ['#4CAF50', '#2196F3', '#FFC107', '#8BC34A'], // Assign colors based on index
+        borderColor: ['#4CAF50', '#2196F3', '#FFC107', '#8BC34A'],
+        borderWidth: 1
+    }];
+
     // Create the bar chart
     const ctx = document.getElementById('categoryBarChart').getContext('2d');
     new Chart(ctx, {
         type: 'bar',
         data: {
             labels: categories,
-            datasets: [{
-                label: 'Total Items per Category',
-                data: totals,
-                backgroundColor: ['#4e73df', '#1cc88a'],
-                borderColor: ['#4e73df', '#1cc88a'],
-                borderWidth: 1
-            }]
+            datasets: datasets 
         },
         options: {
             responsive: true,
             plugins: {
-                legend: { display: true },
+                legend: { display: false },
                 title: {
                     display: true,
-                    text: 'Total Items per Category'
+                    
                 }
             },
             scales: {
                 y: {
-                    beginAtZero: true
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1,
+                        callback: function(value) {
+                            return Number.isInteger(value) ? value : '';
+                        }
+                    }
                 }
             }
         }
