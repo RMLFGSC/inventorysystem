@@ -10,6 +10,9 @@ $query = "SELECT request.*, users.fullname AS requester_name, users.department, 
           AND request.is_posted = 1
           ORDER BY status ASC, req_number DESC";
 $result = mysqli_query($conn, $query);
+
+// Get the highlighted request ID if available
+$highlighted_req_id = isset($_GET['req_id']) ? $_GET['req_id'] : null;
 ?>
 
 
@@ -175,7 +178,7 @@ $result = mysqli_query($conn, $query);
 
                             <tbody>
                                 <?php while ($row = mysqli_fetch_assoc($result)): ?>
-                                    <tr>
+                                    <tr class="<?php echo $row['req_id'] == $highlighted_req_id ? 'table-warning' : ''; ?>">
                                         <td><?php echo $row['req_number']; ?></td>
                                         <td><?php echo $row['requester_name']; ?></td>
                                         <td><?php echo $row['department']; ?></td>
