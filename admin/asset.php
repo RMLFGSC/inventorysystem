@@ -60,9 +60,9 @@ include("../includes/navbar_admin.php");
             </div>
         </div>
 
-        <!-- Modal Structure -->
+        <!-- Add Fixed Asset Modal -->
         <div class="modal fade" id="GMCAssign" tabindex="-1" role="dialog" aria-labelledby="GMCAssignLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="GMCAssignLabel">Add Fixed Asset</h5>
@@ -71,33 +71,49 @@ include("../includes/navbar_admin.php");
                         </button>
                     </div>
 
-                    <div class="modal-body">
-                        <!-- Error Message Display -->
-                        <div id="errorMsg" class="alert alert-danger" style="display: none;"></div>
-                        <form action="assign" method="POST">
-                            <div class="form-row">
-                                <div class="form-group col-md-8 col-12">
-                                    <label for="item">Item</label>
-                                    <select name="item" class="form-control" required>
-                                        <option value="" disabled selected>Select Item</option>
-                                        <?php
-                                        $query = "SELECT item FROM stock_in WHERE qty > 0 GROUP BY item";
-                                        $result = $conn->query($query);
-                                        while ($row = $result->fetch_assoc()) {
-                                            echo "<option value='" . $row['item'] . "'>" . $row['item'] . "</option>";
-                                        }
-                                        ?>
-                                    </select>
+                    <form action="assign" method="POST">
+                        <div class="modal-body">
+
+                            <!-- Error Message -->
+                            <div id="errorMsg" class="alert alert-danger" style="display: none;"></div>
+
+                            <!-- Dynamic item + qty fields -->
+                            <div class="card">
+                                <div class="card-header text-white" style="background-color: #76a73c;">
+                                    <strong>Assign Fixed Asset</strong>
                                 </div>
-                                <div class="form-group col-md-4 col-12">
-                                    <label for="qty">Quantity</label>
-                                    <input type="number" class="form-control" id="qty" name="qty" placeholder="Qty" required>
+                                <div class="card-body">
+                                    <div id="fixedAssetFields">
+                                        <div class="form-row item-row mb-3">
+                                            <div class="form-group col-md-8 col-12">
+                                                <label for="item">Item</label>
+                                                <select name="item[]" class="form-control" required>
+                                                    <option value="" disabled selected>Select Item</option>
+                                                    <?php
+                                                    $query = "SELECT item FROM stock_in WHERE qty > 0 GROUP BY item";
+                                                    $result = $conn->query($query);
+                                                    while ($row = $result->fetch_assoc()) {
+                                                        echo "<option value='" . $row['item'] . "'>" . $row['item'] . "</option>";
+                                                    }
+                                                    ?>
+                                                </select>
+                                            </div>
+                                            <div class="form-group col-md-4 col-12">
+                                                <label for="qty">Quantity</label>
+                                                <input type="number" name="qty[]" class="form-control" placeholder="Qty" required>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-3 text-center">
+                                        <button type="button" class="btn btn-sm btn-secondary" id="addFixedAssetItem">Add Item</button>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Hidden Serial Number Input -->
-        <input type="hidden" id="serialNumber" name="serial">
+                            <hr>
 
+                            <!-- User and Location Fields -->
                             <div class="form-group">
                                 <label for="user">User</label>
                                 <input type="text" class="form-control" id="user" name="user" placeholder="Enter user" required>
@@ -108,12 +124,16 @@ include("../includes/navbar_admin.php");
                                 <input type="text" class="form-control" id="location" name="location" placeholder="Enter location" required>
                             </div>
 
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-primary">Save</button>
-                            </div>
-                        </form>
-                    </div>
+                            <!-- Hidden Serial Number Field -->
+                            <input type="hidden" id="serialNumber" name="serial">
+
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -134,41 +154,49 @@ include("../includes/navbar_admin.php");
 
 <!-- JavaScript to add more item rows -->
 <script>
-    document.getElementById('addItem').addEventListener('click', function() {
-        var container = document.getElementById('itemContainer');
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('addFixedAssetItem').addEventListener('click', function () {
+            var container = document.getElementById('fixedAssetFields');
 
-        var newRow = document.createElement('div');
-        newRow.classList.add('form-row', 'item-row', 'mb-3');
+            var newRow = document.createElement('div');
+            newRow.classList.add('form-row', 'item-row', 'mb-3');
 
-        newRow.innerHTML = `
-            <div class="form-group col-md-8 col-12">
-                <label for="item">Item</label>
-                <select class="form-control" name="item[]" required>
-                    <option value="" selected disabled>Select item</option>
-                    <?php
-                    $sql = "SELECT DISTINCT item FROM stock_in";
-                    $result = $conn->query($sql);
-
-                    if ($result->num_rows > 0) {
-                        while ($row = $result->fetch_assoc()) {
-                            echo "<option value='" . $row['item'] . "'>" . $row['item'] . "</option>";
+            newRow.innerHTML = `
+                <div class="form-group col-md-8 col-12">
+                    <label for="item">Item</label>
+                    <select class="form-control" name="item[]" required>
+                        <option value="" selected disabled>Select item</option>
+                        <?php
+                        $sql = "SELECT DISTINCT item FROM stock_in";
+                        $result = $conn->query($sql);
+                        if ($result->num_rows > 0) {
+                            while ($row = $result->fetch_assoc()) {
+                                echo "<option value='" . $row['item'] . "'>" . $row['item'] . "</option>";
+                            }
+                        } else {
+                            echo "<option value='' disabled>No items available</option>";
                         }
-                    } else {
-                        echo "<option value='' disabled>No items available</option>";
-                    }
-                    ?>
-                </select>
-            </div>
-            <div class="form-group col-md-4 col-12">
-                <label for="qty">Quantity</label>
-                <input type="number" class="form-control" name="qty[]" placeholder="Qty" required>
-            </div>
-            <div class="form-group col-md-2 col-12 d-flex align-items-end">
-                <button type="button" class="btn btn-danger btn-sm removeItem">X</button>
-            </div>
-        `;
+                        ?>
+                    </select>
+                </div>
+                <div class="form-group col-md-4 col-12">
+                    <label for="qty">Quantity</label>
+                    <input type="number" class="form-control" name="qty[]" placeholder="Qty" required>
+                </div>
+                <div class="form-group col-md-2 col-12 d-flex align-items-end">
+                    <button type="button" class="btn btn-danger btn-sm removeItem">X</button>
+                </div>
+            `;
 
-        container.insertBefore(newRow, container.lastElementChild);
+            container.appendChild(newRow);
+        });
+
+        // Remove row when 'X' button is clicked
+        document.addEventListener('click', function (e) {
+            if (e.target && e.target.classList.contains('removeItem')) {
+                e.target.closest('.item-row').remove();
+            }
+        });
     });
 
     // Remove item row on button click
@@ -192,8 +220,8 @@ include("../includes/navbar_admin.php");
                 if (response.success) {
                     alert(response.success);
                     $('#assignForm')[0].reset();
-                    $('#addModal').modal('hide'); 
-                    location.reload(); 
+                    $('#addModal').modal('hide');
+                    location.reload();
                 } else if (response.error) {
                     // Display the error inside the modal
                     $('#errorMsg').text(response.error).show();
@@ -205,5 +233,4 @@ include("../includes/navbar_admin.php");
             }
         });
     });
-    
 </script>
