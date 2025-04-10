@@ -90,60 +90,68 @@ $result = mysqli_query($conn, $query);
                             </tbody>
                         </table>
 
-                    <?php elseif ($viewMode === 'detailed'): ?>
-                        <!-- DETAILED VIEW -->
-                        <table class="table table-bordered table-hover">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th>Item</th>
-                                    <th>Qty</th>
-                                    <th>User</th>
-                                    <th>Location</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                // Query to get all items from stock_in and their assignment status from fixed_assets
-                                 $detailedQuery = "
-                                    SELECT 
-                                        si.item, 
-                                        CASE 
-                                            WHEN si.qty > 0 THEN SUM(si.qty)
-                                            ELSE fa.qty
-                                        END AS qty,
-                                        si.orig_qty,
-                                        IF(si.qty = 0, IFNULL(fa.owner, 'N/A'), 'N/A') AS user,
-                                        IF(si.qty = 0, IFNULL(fa.location, 'Stockroom'), 'Stockroom') AS location,
-                                        CASE 
-                                            WHEN si.qty = 0 THEN 'Assigned'
-                                            ELSE 'Unassigned'
-                                        END AS status
-                                    FROM stock_in si
-                                    LEFT JOIN fixed_assets fa ON si.item = fa.stockin_item
-                                    WHERE is_posted=1
-                                    GROUP BY si.item, status
-                                ";
+                        <?php elseif ($viewMode === 'detailed'): ?>
+    <!-- DETAILED VIEW -->
+    <table class="table table-bordered table-hover">
+        <thead class="thead-light">
+            <tr>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>User</th>
+                <th>Location</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php
+        // UNASSIGNED ITEMS - from stock_in table only
+        $unassignedQuery = "
+            SELECT item, COUNT(*) AS qty
+            FROM stock_in
+            WHERE is_posted = 1
+            GROUP BY item
+        ";
 
-                                // Apply date filter if provided
-                                if (!empty($startDate) && !empty($endDate)) {
-                                    $detailedQuery .= " WHERE si.dr >= '$startDate' AND si.dr <= '$endDate'";
-                                }
+        $unassignedResult = mysqli_query($conn, $unassignedQuery);
+        while ($row = mysqli_fetch_assoc($unassignedResult)) {
+            // Get how many are assigned from fixed_assets
+            $item = $row['item'];
+            $qty = $row['qty'];
 
-                                $detailedResult = mysqli_query($conn, $detailedQuery);
-                                while ($drow = mysqli_fetch_assoc($detailedResult)):
-                                ?>
-                                    <tr>
-                                        <td><?= htmlspecialchars($drow['item']); ?></td>
-                                        <td><?= htmlspecialchars($drow['qty']); ?></td>
-                                        <td><?= htmlspecialchars($drow['user']); ?></td>
-                                        <td><?= htmlspecialchars($drow['location']); ?></td>
-                                        <td><?= htmlspecialchars($drow['status']); ?></td>
-                                    </tr>
-                                <?php endwhile; ?>
-                            </tbody>
-                        </table>
-                    <?php endif; ?>
+            $assignedQuery = "SELECT SUM(qty) AS assigned_qty FROM fixed_assets WHERE stockin_item = '$item'";
+            $assignedResult = mysqli_query($conn, $assignedQuery);
+            $assignedRow = mysqli_fetch_assoc($assignedResult);
+            $assignedQty = $assignedRow['assigned_qty'] ?? 0;
+
+            $unassignedQty = $qty - $assignedQty;
+
+            if ($unassignedQty > 0) {
+                echo "<tr>
+                    <td>" . htmlspecialchars($item) . "</td>
+                    <td>" . $unassignedQty . "</td>
+                    <td>N/A</td>
+                    <td>Stockroom</td>
+                    <td>Unassigned</td>
+                </tr>";
+            }
+        }
+
+        // ASSIGNED ITEMS - from fixed_assets table only
+        $assignedQuery = "SELECT stockin_item AS item, qty, owner, location FROM fixed_assets";
+        $assignedResult = mysqli_query($conn, $assignedQuery);
+            while ($drow = mysqli_fetch_assoc($assignedResult)):
+            ?>
+                <tr>
+                    <td><?= htmlspecialchars($drow['item']); ?></td>
+                    <td><?= htmlspecialchars($drow['qty']); ?></td>
+                    <td><?= htmlspecialchars($drow['owner']); ?></td>
+                    <td><?= htmlspecialchars($drow['location']); ?></td>
+                    <td>Assigned</td>                </tr>
+            <?php endwhile; ?>
+        </tbody>
+    </table>
+<?php endif; ?>
+
 
                 </div>
             </div>

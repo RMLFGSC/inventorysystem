@@ -14,6 +14,7 @@
 
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- Page level plugins -->
     <script src="inventorysystem/vendor/chart.js/Chart.min.js"></script>
