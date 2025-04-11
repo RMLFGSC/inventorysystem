@@ -1,91 +1,88 @@
 <?php
-session_start();
 include("../conn.php");
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Get the user (owner), location, item, and quantity from the form
     $owner = $_POST['user'];
     $location = $_POST['location'];
-    $stockin_item = $_POST['item'];
-    $qty = $_POST['qty'];
-
-    // Start transaction
-    $conn->begin_transaction();
+    $items = $_POST['item'];  
+    $quantities = $_POST['qty'];
 
     try {
-        // Step 1: Check if the total available stock is enough
-        $totalStockStmt = $conn->prepare("SELECT SUM(qty) AS total_qty FROM stock_in WHERE item = ?");
-        $totalStockStmt->bind_param("s", $stockin_item);
-        $totalStockStmt->execute();
-        $totalStockResult = $totalStockStmt->get_result();
-        $totalStockRow = $totalStockResult->fetch_assoc();
-        $totalAvailableStock = $totalStockRow['total_qty'] ?? 0;
+        $conn->begin_transaction(); // Add this to manually handle commit/rollback
 
-        // Check if the requested quantity exceeds available stock
-        if ($qty > $totalAvailableStock) {
-            throw new Exception("Insufficient stock for item: " . $stockin_item . ". Available: " . $totalAvailableStock . ", Requested: " . $qty);
+        // Check if owner already exists
+        $checkStmt = $conn->prepare("SELECT 1 FROM fixed_assets WHERE owner = ? LIMIT 1");
+        $checkStmt->bind_param("s", $owner);
+        $checkStmt->execute();
+        $checkResult = $checkStmt->get_result();
+
+        if ($checkResult->num_rows > 0) {
+            echo json_encode(['error' => "User already exists."]);
+            exit;
         }
+        $checkStmt->close();
 
-        // Prepare the SQL statement to insert data into the fixed_assets table
-        $stmt = $conn->prepare("INSERT INTO fixed_assets (stockin_item, qty, owner, location) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("siss", $stockin_item, $qty, $owner, $location);
-        $stmt->execute();
+        for ($i = 0; $i < count($items); $i++) {
+            $serial_number = $items[$i]; 
+            $qty = (int)$quantities[$i];
 
-        // Stock deduction after successful insertion
-        $remainingQty = $qty;
+            // Check stock availability
+            $totalStockStmt = $conn->prepare("SELECT SUM(qty) AS total_qty FROM stock_in WHERE serialNO = ?");
+            $totalStockStmt->bind_param("s", $serial_number);
+            $totalStockStmt->execute();
+            $totalStockResult = $totalStockStmt->get_result();
+            $totalAvailableStock = $totalStockResult->fetch_assoc()['total_qty'] ?? 0;
 
-        while ($remainingQty > 0) {
-            // Find the next available stock record with the given item and a positive qty
-            $selectStmt = $conn->prepare("SELECT stockin_id, qty FROM stock_in WHERE item = ? AND qty > 0 ORDER BY stockin_id ASC LIMIT 1");
-            $selectStmt->bind_param("s", $stockin_item);
-            $selectStmt->execute();
-            $result = $selectStmt->get_result();
-
-            if ($result->num_rows === 0) {
-                throw new Exception("Not enough stock for item: " . $stockin_item);
+            if ($qty > $totalAvailableStock) {
+                echo json_encode(['error' => "Insufficient stock for serial number: $serial_number"]);
+                exit;
             }
 
-            $row = $result->fetch_assoc();
-            $stockin_id = $row['stockin_id'];
-            $currentQty = $row['qty'];
+            // Get item name
+            $itemQuery = $conn->prepare("SELECT item FROM stock_in WHERE serialNO = ? LIMIT 1");
+            $itemQuery->bind_param("s", $serial_number);
+            $itemQuery->execute();
+            $itemRow = $itemQuery->get_result()->fetch_assoc();
+            $item_name = $itemRow['item'];
 
-            // Calculate the quantity to deduct
-            $deductQty = min($remainingQty, $currentQty);
-            $newQty = $currentQty - $deductQty;
+            // Insert to fixed_assets
+            $stmt = $conn->prepare("INSERT INTO fixed_assets (stockin_item, qty, owner, location, serial_number) VALUES (?, ?, ?, ?, ?)");
+            $stmt->bind_param("sisss", $item_name, $qty, $owner, $location, $serial_number);
+            $stmt->execute();
 
-            // Update the stock record
-            $updateStmt = $conn->prepare("UPDATE stock_in SET qty = ? WHERE stockin_id = ?");
-            $updateStmt->bind_param("ii", $newQty, $stockin_id);
-            if (!$updateStmt->execute()) {
-                throw new Exception("Error updating stock: " . $updateStmt->error);
+            // Deduct stock
+            $remainingQty = $qty;
+            while ($remainingQty > 0) {
+                $selectStmt = $conn->prepare("SELECT stockin_id, qty FROM stock_in WHERE serialNO = ? AND qty > 0 ORDER BY stockin_id ASC LIMIT 1");
+                $selectStmt->bind_param("s", $serial_number);
+                $selectStmt->execute();
+                $result = $selectStmt->get_result();
+
+                if ($result->num_rows === 0) {
+                    echo json_encode(['error' => "Stock ran out while deducting for $serial_number"]);
+                    exit;
+                }
+
+                $row = $result->fetch_assoc();
+                $deductQty = min($remainingQty, $row['qty']);
+                $newQty = $row['qty'] - $deductQty;
+
+                $updateStmt = $conn->prepare("UPDATE stock_in SET qty = ? WHERE stockin_id = ?");
+                $updateStmt->bind_param("ii", $newQty, $row['stockin_id']);
+                $updateStmt->execute();
+
+                $remainingQty -= $deductQty;
             }
-
-            // Subtract the deducted quantity from the remaining quantity
-            $remainingQty -= $deductQty;
-
-            // Close the prepared statements
-            $selectStmt->close();
-            $updateStmt->close();
         }
 
-        // Commit transaction
         $conn->commit();
-        
-        // Redirect to the fixed asset page after successful submission
-        $_SESSION['success'] = 'Item assigned successfully';
-        header("Location: asset");
+        echo json_encode(['success' => 'Items assigned successfully']);
         exit;
 
     } catch (Exception $e) {
-        // Rollback transaction on error
         $conn->rollback();
-        $_SESSION['error'] = $e->getMessage();
-        header("Location: asset");
+        echo json_encode(['error' => $e->getMessage()]);
         exit;
-    } finally {
-        // Close the statement and connection
-        $stmt->close();
-        $conn->close();
     }
 }
 ?>
