@@ -16,14 +16,17 @@ $result = mysqli_query($conn, $query);
         <div class="container-fluid">
             <div class="d-sm-flex align-items-center justify-content-between mb-4">
                 <h1 class="h3 mb-0 text-gray-800">Fixed Assets Report</h1>
-                <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#GMCaddRequest">
-                        <i class="fas fa-download fa-sm text-white-50"></i> Generate Report
+                <button type="button" class="btn btn-sm btn-primary btn-icon-split" data-toggle="modal" data-target="#GMCaddRequest">
+                    <span class="icon text-white-50">
+                        <i class="fas fa-download fa-sm text-white-50"></i>
+                    </span>
+                    <span class="text">Generate Report</span>
                 </button>
             </div>
 
             <div class="card shadow mb-4">
                 <div class="card-body">
-                    <table class="table table-bordered table-hover">
+                    <table class="table table-bordered table-hover" id="dataTable">
                         <thead class="thead-light">
                             <tr>
                                 <th>Item</th>
