@@ -170,8 +170,11 @@ $result = mysqli_query($conn, $query);
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
                     <h6 class="m-0 font-weight-bold text-primary">Requisition List</h6>
-                    <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#GMCaddRequest">
-                        <i class="fas fa-plus fa-sm text-white-50"></i> Add Request
+                    <button type="button" class="btn btn-sm btn-primary btn-icon-split" data-toggle="modal" data-target="#GMCaddRequest">
+                    <span class="icon text-white-50">
+                            <i class="fas fa-plus fa-sm text-white-50"></i>
+                        </span>
+                        <span class="text">Add Request</span>
                     </button>
                 </div>
                 <div class="card-body">
@@ -318,7 +321,7 @@ $result = mysqli_query($conn, $query);
                     Swal.fire({
                         icon: 'success',
                         title: 'Success!',
-                        text: 'Stock-in successfully added.',
+                        text: 'Request successfully added.',
                         confirmButtonColor: '#3085d6',
                         width: '300px'
                     });
