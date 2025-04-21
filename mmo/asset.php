@@ -28,8 +28,11 @@ $result = mysqli_query($conn, $query);
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
                     <h6 class="m-0 font-weight-bold text-primary">Fixed Assets</h6>
-                    <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#GMCAssign">
-                        <i class="fas fa-plus fa-sm text-white-50"></i> Add
+                    <button type="button" class="btn btn-sm btn-primary btn-icon-split" data-toggle="modal" data-target="#GMCAssign">
+                        <span class="icon text-white-50">
+                            <i class="fas fa-plus fa-sm text-white-50"></i>
+                        </span>
+                        <span class="text">Add Fixed Assets</span>
                     </button>
                 </div>
 
@@ -82,8 +85,21 @@ $result = mysqli_query($conn, $query);
                         </button>
                     </div>
 
-                    <div class="modal-body" id="assetDetailsContent">
-                        <!-- AJAX content here -->
+                    <div class="modal-body">
+                        <!-- Add Stock-in Button -->
+                        <div class="d-flex justify-content-end mb-3">
+                            <button type="button" class="btn btn-primary btn-sm btn-icon-split" data-toggle="modal" data-target="#GMCaddStockin">
+                            <span class="icon text-white-50">
+                            <i class="fas fa-plus fa-sm text-white-50"></i>
+                        </span>
+                        <span class="text">Add Item</span>
+                    </button>
+                        </div>
+
+                        <!-- Dynamic content will be inserted here via AJAX -->
+                        <div id="assetDetailsContent">
+                            <!-- AJAX content -->
+                        </div>
                     </div>
 
                 </div>
@@ -121,7 +137,7 @@ $result = mysqli_query($conn, $query);
                                                 <select name="item[]" class="form-control" required>
                                                     <option value="" disabled selected>Select Item</option>
                                                     <?php
-                                                    $query = "SELECT item, serialNO FROM stock_in WHERE qty > 0 GROUP BY item, serialNO";
+                                                    $query = "SELECT item, serialNO FROM stock_in WHERE qty > 0 AND category IN ('IT Fixed Asset', 'Engineering Fixed Asset') GROUP BY item, serialNO";
                                                     $result = $conn->query($query);
                                                     while ($row = $result->fetch_assoc()) {
                                                         echo "<option value='" . $row['serialNO'] . "'>" . $row['item'] . " - " . $row['serialNO'] . "</option>";
@@ -194,9 +210,9 @@ $result = mysqli_query($conn, $query);
                 <div class="form-group col-md-8 col-12">
                     <label for="item">Item</label>
                     <select name="item[]" class="form-control" required>
-                        option value="" disabled selected>Select Item</option>
+                        <option value="" disabled selected>Select Item</option>
                             <?php
-                            $query = "SELECT item, serialNO FROM stock_in WHERE qty > 0 GROUP BY item, serialNO";
+                            $query = "SELECT item, serialNO FROM stock_in WHERE qty > 0 AND category IN ('IT Fixed Asset', 'Engineering Fixed Asset') GROUP BY item, serialNO";
                             $result = $conn->query($query);
                             while ($row = $result->fetch_assoc()) {
                                 echo "<option value='" . $row['serialNO'] . "'>" . $row['item'] . " - " . $row['serialNO'] . "</option>";

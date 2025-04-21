@@ -53,7 +53,24 @@ if (isset($_GET['req_id'])) {
     mysqli_stmt_execute($stmt);
     mysqli_stmt_close($stmt);
 }
+
+// Add a variable to track if there are new notifications
+$new_notifications = !empty($notifications);
+
+
 ?>
+
+<!-- Add audio element for notification sound -->
+<audio id="notificationSound" src="../sound/notification_sound.wav" preload="auto"></audio>
+
+<script>
+    // Play sound if there are new notifications based on count
+    <?php if ($unread_notification_count > 0 && !$new_notifications): ?>
+        document.getElementById('notificationSound').play();
+    <?php endif; ?>
+
+    console.log("Unread notifications: <?php echo $unread_notification_count; ?>, New notifications: <?php echo $new_notifications ? 'true' : 'false'; ?>");
+</script>
 
         <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
 
@@ -105,12 +122,9 @@ if (isset($_GET['req_id'])) {
                     <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <span class="mr-2 d-none d-lg-inline text-gray-600 small"><?php echo htmlspecialchars($user_name); ?></span>
-                        <img class="img-profile rounded-circle"
-                            src="img/undraw_profile.svg">
                     </a>
                     <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                         aria-labelledby="userDropdown">
-                        <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
                             <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                             Logout

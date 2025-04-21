@@ -41,6 +41,7 @@
                     data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <a class="collapse-item" href="reports-stockin.php">Inventory Report</a>
+                        <a class="collapse-item" href="asset_reports.php">Fixed Asset Report</a>
                         <a class="collapse-item" href="reports-requisition.php">Requisition Report</a>
                         <a class="collapse-item" href="reports-issuance.php">Issuance Report</a>
                 </div>
