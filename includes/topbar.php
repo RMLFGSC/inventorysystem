@@ -1,4 +1,4 @@
-<?php
+topbar<?php
 if (isset($_SESSION['auth']) && $_SESSION['auth'] == true) {
     $user_name = $_SESSION['auth_user']['user_name']; 
     $logged_in_user_id = $_SESSION['auth_user']['user_id']; 
@@ -53,7 +53,24 @@ if (isset($_GET['req_id'])) {
     mysqli_stmt_execute($stmt);
     mysqli_stmt_close($stmt);
 }
+
+// Add a variable to track if there are new notifications
+$new_notifications = !empty($notifications);
+
+
 ?>
+
+<!-- Add audio element for notification sound -->
+<audio id="notificationSound" src="../sound/notification_sound.wav" preload="auto"></audio>
+
+<script>
+    // Play sound if there are new notifications based on count
+    <?php if ($unread_notification_count > 0 && !$new_notifications): ?>
+        document.getElementById('notificationSound').play();
+    <?php endif; ?>
+
+    console.log("Unread notifications: <?php echo $unread_notification_count; ?>, New notifications: <?php echo $new_notifications ? 'true' : 'false'; ?>");
+</script>
 
         <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
 
