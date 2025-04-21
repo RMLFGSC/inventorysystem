@@ -247,7 +247,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
                     <h6 class="m-0 font-weight-bold text-primary">Stock-in </h6>
                     <button type="button" class="btn btn-sm btn-primary btn-icon-split" data-toggle="modal" data-target="#GMCaddStockin">
-                    <span class="icon text-white-50">
+                        <span class="icon text-white-50">
                             <i class="fas fa-plus fa-sm text-white-50"></i>
                         </span>
                         <span class="text">Add Stock-in</span>
@@ -281,7 +281,19 @@ while ($row = mysqli_fetch_assoc($result)) {
                                     ?>
 
                                     <?php foreach ($itemGroups as $itemKey => $items): ?>
-                                        <?php $itemRowspan = count($items); ?>
+                                        <?php
+                                        $itemRowspan = count($items);
+
+                                        // Check if all serial numbers are "N/A"
+                                        $allSerialsNA = true;
+                                        foreach ($items as $s) {
+                                            if (strtoupper(trim($s['serialNO'])) !== 'N/A') {
+                                                $allSerialsNA = false;
+                                                break;
+                                            }
+                                        }
+                                        ?>
+
                                         <?php foreach ($items as $index => $row): ?>
                                             <tr>
                                                 <?php if (!$controlNoDisplayed): ?>
@@ -289,15 +301,18 @@ while ($row = mysqli_fetch_assoc($result)) {
                                                     <?php $controlNoDisplayed = true; ?>
                                                 <?php endif; ?>
 
-                                                <td><?php echo $row['serialNO']; ?></td>
+                                                <?php if ($allSerialsNA): ?>
+                                                    <?php if ($index === 0): ?>
+                                                        <td rowspan="<?= $itemRowspan; ?>">N/A</td>
+                                                    <?php endif; ?>
+                                                <?php else: ?>
+                                                    <td><?php echo $row['serialNO']; ?></td>
+                                                <?php endif; ?>
 
                                                 <?php if ($index === 0): ?>
                                                     <td rowspan="<?= $itemRowspan; ?>"><?php echo $row['item']; ?></td>
                                                     <td rowspan="<?= $itemRowspan; ?>"><?php echo $row['category']; ?></td>
                                                     <td rowspan="<?= $itemRowspan; ?>"><?php echo $row['dr']; ?></td>
-                                                <?php endif; ?>
-
-                                                <?php if ($index === 0): ?>
                                                     <td rowspan="<?= $itemRowspan; ?>" class="text-center">
                                                         <?php if ($row['is_posted'] == 0): ?>
                                                             <button type="button" data-bs-toggle="modal" data-bs-target="#GMCeditStockin" class="btn btn-sm btn-success editStockinBtn" title="Edit">
@@ -319,6 +334,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                                     <?php endforeach; ?>
                                 <?php endforeach; ?>
 
+
                             </tbody>
 
                         </table>
@@ -333,7 +349,7 @@ while ($row = mysqli_fetch_assoc($result)) {
         include("../includes/footer.php");
         ?>
 
-<script>
+        <script>
             document.addEventListener('DOMContentLoaded', function() {
                 // Add Item Fields Dynamically
                 document.getElementById('addItem').addEventListener('click', function() {
