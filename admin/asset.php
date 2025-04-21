@@ -88,12 +88,12 @@ $result = mysqli_query($conn, $query);
                     <div class="modal-body">
                         <!-- Add Stock-in Button -->
                         <div class="d-flex justify-content-end mb-3">
-                            <button type="button" class="btn btn-primary btn-sm btn-icon-split" data-toggle="modal" data-target="#GMCaddStockin">
-                            <span class="icon text-white-50">
-                            <i class="fas fa-plus fa-sm text-white-50"></i>
-                        </span>
-                        <span class="text">Add Item</span>
-                    </button>
+                            <button type="button" class="btn btn-primary btn-sm btn-icon-split" data-toggle="modal" data-target="#addItemModal">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-plus fa-sm text-white-50"></i>
+                                </span>
+                                <span class="text">Add Item</span>
+                            </button>
                         </div>
 
                         <!-- Dynamic content will be inserted here via AJAX -->
@@ -101,7 +101,51 @@ $result = mysqli_query($conn, $query);
                             <!-- AJAX content -->
                         </div>
                     </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
 
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Item Modal -->
+        <div class="modal fade" id="addItemModal" tabindex="-1" role="dialog" aria-labelledby="addItemModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addItemModalLabel">Add Item to Fixed Asset</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form id="addItemForm">
+                        <div class="modal-body">
+                            <div class="form-row">
+                                <div class="form-group col-md-8">
+                                    <label for="item">Item</label>
+                                    <select name="item" class="form-control" required>
+                                        <option value="" disabled selected>Select Item</option>
+                                        <?php
+                                        $query = "SELECT item, serialNO FROM stock_in WHERE qty > 0 AND category IN ('IT Fixed Asset', 'Engineering Fixed Asset') GROUP BY item, serialNO";
+                                        $result = $conn->query($query);
+                                        while ($row = $result->fetch_assoc()) {
+                                            echo "<option value='" . $row['serialNO'] . "'>" . $row['item'] . " - " . $row['serialNO'] . "</option>";
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label for="qty">Quantity</label>
+                                    <input type="number" name="qty" class="form-control" placeholder="Qty" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-sm btn-primary" id="submitAddItemBtn">Add Item</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

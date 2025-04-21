@@ -100,8 +100,8 @@ $result = mysqli_query($conn, $query);
                         </div>
 
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            <button type="submit" name="addRequest" class="btn btn-primary">Submit</button>
+                            <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" name="addRequest" class="btn btn-sm btn-primary">Submit</button>
                         </div>
                     </form>
                 </div>
@@ -404,7 +404,7 @@ $result = mysqli_query($conn, $query);
 
                 Swal.fire({
                     title: 'Post Request?',
-                    text: 'Are you sure you want to post this request? Once posted, it can no longer be edited.',
+                    text: 'Once posted, it can no longer be edited.',
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonText: 'Yes, Post it',

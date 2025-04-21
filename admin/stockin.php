@@ -112,8 +112,8 @@ while ($row = mysqli_fetch_assoc($result)) {
                         </div>
 
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            <button type="submit" name="addStockin" class="btn btn-primary">Submit</button>
+                            <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" name="addStockin" class="btn btn-sm btn-primary">Submit</button>
                         </div>
                     </form>
                 </div>
@@ -151,7 +151,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
@@ -436,12 +436,12 @@ while ($row = mysqli_fetch_assoc($result)) {
                         const stockinId = this.getAttribute('data-stockin-id');
 
                         Swal.fire({
-                            title: 'Are you sure?',
-                            text: "You are about to post this stock-in.",
+                            title: 'Post Stock-in?',
+                            text: "Once posted, it can no longer be edited.",
                             icon: 'warning',
                             showCancelButton: true,
-                            confirmButtonColor: '#3085d6',
-                            cancelButtonColor: '#d33',
+                            confirmButtonColor: '#28a745',
+                            cancelButtonText: 'Cancel',
                             confirmButtonText: 'Yes, post it!',
                             width: '300px'
                         }).then((result) => {
