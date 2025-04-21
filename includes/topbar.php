@@ -1,4 +1,4 @@
-topbar<?php
+<?php
 if (isset($_SESSION['auth']) && $_SESSION['auth'] == true) {
     $user_name = $_SESSION['auth_user']['user_name']; 
     $logged_in_user_id = $_SESSION['auth_user']['user_id']; 
@@ -122,8 +122,6 @@ $new_notifications = !empty($notifications);
                     <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <span class="mr-2 d-none d-lg-inline text-gray-600 small"><?php echo htmlspecialchars($user_name); ?></span>
-                        <img class="img-profile rounded-circle"
-                            src="img/undraw_profile.svg">
                     </a>
                     <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                         aria-labelledby="userDropdown">

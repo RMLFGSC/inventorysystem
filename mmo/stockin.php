@@ -10,10 +10,13 @@ $nextControlNo = isset($lastControlNo['controlNO']) ? intval(substr($lastControl
 $controlNumber = 'CN-' . $nextControlNo;
 
 //query
-$query = "SELECT * FROM stock_in WHERE stockin_id IN 
-         (SELECT MIN(stockin_id) FROM stock_in GROUP BY controlNO) ORDER BY stockin_id DESC";
-$result = mysqli_query($conn, $query) or die(mysqli_error($conn));
+$query = "SELECT * FROM stock_in ORDER BY controlNO DESC, stockin_id ASC";
+$result = mysqli_query($conn, $query);
 
+$groupedData = [];
+while ($row = mysqli_fetch_assoc($result)) {
+    $groupedData[$row['controlNO']][] = $row;
+}
 ?>
 
 
@@ -236,7 +239,101 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
         </div>
         <!-- End of Edit Modal -->
 
-        <script>
+
+        <div class="container-fluid">
+
+            <!-- Table Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Stock-in </h6>
+                    <button type="button" class="btn btn-sm btn-primary btn-icon-split" data-toggle="modal" data-target="#GMCaddStockin">
+                    <span class="icon text-white-50">
+                            <i class="fas fa-plus fa-sm text-white-50"></i>
+                        </span>
+                        <span class="text">Add Stock-in</span>
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table">
+                        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Control #</th>
+                                    <th>Serial Number</th>
+                                    <th>Item</th>
+                                    <th>Category</th>
+                                    <th>Date Received</th>
+                                    <th class="text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($groupedData as $controlNO => $rows): ?>
+                                    <?php
+                                    $rowspan = count($rows);
+                                    $controlNoDisplayed = false;
+
+                                    // Group by item + category + dr
+                                    $itemGroups = [];
+                                    foreach ($rows as $row) {
+                                        $key = $row['item'] . '_' . $row['category'] . '_' . $row['dr'];
+                                        $itemGroups[$key][] = $row;
+                                    }
+                                    ?>
+
+                                    <?php foreach ($itemGroups as $itemKey => $items): ?>
+                                        <?php $itemRowspan = count($items); ?>
+                                        <?php foreach ($items as $index => $row): ?>
+                                            <tr>
+                                                <?php if (!$controlNoDisplayed): ?>
+                                                    <td rowspan="<?= $rowspan; ?>"><?php echo $row['controlNO']; ?></td>
+                                                    <?php $controlNoDisplayed = true; ?>
+                                                <?php endif; ?>
+
+                                                <td><?php echo $row['serialNO']; ?></td>
+
+                                                <?php if ($index === 0): ?>
+                                                    <td rowspan="<?= $itemRowspan; ?>"><?php echo $row['item']; ?></td>
+                                                    <td rowspan="<?= $itemRowspan; ?>"><?php echo $row['category']; ?></td>
+                                                    <td rowspan="<?= $itemRowspan; ?>"><?php echo $row['dr']; ?></td>
+                                                <?php endif; ?>
+
+                                                <?php if ($index === 0): ?>
+                                                    <td rowspan="<?= $itemRowspan; ?>" class="text-center">
+                                                        <?php if ($row['is_posted'] == 0): ?>
+                                                            <button type="button" data-bs-toggle="modal" data-bs-target="#GMCeditStockin" class="btn btn-sm btn-success editStockinBtn" title="Edit">
+                                                                <i class="fa-solid fa-edit"></i>
+                                                            </button>
+                                                        <?php endif; ?>
+
+                                                        <button type="button" data-toggle="modal" data-target="#viewModal" class="btn btn-sm btn-warning view-btn" title="View" data-controlno="<?php echo htmlspecialchars($row['controlNO']); ?>">
+                                                            <i class="fa-solid fa-eye text-white"></i>
+                                                        </button>
+
+                                                        <?php if ($row['is_posted'] == 0): ?>
+                                                            <button class="btn btn-sm btn-info postStockBtn" data-stockin-id="<?php echo $row['stockin_id']; ?>"><i class="fas fa-square-check"></i></button>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                <?php endif; ?>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php endforeach; ?>
+                                <?php endforeach; ?>
+
+                            </tbody>
+
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <?php
+        include("../includes/scripts.php");
+        include("../includes/footer.php");
+        ?>
+
+<script>
             document.addEventListener('DOMContentLoaded', function() {
                 // Add Item Fields Dynamically
                 document.getElementById('addItem').addEventListener('click', function() {
@@ -305,10 +402,10 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
                             type: 'POST',
                             data: {
                                 controlNO: stockinId
-                            }, 
+                            }, // Change to controlNO
                             success: function(data) {
-                                $('#stockinDetailsBody').html(data); 
-                                $('#editModal').modal('show'); 
+                                $('#stockinDetailsBody').html(data); // Populate the modal with fetched data
+                                $('#editModal').modal('show'); // Show the modal
                             },
                             error: function(xhr, status, error) {
                                 console.error("Error fetching stock-in details: ", error);
@@ -339,9 +436,22 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
                     });
                 });
 
+                <?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: 'Stock-in successfully added.',
+                        confirmButtonColor: '#3085d6',
+                        width: '300px'
+                    });
+                    if (window.history.replaceState) {
+                        window.history.replaceState(null, null, window.location.pathname);
+                    }
+                <?php endif; ?>
+
                 // Event listener for the "Add Item" button in the Edit Modal
                 document.getElementById('addItemEdit').addEventListener('click', function() {
-                    const itemFields = document.getElementById('editItemFields');
+                    const itemFields = document.getElementById('editItemFields'); // Ensure this ID is correct
 
                     const newItemRow = document.createElement('div');
                     newItemRow.classList.add('form-row', 'item-row', 'mb-3');
@@ -371,75 +481,8 @@ $result = mysqli_query($conn, $query) or die(mysqli_error($conn));
                     itemFields.appendChild(newItemRow);
 
                     newItemRow.querySelector('.removeItem').addEventListener('click', function() {
-                        itemFields.removeChild(newItemRow); 
+                        itemFields.removeChild(newItemRow); // Remove the item row
                     });
                 });
             });
-
         </script>
-
-
-        <div class="container-fluid">
-
-            <!-- Table Card -->
-            <div class="card shadow mb-4">
-                <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                    <h6 class="m-0 font-weight-bold text-primary">Stock-in </h6>
-                    <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#GMCaddStockin">
-                        <i class="fas fa-plus fa-sm text-white-50"></i> Add Stock-in
-                    </button>
-                </div>
-                <div class="card-body">
-                    <div class="table">
-                        <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th>Control #</th>
-                                    <th>Serial Number</th>
-                                    <th>Item</th>
-                                    <th>Category</th>
-                                    <th>Qty</th>
-                                    <th>Date Received</th>
-                                    <th class="text-center">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php while ($row = mysqli_fetch_assoc($result)): ?>
-                                    <tr>
-                                        <td><?php echo $row['controlNO']; ?></td>
-                                        <td><?php echo $row['serialNO']; ?></td>
-                                        <td><?php echo $row['item']; ?></td>
-                                        <td><?php echo $row['category']; ?></td>
-                                        <td><?php echo $row['orig_qty']; ?></td>
-                                        <td><?php echo $row['dr']; ?></td>
-                                        <td class="text-center">
-                                            <?php if ($row['is_posted'] == 0): ?>
-                                                <button type="button" data-bs-toggle="modal" data-bs-target="#GMCeditStockin" class="btn btn-sm btn-success editStockinBtn" title="Edit">
-                                                    <i class="fa-solid fa-edit"></i>
-                                                </button>
-                                            <?php endif; ?>
-
-                                            <button type="button" data-toggle="modal" data-target="#viewModal" class="btn btn-sm btn-warning view-btn" title="View" data-controlno="<?php echo htmlspecialchars($row['controlNO']); ?>">
-                                                <i class="fa-solid fa-eye text-white"></i>
-                                            </button>
-
-                                            <?php if ($row['is_posted'] == 0): ?>
-                                                <button type="button" class="btn btn-sm btn-info postStockBtn" title="Post Stock" data-stockin-id="<?php echo $row['stockin_id']; ?>">
-                                                    <i class="fas fa-square-check"></i>
-                                                </button>
-                                            <?php endif; ?>
-                                        </td>
-                                    </tr>
-                                <?php endwhile; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-        <?php
-        include("../includes/scripts.php");
-        include("../includes/footer.php");
-        ?>
