@@ -56,15 +56,33 @@ if (isset($_SESSION['auth']) && $_SESSION['auth'] == true) {
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fas fa-bell fa-fw"></i>
                                 <!-- Counter - Alerts -->
-                                <span class="badge badge-danger badge-counter" id="notificationCount">0</span>
+                                <span class="badge badge-danger badge-counter" id="notificationCount"></span>
                             </a>
                             <!-- Dropdown - Alerts -->
                             <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                                aria-labelledby="alertsDropdown" id="notificationList">
-                                <h6 class="dropdown-header">
-                                    Alerts Center
+                                aria-labelledby="alertsDropdown">
+                                <h6 class="dropdown-header" style="background-color: #4CAF50; color: white; font-weight: bold; padding: 10px; border-radius: 5px 5px 0 0;">
+                                    NOTIFICATION
                                 </h6>
-                                <!-- Notifications will be dynamically added here -->
+                                <?php if (!empty($notifications)): ?>
+                                    <?php foreach ($notifications as $notification): ?>
+                                        <a class="dropdown-item d-flex align-items-center" href="issuance.php?req_id=<?php echo $notification['req_id']; ?>&highlight=1">
+                                            <div class="mr-3">
+                                                <div class="icon-circle bg-info">
+                                                    <i class="fas fa-bell text-white"></i>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="small text-gray-500"><?php echo htmlspecialchars(date("F j, Y", strtotime($notification['date']))); ?></div>
+                                                <span class="<?php echo $notification['is_read'] ? 'text-gray-600' : 'font-weight-bold'; ?>">
+                                                    <?php echo htmlspecialchars($notification['fullname']); ?> requested!
+                                                </span>
+                                            </div>
+                                        </a>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <a class="dropdown-item text-center small text-gray-500" href="#">No new notification</a>
+                                <?php endif; ?>
                             </div>
                         </li>
 
@@ -78,25 +96,10 @@ if (isset($_SESSION['auth']) && $_SESSION['auth'] == true) {
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="mr-2 d-none d-lg-inline text-gray-600 small"><?php echo htmlspecialchars($user_name); ?></span>
-                                <img class="img-profile rounded-circle"
-                                    src="img/undraw_profile.svg">
                             </a>
                             <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Profile
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Settings
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Activity Log
-                                </a>
-                                <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Logout
@@ -109,40 +112,3 @@ if (isset($_SESSION['auth']) && $_SESSION['auth'] == true) {
                 </nav>
                 <!-- End of Topbar -->
 
-<script>
-    // Function to update notifications
-    function updateNotifications() {
-        $.ajax({
-            url: 'fetch_notifications.php', // Endpoint to fetch notifications
-            type: 'GET',
-            dataType: 'json',
-            success: function(data) {
-                $('#notificationCount').text(data.count); // Update notification count
-                $('#notificationList').empty(); // Clear existing notifications
-                data.notifications.forEach(function(notification) {
-                    $('#notificationList').append(`
-                        <a class="dropdown-item d-flex align-items-center" href="#">
-                            <div class="mr-3">
-                                <div class="icon-circle ${notification.type === 'approved' ? 'bg-success' : 'bg-danger'}">
-                                    <i class="fas fa-${notification.type === 'approved' ? 'check' : 'times'} text-white"></i>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="small text-gray-500">${notification.date}</div>
-                                <span class="font-weight-bold">${notification.message}</span>
-                            </div>
-                        </a>
-                    `);
-                });
-            },
-            error: function(xhr, status, error) {
-                console.error("Error fetching notifications: ", error);
-            }
-        });
-    }
-
-    // Call updateNotifications on page load
-    $(document).ready(function() {
-        updateNotifications();
-    });
-</script>
