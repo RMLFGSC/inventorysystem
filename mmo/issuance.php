@@ -556,9 +556,8 @@ $highlighted_req_id = isset($_GET['req_id']) ? $_GET['req_id'] : null;
                                     timer: 1500,
                                     showConfirmButton: false
                                 }).then(() => {
-                                    // Remove the highlighted row
-                                    $('tr.table-warning').remove(); // Remove the row with the highlight
-                                            location.reload();
+                                    // Redirect to the same page without highlight
+                                    window.location.href = 'issuance.php';
                                 });
                             },
                             error: function(xhr, status, error) {
@@ -629,9 +628,8 @@ $highlighted_req_id = isset($_GET['req_id']) ? $_GET['req_id'] : null;
                                             timer: 1500,
                                             showConfirmButton: false
                                         }).then(() => {
-                                            // Remove the highlighted row
-                                            $('tr.table-warning').remove(); // Remove the row with the highlight
-                                            location.reload();
+                                            // Redirect to the same page without highlight
+                                            window.location.href = 'issuance.php';
                                         });
                                     },
                                     error: function(xhr, status, error) {
