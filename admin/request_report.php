@@ -33,6 +33,12 @@ $result = mysqli_query($conn, $query);
             <!-- Page Heading -->
             <div class="d-sm-flex align-items-center justify-content-between mb-4">
                 <h1 class="h3 mb-0 text-gray-800">Request Report</h1>
+                <button type="button" class="btn btn-sm btn-primary btn-icon-split" data-toggle="modal" data-target="#GMCaddRequest">
+                    <span class="icon text-white-50">
+                        <i class="fas fa-download fa-sm text-white-50"></i>
+                    </span>
+                    <span class="text">Export Report</span>
+                </button>
             </div>
 
             <!-- DataTales Example -->

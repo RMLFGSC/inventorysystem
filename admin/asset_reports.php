@@ -20,7 +20,7 @@ $result = mysqli_query($conn, $query);
                     <span class="icon text-white-50">
                         <i class="fas fa-download fa-sm text-white-50"></i>
                     </span>
-                    <span class="text">Generate Report</span>
+                    <span class="text">Export Report</span>
                 </button>
             </div>
 

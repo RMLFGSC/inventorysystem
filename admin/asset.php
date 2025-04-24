@@ -122,7 +122,7 @@ $result = mysqli_query($conn, $query);
                     <form id="addItemForm">
                         <div class="modal-body">
                             <div class="form-row">
-                                <div class="form-group col-md-8">
+                                <div class="form-group col-md-12">
                                     <label for="item">Item</label>
                                     <select name="item" class="form-control" required>
                                         <option value="" disabled selected>Select Item</option>
@@ -135,10 +135,7 @@ $result = mysqli_query($conn, $query);
                                         ?>
                                     </select>
                                 </div>
-                                <div class="form-group col-md-4">
-                                    <label for="qty">Quantity</label>
-                                    <input type="number" name="qty" class="form-control" placeholder="Qty" required>
-                                </div>
+
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -152,7 +149,7 @@ $result = mysqli_query($conn, $query);
 
         <!-- Add Fixed Asset Modal -->
         <div class="modal fade" id="GMCAssign" tabindex="-1" role="dialog" aria-labelledby="GMCAssignLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="GMCAssignLabel">Add Fixed Asset</h5>
@@ -176,7 +173,7 @@ $result = mysqli_query($conn, $query);
                                 <div class="card-body">
                                     <div id="fixedAssetFields">
                                         <div class="form-row item-row mb-3">
-                                            <div class="form-group col-md-8 col-12">
+                                            <div class="form-group col-md-12">
                                                 <label for="item">Item</label>
                                                 <select name="item[]" class="form-control" required>
                                                     <option value="" disabled selected>Select Item</option>
@@ -188,10 +185,6 @@ $result = mysqli_query($conn, $query);
                                                     }
                                                     ?>
                                                 </select>
-                                            </div>
-                                            <div class="form-group col-md-4 col-12">
-                                                <label for="qty">Quantity</label>
-                                                <input type="number" name="qty[]" class="form-control" placeholder="Qty" required>
                                             </div>
                                         </div>
                                     </div>
@@ -251,10 +244,11 @@ $result = mysqli_query($conn, $query);
             newRow.classList.add('form-row', 'item-row', 'mb-3');
 
             newRow.innerHTML = `
-                <div class="form-group col-md-8 col-12">
-                    <label for="item">Item</label>
-                    <select name="item[]" class="form-control" required>
-                        <option value="" disabled selected>Select Item</option>
+              <div class="form-group col-12"> 
+                    <label for="item" class="mr-2">Item</label> 
+                    <div class="d-flex align-items-center"> 
+                        <select name="item[]" class="form-control flex-grow-1" required> 
+                            <option value="" disabled selected>Select Item</option>
                             <?php
                             $query = "SELECT item, serialNO FROM stock_in WHERE qty > 0 AND category IN ('IT Fixed Asset', 'Engineering Fixed Asset') GROUP BY item, serialNO";
                             $result = $conn->query($query);
@@ -262,15 +256,10 @@ $result = mysqli_query($conn, $query);
                                 echo "<option value='" . $row['serialNO'] . "'>" . $row['item'] . " - " . $row['serialNO'] . "</option>";
                             }
                             ?>
-                    </select>
+                        </select>
+                        <button type="button" class="btn btn-danger btn-sm removeItem ml-2">X</button> <!-- Added margin to the left -->
+                    </div>
                 </div>
-                    <div class="form-group col-md-4 col-12">
-                        <label for="qty">Quantity</label>
-                        <input type="number" class="form-control" name="qty[]" placeholder="Qty" required>
-                    </div>
-                    <div class="form-group col-md-2 col-12 d-flex align-items-end">
-                        <button type="button" class="btn btn-danger btn-sm removeItem">X</button>
-                    </div>
             `;
 
             container.appendChild(newRow);
