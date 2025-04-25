@@ -6,6 +6,7 @@ include("../includes/navbar_admin.php");
 $query = "
     SELECT fa.owner AS assigned_name, fa.location, COUNT(*) AS total_items
     FROM fixed_assets fa
+    WHERE fa.owner != 'N/A'
     GROUP BY fa.owner, fa.location
 ";
 
@@ -88,7 +89,7 @@ $result = mysqli_query($conn, $query);
                     <div class="modal-body">
                         <!-- Add Stock-in Button -->
                         <div class="d-flex justify-content-end mb-3">
-                            <button type="button" class="btn btn-primary btn-sm btn-icon-split" data-toggle="modal" data-target="#addItemModal">
+                            <button type="button" class="btn btn-primary btn-sm btn-icon-split" data-toggle="modal" data-target="#GMCaddStockin">
                                 <span class="icon text-white-50">
                                     <i class="fas fa-plus fa-sm text-white-50"></i>
                                 </span>
@@ -101,6 +102,7 @@ $result = mysqli_query($conn, $query);
                             <!-- AJAX content -->
                         </div>
                     </div>
+
                     <div class="modal-footer">
                         <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
                     </div>
@@ -109,47 +111,9 @@ $result = mysqli_query($conn, $query);
             </div>
         </div>
 
-        <!-- Add Item Modal -->
-        <div class="modal fade" id="addItemModal" tabindex="-1" role="dialog" aria-labelledby="addItemModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="addItemModalLabel">Add Item to Fixed Asset</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <form id="addItemForm">
-                        <div class="modal-body">
-                            <div class="form-row">
-                                <div class="form-group col-md-12">
-                                    <label for="item">Item</label>
-                                    <select name="item" class="form-control" required>
-                                        <option value="" disabled selected>Select Item</option>
-                                        <?php
-                                        $query = "SELECT item, serialNO FROM stock_in WHERE qty > 0 AND category IN ('IT Fixed Asset', 'Engineering Fixed Asset') GROUP BY item, serialNO";
-                                        $result = $conn->query($query);
-                                        while ($row = $result->fetch_assoc()) {
-                                            echo "<option value='" . $row['serialNO'] . "'>" . $row['item'] . " - " . $row['serialNO'] . "</option>";
-                                        }
-                                        ?>
-                                    </select>
-                                </div>
-
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-sm btn-primary" id="submitAddItemBtn">Add Item</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
         <!-- Add Fixed Asset Modal -->
         <div class="modal fade" id="GMCAssign" tabindex="-1" role="dialog" aria-labelledby="GMCAssignLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="GMCAssignLabel">Add Fixed Asset</h5>
@@ -173,18 +137,28 @@ $result = mysqli_query($conn, $query);
                                 <div class="card-body">
                                     <div id="fixedAssetFields">
                                         <div class="form-row item-row mb-3">
-                                            <div class="form-group col-md-12">
+                                            <div class="form-group col-md-8 col-12">
                                                 <label for="item">Item</label>
                                                 <select name="item[]" class="form-control" required>
                                                     <option value="" disabled selected>Select Item</option>
                                                     <?php
-                                                    $query = "SELECT item, serialNO FROM stock_in WHERE qty > 0 AND category IN ('IT Fixed Asset', 'Engineering Fixed Asset') GROUP BY item, serialNO";
+                                                    $query = " SELECT item, serialNO FROM stock_in 
+                                                                WHERE qty > 0 AND category IN ('IT Fixed Asset', 'Engineering Fixed Asset')
+                                                                GROUP BY item, serialNO
+                                                                UNION
+                                                                SELECT stockin_item AS item, serial_number AS serialNO FROM fixed_assets 
+                                                                WHERE status = 'unassigned'
+                                                                GROUP BY item, serialNO";
                                                     $result = $conn->query($query);
                                                     while ($row = $result->fetch_assoc()) {
                                                         echo "<option value='" . $row['serialNO'] . "'>" . $row['item'] . " - " . $row['serialNO'] . "</option>";
                                                     }
                                                     ?>
                                                 </select>
+                                            </div>
+                                            <div class="form-group col-md-4 col-12">
+                                                <label for="qty">Quantity</label>
+                                                <input type="number" name="qty[]" class="form-control" placeholder="Qty" required>
                                             </div>
                                         </div>
                                     </div>
@@ -244,11 +218,10 @@ $result = mysqli_query($conn, $query);
             newRow.classList.add('form-row', 'item-row', 'mb-3');
 
             newRow.innerHTML = `
-              <div class="form-group col-12"> 
-                    <label for="item" class="mr-2">Item</label> 
-                    <div class="d-flex align-items-center"> 
-                        <select name="item[]" class="form-control flex-grow-1" required> 
-                            <option value="" disabled selected>Select Item</option>
+                <div class="form-group col-md-8 col-12">
+                    <label for="item">Item</label>
+                    <select name="item[]" class="form-control" required>
+                        <option value="" disabled selected>Select Item</option>
                             <?php
                             $query = "SELECT item, serialNO FROM stock_in WHERE qty > 0 AND category IN ('IT Fixed Asset', 'Engineering Fixed Asset') GROUP BY item, serialNO";
                             $result = $conn->query($query);
@@ -256,10 +229,15 @@ $result = mysqli_query($conn, $query);
                                 echo "<option value='" . $row['serialNO'] . "'>" . $row['item'] . " - " . $row['serialNO'] . "</option>";
                             }
                             ?>
-                        </select>
-                        <button type="button" class="btn btn-danger btn-sm removeItem ml-2">X</button> <!-- Added margin to the left -->
-                    </div>
+                    </select>
                 </div>
+                    <div class="form-group col-md-4 col-12">
+                        <label for="qty">Quantity</label>
+                        <input type="number" class="form-control" name="qty[]" placeholder="Qty" required>
+                    </div>
+                    <div class="form-group col-md-2 col-12 d-flex align-items-end">
+                        <button type="button" class="btn btn-danger btn-sm removeItem">X</button>
+                    </div>
             `;
 
             container.appendChild(newRow);
@@ -321,6 +299,65 @@ $result = mysqli_query($conn, $query);
             },
             error: function() {
                 $('#assetDetailsContent').html('<p class="text-danger">Error loading data.</p>');
+            }
+        });
+    });
+
+    $(document).on('click', '.removeAssetBtn', function(e) {
+        e.preventDefault();
+
+        const serial = $(this).data('serial');
+        const owner = $(this).data('owner');
+        const location = $(this).data('location');
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This item will be removed from the user's asset list.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, remove it!',
+            cancelButtonText: 'Cancel',
+            width: '300px'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: 'reassign_asset',
+                    type: 'POST',
+                    data: {
+                        serial: serial,
+                        owner: owner,
+                        location: location
+                    },
+                    success: function(response) {
+                        Swal.fire(
+                            'Removed!',
+                            response,
+                            'success'
+                        );
+
+                        // Refresh modal contents
+                        $.ajax({
+                            url: 'fetch_asset_details',
+                            type: 'POST',
+                            data: {
+                                owner: owner,
+                                location: location
+                            },
+                            success: function(data) {
+                                $('#assetDetailsContent').html(data);
+                            }
+                        });
+                    },
+                    error: function() {
+                        Swal.fire(
+                            'Error!',
+                            'There was a problem removing the item.',
+                            'error'
+                        );
+                    }
+                });
             }
         });
     });
