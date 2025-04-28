@@ -15,7 +15,7 @@ include("../includes/navbar_eng.php");
 
         <!-- topbar -->
         <?php
-        include("../includes/topbar.php");
+        include("../includes/topbar_eng.php");
         ?>
 
 
@@ -152,14 +152,14 @@ include("../includes/navbar_eng.php");
                         ?>
                     ],
                     backgroundColor: [
-                        'rgba(255, 206, 86, 0.2)',
-                        'rgba(75, 192, 192, 0.2)',
-                        'rgba(255, 99, 132, 0.2)'
+                        'rgba(0, 123, 255, 1)', // Solid blue
+                        'rgba(40, 167, 69, 1)', // Solid green
+                        'rgba(255, 193, 7, 1)'  // Solid yellow
                     ],
                     borderColor: [
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(255, 99, 132, 1)'
+                        'rgba(0, 123, 255, 1)', // Solid blue
+                        'rgba(40, 167, 69, 1)', // Solid green
+                        'rgba(255, 193, 7, 1)'  // Solid yellow
                     ],
                     borderWidth: 1
                 }]
@@ -167,7 +167,16 @@ include("../includes/navbar_eng.php");
             options: {
                 scales: {
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            min: 1
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false // Disable the legend
                     }
                 }
             }
