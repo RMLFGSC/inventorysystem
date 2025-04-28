@@ -6,7 +6,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $status = $_POST['status'];
     $date_issued = $_POST['date_issued'];
     $issued_by = $_POST['issued_by'];
-    $items = $_POST['items'];
+    // $items = $_POST['items']; // Removed items as it's no longer needed
 
     // 1. Update request table
     $updateQuery = "UPDATE request SET status = ?, date_issued = ?, issued_by = ? WHERE req_number = ?";
@@ -18,37 +18,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // 2. Deduct stock for each item
-    foreach ($items as $item) {
-        $itemId = $item['id'];
-        $quantity = (int)$item['qty'];
-
-        // Optional: Check current stock (recommended for validation)
-        $checkStock = $conn->prepare("SELECT qty FROM stock_in WHERE stockin_id = ?");
-        $checkStock->bind_param("i", $itemId);
-        $checkStock->execute();
-        $checkStock->bind_result($currentQty);
-        $checkStock->fetch();
-        $checkStock->close();
-
-        if ($currentQty < $quantity) {
-            echo json_encode(['success' => false, 'message' => "Insufficient stock for item ID $itemId."]);
-            exit;
-        }
-
-        // Deduct from correct column: qty
-        $deductQuery = "UPDATE stock_in SET qty = qty - ? WHERE stockin_id = ?";
-        $deductStmt = $conn->prepare($deductQuery);
-        $deductStmt->bind_param("ii", $quantity, $itemId);
-
-        if (!$deductStmt->execute()) {
-            echo json_encode(['success' => false, 'message' => "Failed to deduct stock for item ID $itemId."]);
-            exit;
-        }
-    }
-
     // 3. Success response
-    echo json_encode(['success' => true, 'message' => 'Request approved and stock deducted successfully.']);
+    echo json_encode(['success' => true, 'message' => 'Request approved successfully.']);
 } else {
     echo json_encode(['success' => false, 'message' => 'Invalid request method.']);
 }

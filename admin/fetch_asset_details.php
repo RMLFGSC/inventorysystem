@@ -27,7 +27,14 @@ if (isset($_POST['owner']) && isset($_POST['location'])) {
         echo "<td class = text-center>" . htmlspecialchars($row['qty']) . "</td>";
         echo "<td>" . htmlspecialchars($row['stockin_item']) . "</td>";
         echo "<td>" . htmlspecialchars($row['serial_number']) . "</td>";
-        echo "<td class='text-center'><a href='#' class='text-danger'><i class='fas fa-times-circle'></i></a></td>";
+        echo "<td class='text-center'>
+        <a href='#' class='text-danger removeAssetBtn' 
+           data-serial='" . htmlspecialchars($row['serial_number']) . "'
+           data-owner='" . htmlspecialchars($owner) . "'
+           data-location='" . htmlspecialchars($location) . "'>
+           <i class='fas fa-times-circle'></i>
+        </a>
+      </td>";
         echo "</tr>";
     }
     echo "</tbody>";

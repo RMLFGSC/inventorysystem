@@ -271,6 +271,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                                     <?php
                                     $rowspan = count($rows);
                                     $controlNoDisplayed = false;
+                                    $actionDisplayed = false;
 
                                     // Group by item + category + dr
                                     $itemGroups = [];
@@ -297,23 +298,26 @@ while ($row = mysqli_fetch_assoc($result)) {
                                         <?php foreach ($items as $index => $row): ?>
                                             <tr>
                                                 <?php if (!$controlNoDisplayed): ?>
-                                                    <td rowspan="<?= $rowspan; ?>"><?php echo $row['controlNO']; ?></td>
+                                                    <td rowspan="<?= $rowspan; ?>" style="vertical-align: middle;"><?php echo $row['controlNO']; ?></td>
                                                     <?php $controlNoDisplayed = true; ?>
                                                 <?php endif; ?>
 
                                                 <?php if ($allSerialsNA): ?>
                                                     <?php if ($index === 0): ?>
-                                                        <td rowspan="<?= $itemRowspan; ?>">N/A</td>
+                                                        <td rowspan="<?= $itemRowspan; ?>" style="vertical-align: middle;">N/A</td>
                                                     <?php endif; ?>
                                                 <?php else: ?>
-                                                    <td><?php echo $row['serialNO']; ?></td>
+                                                    <td style="vertical-align: middle;"><?php echo $row['serialNO']; ?></td>
                                                 <?php endif; ?>
 
                                                 <?php if ($index === 0): ?>
-                                                    <td rowspan="<?= $itemRowspan; ?>"><?php echo $row['item']; ?></td>
-                                                    <td rowspan="<?= $itemRowspan; ?>"><?php echo $row['category']; ?></td>
-                                                    <td rowspan="<?= $itemRowspan; ?>"><?php echo $row['dr']; ?></td>
-                                                    <td rowspan="<?= $itemRowspan; ?>" class="text-center">
+                                                    <td rowspan="<?= $itemRowspan; ?>" style="vertical-align: middle;"><?php echo $row['item']; ?></td>
+                                                    <td rowspan="<?= $itemRowspan; ?>" style="vertical-align: middle;"><?php echo $row['category']; ?></td>
+                                                    <td rowspan="<?= $itemRowspan; ?>" style="vertical-align: middle;"><?php echo $row['dr']; ?></td>
+                                                <?php endif; ?>
+
+                                                <?php if (!$actionDisplayed): ?>
+                                                    <td rowspan="<?= $rowspan; ?>" class="text-center" style="vertical-align: middle;">
                                                         <?php if ($row['is_posted'] == 0): ?>
                                                             <button type="button" data-bs-toggle="modal" data-bs-target="#GMCeditStockin" class="btn btn-sm btn-success editStockinBtn" title="Edit">
                                                                 <i class="fa-solid fa-edit"></i>
@@ -328,14 +332,14 @@ while ($row = mysqli_fetch_assoc($result)) {
                                                             <button class="btn btn-sm btn-info postStockBtn" data-stockin-id="<?php echo $row['stockin_id']; ?>"><i class="fas fa-square-check"></i></button>
                                                         <?php endif; ?>
                                                     </td>
+                                                    <?php $actionDisplayed = true; ?>
                                                 <?php endif; ?>
                                             </tr>
                                         <?php endforeach; ?>
                                     <?php endforeach; ?>
                                 <?php endforeach; ?>
-
-
                             </tbody>
+
 
                         </table>
                     </div>
