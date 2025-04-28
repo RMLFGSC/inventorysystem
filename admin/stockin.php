@@ -267,78 +267,78 @@ while ($row = mysqli_fetch_assoc($result)) {
                                 </tr>
                             </thead>
                             <tbody>
-    <?php foreach ($groupedData as $controlNO => $rows): ?>
-        <?php
-        $rowspan = count($rows);
-        $controlNoDisplayed = false;
-        $actionDisplayed = false;
+                                <?php foreach ($groupedData as $controlNO => $rows): ?>
+                                    <?php
+                                    $rowspan = count($rows);
+                                    $controlNoDisplayed = false;
+                                    $actionDisplayed = false;
 
-        // Group by item + category + dr
-        $itemGroups = [];
-        foreach ($rows as $row) {
-            $key = $row['item'] . '_' . $row['category'] . '_' . $row['dr'];
-            $itemGroups[$key][] = $row;
-        }
-        ?>
+                                    // Group by item + category + dr
+                                    $itemGroups = [];
+                                    foreach ($rows as $row) {
+                                        $key = $row['item'] . '_' . $row['category'] . '_' . $row['dr'];
+                                        $itemGroups[$key][] = $row;
+                                    }
+                                    ?>
 
-        <?php foreach ($itemGroups as $itemKey => $items): ?>
-            <?php
-            $itemRowspan = count($items);
+                                    <?php foreach ($itemGroups as $itemKey => $items): ?>
+                                        <?php
+                                        $itemRowspan = count($items);
 
-            // Check if all serial numbers are "N/A"
-            $allSerialsNA = true;
-            foreach ($items as $s) {
-                if (strtoupper(trim($s['serialNO'])) !== 'N/A') {
-                    $allSerialsNA = false;
-                    break;
-                }
-            }
-            ?>
+                                        // Check if all serial numbers are "N/A"
+                                        $allSerialsNA = true;
+                                        foreach ($items as $s) {
+                                            if (strtoupper(trim($s['serialNO'])) !== 'N/A') {
+                                                $allSerialsNA = false;
+                                                break;
+                                            }
+                                        }
+                                        ?>
 
-            <?php foreach ($items as $index => $row): ?>
-                <tr>
-                    <?php if (!$controlNoDisplayed): ?>
-                        <td rowspan="<?= $rowspan; ?>" style="vertical-align: middle;"><?php echo $row['controlNO']; ?></td>
-                        <?php $controlNoDisplayed = true; ?>
-                    <?php endif; ?>
+                                        <?php foreach ($items as $index => $row): ?>
+                                            <tr>
+                                                <?php if (!$controlNoDisplayed): ?>
+                                                    <td rowspan="<?= $rowspan; ?>" style="vertical-align: middle;"><?php echo $row['controlNO']; ?></td>
+                                                    <?php $controlNoDisplayed = true; ?>
+                                                <?php endif; ?>
 
-                    <?php if ($allSerialsNA): ?>
-                        <?php if ($index === 0): ?>
-                            <td rowspan="<?= $itemRowspan; ?>" style="vertical-align: middle;">N/A</td>
-                        <?php endif; ?>
-                    <?php else: ?>
-                        <td style="vertical-align: middle;"><?php echo $row['serialNO']; ?></td>
-                    <?php endif; ?>
+                                                <?php if ($allSerialsNA): ?>
+                                                    <?php if ($index === 0): ?>
+                                                        <td rowspan="<?= $itemRowspan; ?>" style="vertical-align: middle;">N/A</td>
+                                                    <?php endif; ?>
+                                                <?php else: ?>
+                                                    <td style="vertical-align: middle;"><?php echo $row['serialNO']; ?></td>
+                                                <?php endif; ?>
 
-                    <?php if ($index === 0): ?>
-                        <td rowspan="<?= $itemRowspan; ?>" style="vertical-align: middle;"><?php echo $row['item']; ?></td>
-                        <td rowspan="<?= $itemRowspan; ?>" style="vertical-align: middle;"><?php echo $row['category']; ?></td>
-                        <td rowspan="<?= $itemRowspan; ?>" style="vertical-align: middle;"><?php echo $row['dr']; ?></td>
-                    <?php endif; ?>
+                                                <?php if ($index === 0): ?>
+                                                    <td rowspan="<?= $itemRowspan; ?>" style="vertical-align: middle;"><?php echo $row['item']; ?></td>
+                                                    <td rowspan="<?= $itemRowspan; ?>" style="vertical-align: middle;"><?php echo $row['category']; ?></td>
+                                                    <td rowspan="<?= $itemRowspan; ?>" style="vertical-align: middle;"><?php echo $row['dr']; ?></td>
+                                                <?php endif; ?>
 
-                    <?php if (!$actionDisplayed): ?>
-                        <td rowspan="<?= $rowspan; ?>" class="text-center" style="vertical-align: middle;">
-                            <?php if ($row['is_posted'] == 0): ?>
-                                <button type="button" data-bs-toggle="modal" data-bs-target="#GMCeditStockin" class="btn btn-sm btn-success editStockinBtn" title="Edit">
-                                    <i class="fa-solid fa-edit"></i>
-                                </button>
-                            <?php endif; ?>
+                                                <?php if (!$actionDisplayed): ?>
+                                                    <td rowspan="<?= $rowspan; ?>" class="text-center" style="vertical-align: middle;">
+                                                        <?php if ($row['is_posted'] == 0): ?>
+                                                            <button type="button" data-bs-toggle="modal" data-bs-target="#GMCeditStockin" class="btn btn-sm btn-success editStockinBtn" title="Edit">
+                                                                <i class="fa-solid fa-edit"></i>
+                                                            </button>
+                                                        <?php endif; ?>
 
-                            <button type="button" data-toggle="modal" data-target="#viewModal" class="btn btn-sm btn-warning view-btn" title="View" data-controlno="<?php echo htmlspecialchars($row['controlNO']); ?>">
-                                <i class="fa-solid fa-eye text-white"></i>
-                            </button>
+                                                        <button type="button" data-toggle="modal" data-target="#viewModal" class="btn btn-sm btn-warning view-btn" title="View" data-controlno="<?php echo htmlspecialchars($row['controlNO']); ?>">
+                                                            <i class="fa-solid fa-eye text-white"></i>
+                                                        </button>
 
-                            <?php if ($row['is_posted'] == 0): ?>
-                                <button class="btn btn-sm btn-info postStockBtn" data-stockin-id="<?php echo $row['stockin_id']; ?>"><i class="fas fa-square-check"></i></button>
-                            <?php endif; ?>
-                        </td>
-                        <?php $actionDisplayed = true; ?>
-                    <?php endif; ?>
-                </tr>
-            <?php endforeach; ?>
-        <?php endforeach; ?>
-    <?php endforeach; ?>
-</tbody>
+                                                        <?php if ($row['is_posted'] == 0): ?>
+                                                            <button class="btn btn-sm btn-info postStockBtn" data-stockin-id="<?php echo $row['stockin_id']; ?>"><i class="fas fa-square-check"></i></button>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                    <?php $actionDisplayed = true; ?>
+                                                <?php endif; ?>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php endforeach; ?>
+                                <?php endforeach; ?>
+                            </tbody>
 
 
                         </table>
