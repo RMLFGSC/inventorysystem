@@ -4,10 +4,9 @@ include("../includes/navbar_admin.php");
 
 // Query
 $query = "
-    SELECT fa.owner AS assigned_name, fa.location, COUNT(*) AS total_items
+    SELECT fa.asset_id, fa.stockin_item, fa.qty, fa.owner, fa.location
     FROM fixed_assets fa
-    WHERE fa.owner != 'N/A'
-    GROUP BY fa.owner, fa.location
+    ORDER BY fa.owner, fa.stockin_item
 ";
 
 $result = mysqli_query($conn, $query);
@@ -42,23 +41,22 @@ $result = mysqli_query($conn, $query);
                         <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
                             <thead class="thead-light">
                                 <tr>
-                                    <th>User</th>
-                                    <th>Department</th>
-                                    <th>Item count</th>
+                                    <th>Item</th>
+                                    <th>Quantity</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php while ($row = mysqli_fetch_assoc($result)): ?>
                                     <tr>
-                                        <td><?php echo $row['assigned_name']; ?></td>
-                                        <td><?php echo $row['location']; ?></td>
-                                        <td><?php echo $row['total_items']; ?></td>
+                                        <td><?php echo $row['stockin_item']; ?></td>
+                                        <td><?php echo $row['qty']; ?></td>
                                         <td class="text-center">
                                             <button
                                                 type="button"
                                                 class="btn btn-warning btn-sm viewAssetBtn"
-                                                data-owner="<?php echo htmlspecialchars($row['assigned_name']); ?>"
+                                                data-id="<?php echo htmlspecialchars($row['asset_id']); ?>"
+                                                data-owner="<?php echo htmlspecialchars($row['owner']); ?>"
                                                 data-location="<?php echo htmlspecialchars($row['location']); ?>"
                                                 data-toggle="modal"
                                                 data-target="#viewModal">
@@ -76,7 +74,7 @@ $result = mysqli_query($conn, $query);
 
         <!-- View Modal -->
         <div class="modal fade" id="viewModal" tabindex="-1" role="dialog" aria-labelledby="viewModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
 
                     <div class="modal-header">
@@ -87,64 +85,15 @@ $result = mysqli_query($conn, $query);
                     </div>
 
                     <div class="modal-body">
-                        <!-- Add item in view modal Button -->
-                        <div class="d-flex justify-content-end mb-3">
-                            <button type="button" class="btn btn-primary btn-sm btn-icon-split" data-toggle="modal" data-target="#GMCaddItem" data-owner="<?php echo htmlspecialchars($row['assigned_name']); ?>" data-location="<?php echo htmlspecialchars($row['location']); ?>">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-plus fa-sm text-white-50"></i>
-                                </span>
-                                <span class="text">Add Item</span>
-                            </button>
-                        </div>
 
-                        <!-- Add Item Modal -->
-                        <div class="modal fade" id="GMCaddItem" tabindex="-1" role="dialog" aria-labelledby="GMCaddItemLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="GMCaddItemLabel">Add Item</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <form id="addStockinForm">
-                                        <div class="modal-body">
-                                            <div class="form-row">
-                                                <div class="form-group col-md-8">
-                                                    <label for="item">Item</label>
-                                                    <select name="item" class="form-control" required>
-                                                        <option value="" disabled selected>Select Item</option>
-                                                        <?php
-                                                        // Fetch items from the database with specific categories and qty > 0
-                                                        $query = "
-                                                            SELECT item, serialNO 
-                                                            FROM stock_in 
-                                                            WHERE qty > 0 
-                                                            AND category IN ('IT Fixed Asset', 'Engineering Fixed Asset') 
-                                                            GROUP BY item, serialNO
-                                                        ";
-                                                        $result = $conn->query($query);
-                                                        while ($row = $result->fetch_assoc()) {
-                                                            echo "<option value='" . $row['serialNO'] . "'>" . $row['item'] . " - " . $row['serialNO'] . "</option>";
-                                                        }
-                                                        ?>
-                                                    </select>
-                                                </div>
-                                                <div class="form-group col-md-4">
-                                                    <label for="qty">Quantity</label>
-                                                    <input type="number" name="qty" class="form-control" placeholder="Qty" required>
-                                                </div>
-                                            </div>
-                                            <input type="hidden" id="ownerInput" name="owner">
-                                            <input type="hidden" id="locationInput" name="location">
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                            <button type="button" class="btn btn-primary" id="submitAddItemBtn">Add Item</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
+                        <!-- Updated button in view modal -->
+                        <div class="d-flex justify-content-end mb-3">
+                            <button type="button" class="btn btn-primary btn-sm btn-icon-split" data-toggle="modal" data-target="#GMCassignModal" data-id="<?php echo htmlspecialchars($row['asset_id']); ?>">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-user-plus fa-sm text-white-50"></i>
+                                </span>
+                                <span class="text">Assign</span>
+                            </button>
                         </div>
 
                         <!-- Dynamic content will be inserted here via AJAX -->
@@ -163,7 +112,7 @@ $result = mysqli_query($conn, $query);
 
         <!-- Add Fixed Asset Modal -->
         <div class="modal fade" id="GMCAssign" tabindex="-1" role="dialog" aria-labelledby="GMCAssignLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="GMCAssignLabel">Add Fixed Asset</h5>
@@ -179,67 +128,30 @@ $result = mysqli_query($conn, $query);
                             <!-- Error message container -->
                             <div id="assignError" class="alert alert-danger" style="display: none;"></div>
 
-                            <!-- Dynamic item + qty fields -->
-                            <div class="card">
-                                <div class="card-header text-white" style="background-color: #76a73c;">
-                                    <strong>Assign Fixed Asset</strong>
-                                </div>
-                                <div class="card-body">
-                                    <div id="fixedAssetFields">
-                                    <div class="form-row item-row mb-3">
-                                            <div class="form-group col-md-8 col-12">
-                                                <label for="item">Item</label>
-                                                <select name="item[]" class="form-control" required>
-                                                    <option value="" disabled selected>Select Item</option>
-                                                    <?php
-                                                    $query = " SELECT item, serialNO FROM stock_in 
-                                                                WHERE qty > 0 AND category IN ('IT Fixed Asset', 'Engineering Fixed Asset')
-                                                                GROUP BY item, serialNO
-                                                                UNION
-                                                                SELECT stockin_item AS item, serial_number AS serialNO FROM fixed_assets 
-                                                                WHERE status = 'unassigned'
-                                                                GROUP BY item, serialNO";
-                                                    $result = $conn->query($query);
-                                                    while ($row = $result->fetch_assoc()) {
-                                                        echo "<option value='" . $row['serialNO'] . "'>" . $row['item'] . " - " . $row['serialNO'] . "</option>";
-                                                    }
-                                                    ?>
-                                                </select>
-                                            </div>
-                                            <div class="form-group col-md-4 col-12">
-                                                <label for="qty">Quantity</label>
-                                                <div class="d-flex align-items-end">
-                                                    <input type="number" class="form-control" name="qty[]" placeholder="Qty" required>
-                                                </div>
-                                            </div>
+                            <div id="fixedAssetFields">
+                                <div class="form-row item-row mb-3">
+                                    <div class="form-group col-md-8 col-12">
+                                        <label for="item">Item</label>
+                                        <input type="text" name="item[]" class="form-control" placeholder="Enter item name" required>
+                                    </div>
+                                    <div class="form-group col-md-4 col-12">
+                                        <label for="qty">Quantity</label>
+                                        <div class="d-flex align-items-end">
+                                            <input type="number" class="form-control" name="qty[]" placeholder="Qty" required>
                                         </div>
                                     </div>
-
-                                    <div class="mt-3 text-center">
-                                        <button type="button" class="btn btn-sm btn-secondary" id="addFixedAssetItem">Add Item</button>
-                                    </div>
                                 </div>
                             </div>
 
-                            <hr>
-
-                            <!-- User and Location Fields -->
-                            <div class="form-group">
-                                <label for="user">User</label>
-                                <input type="text" class="form-control" name="user" placeholder="Enter user" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="location">Location</label>
-                                <input type="text" class="form-control" name="location" placeholder="Enter location" required>
+                            <div class="mt-3 text-center">
+                                <button type="button" class="btn btn-sm btn-secondary" id="addFixedAssetItem">Add Item</button>
                             </div>
 
                         </div>
 
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            <!-- Change to button type -->
-                            <button type="button" class="btn btn-primary" id="submitAssignBtn">Save</button>
+                            <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-sm btn-primary" id="submitAssignBtn">Save</button>
                         </div>
                     </form>
                 </div>
@@ -272,18 +184,7 @@ $result = mysqli_query($conn, $query);
             newRow.innerHTML = `
                 <div class="form-group col-md-8 col-12">
                     <label for="item">Item</label>
-                    <select name="item[]" class="form-control" required>
-                        <option value="" disabled selected>Select Item</option>
-                        <?php
-                        $query = "SELECT item, serialNO FROM stock_in 
-                                  WHERE qty > 0 AND category IN ('IT Fixed Asset', 'Engineering Fixed Asset') 
-                                  GROUP BY item, serialNO";
-                        $result = $conn->query($query);
-                        while ($row = $result->fetch_assoc()) {
-                            echo "<option value='" . $row['serialNO'] . "'>" . $row['item'] . " - " . $row['serialNO'] . "</option>";
-                        }
-                        ?>
-                    </select>
+                    <input type="text" name="item[]" class="form-control" placeholder="Enter item name" required>
                 </div>
                 <div class="form-group col-md-4 col-12">
                     <label for="qty">Quantity</label>
@@ -305,164 +206,36 @@ $result = mysqli_query($conn, $query);
         });
     });
 
-    // Remove item row on button click
-    document.addEventListener('click', function(e) {
-        if (e.target && e.target.classList.contains('removeItem')) {
-            e.target.closest('.item-row').remove();
-        }
-    });
-
     $(document).ready(function() {
-        $('#submitAssignBtn').click(function() {
-            var formData = $('#assignForm').serialize();
-
-            $.ajax({
-                url: 'assign',
-                type: 'POST',
-                data: formData,
-                dataType: 'json',
-                success: function(response) {
-                    if (response.success) {
-                        $('#assignError').hide().text('');
-                        $('#assignForm')[0].reset();
-                        $('#GMCAssign').modal('hide');
-                        location.reload(); // refresh page if needed
-                    } else {
-                        $('#assignError').text(response.error).show();
-                    }
-                },
-                error: function(xhr, status, error) {
-                    $('#assignError').text('An unexpected error occurred.').show();
-                }
-            });
+        $('.viewAssetBtn').click(function() {
+            var assetId = $(this).data('id');
+            $('#assetIdInput').val(assetId);
         });
+
     });
-    $('.viewAssetBtn').click(function() {
+
+    $(document).on('click', '.viewAssetBtn', function() {
+        var assetId = $(this).data('id');
         var owner = $(this).data('owner');
         var location = $(this).data('location');
 
+        // Make an AJAX call to fetch asset details
         $.ajax({
             url: 'fetch_asset_details',
             type: 'POST',
             data: {
+                id: assetId,
                 owner: owner,
                 location: location
             },
-            success: function(data) {
-                $('#assetDetailsContent').html(data);
+            success: function(response) {
+                // Populate the modal with the response data
+                $('#viewModal .modal-body').html(response);
+                $('#viewModal').modal('show');
             },
             error: function() {
-                $('#assetDetailsContent').html('<p class="text-danger">Error loading data.</p>');
+                alert('Error fetching asset details.');
             }
         });
     });
-
-    $(document).on('click', '.removeAssetBtn', function(e) {
-        e.preventDefault();
-
-        const serial = $(this).data('serial');
-        const owner = $(this).data('owner');
-        const location = $(this).data('location');
-
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "This item will be removed from the user's asset list.",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, remove it!',
-            cancelButtonText: 'Cancel',
-            width: '300px'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: 'reassign_asset', // Update to your actual removal script
-                    type: 'POST',
-                    data: {
-                        serial: serial,
-                        owner: owner,
-                        location: location
-                    },
-                    dataType: 'json', // Expecting JSON response
-                    success: function(response) {
-                        if (response.success) {
-                            Swal.fire(
-                                'Removed!',
-                                response.message, // Use the custom message from the server
-                                'success'
-                            );
-
-                            // Refresh modal contents
-                            $.ajax({
-                                url: 'fetch_asset_details',
-                                type: 'POST',
-                                data: {
-                                    owner: owner,
-                                    location: location
-                                },
-                                success: function(data) {
-                                    $('#assetDetailsContent').html(data);
-                                }
-                            });
-                        } else {
-                            Swal.fire(
-                                'Error!',
-                                response.error, // Show error message if any
-                                'error'
-                            );
-                        }
-                    },
-                    error: function() {
-                        Swal.fire(
-                            'Error!',
-                            'There was a problem removing the item.',
-                            'error'
-                        );
-                    }
-                });
-            }
-        });
-    });
-
-    $('#submitAddItemBtn').click(function() {
-        var formData = $('#addStockinForm').serialize();
-        var owner = $('#viewModal').data('owner'); // Get the owner from the view modal
-        var location = $('#viewModal').data('location'); // Get the location from the view modal
-
-        // Append owner and location to the form data
-        formData += '&owner=' + encodeURIComponent(owner) + '&location=' + encodeURIComponent(location);
-
-        $.ajax({
-            url: 'add_item', // Update this URL to your server-side script
-            type: 'POST',
-            data: formData,
-            dataType: 'json',
-            success: function(response) {
-                if (response.success) {
-                    $('#GMCaddItem').modal('hide'); // Hide the add item modal
-                    // Optionally, refresh the asset details in the view modal
-                    $('.viewAssetBtn[data-owner="' + owner + '"][data-location="' + location + '"]').click();
-                } else {
-                    // Handle error
-                    alert(response.error);
-                }
-            },
-            error: function(xhr, status, error) {
-                alert('An unexpected error occurred.');
-            }
-        });
-    });
-
-    $('#GMCaddItem').on('show.bs.modal', function(event) {
-        var button = $(event.relatedTarget); // Button that triggered the modal
-        var owner = button.data('owner'); // Extract info from data-* attributes
-        var location = button.data('location'); // Extract location
-
-        // Set the owner and location in the modal
-        var modal = $(this);
-        modal.find('#ownerInput').val(owner); // Set the owner input field
-        modal.find('#locationInput').val(location); // Set the location input field
-    });
-
 </script>
