@@ -91,10 +91,8 @@ while ($row = mysqli_fetch_assoc($result)) {
                                     <label for="category">Category</label>
                                     <select class="custom-select" id="cat_id" name="category" aria-label="Default select example" required>
                                         <option value="" selected disabled>Select Category</option>
-                                        <option value="IT Equipment">IT Equipment</option>
-                                        <option value="Engineering Equipment">Engineering Equipment</option>
-                                        <option value="IT Fixed Asset">IT Fixed Asset</option>
-                                        <option value="Engineering Fixed Asset">Engineering Fixed Asset</option>
+                                        <option value="IT Supplies">IT Supplies</option>
+                                        <option value="Engineering Supplies">Engineering Supplies</option>
                                     </select>
                                 </div>
                             </div>
@@ -263,6 +261,8 @@ while ($row = mysqli_fetch_assoc($result)) {
                                     <th>Item</th>
                                     <th>Category</th>
                                     <th>Date Received</th>
+                                    <th>Date of Purchase</th>
+                                    <th>Warranty</th>
                                     <th class="text-center">Actions</th>
                                 </tr>
                             </thead>
@@ -314,6 +314,8 @@ while ($row = mysqli_fetch_assoc($result)) {
                                                     <td rowspan="<?= $itemRowspan; ?>" style="vertical-align: middle;"><?php echo $row['item']; ?></td>
                                                     <td rowspan="<?= $itemRowspan; ?>" style="vertical-align: middle;"><?php echo $row['category']; ?></td>
                                                     <td rowspan="<?= $itemRowspan; ?>" style="vertical-align: middle;"><?php echo $row['dr']; ?></td>
+                                                    <td rowspan="<?= $itemRowspan; ?>" style="vertical-align: middle;"><?php echo $row['dop']; ?></td>
+                                                    <td rowspan="<?= $itemRowspan; ?>" style="vertical-align: middle;"><?php echo $row['warranty'] ? 'Yes' : 'No'; ?></td>
                                                 <?php endif; ?>
 
                                                 <?php if (!$actionDisplayed): ?>
@@ -322,14 +324,18 @@ while ($row = mysqli_fetch_assoc($result)) {
                                                             <button type="button" data-bs-toggle="modal" data-bs-target="#GMCeditStockin" class="btn btn-sm btn-success editStockinBtn" title="Edit">
                                                                 <i class="fa-solid fa-edit"></i>
                                                             </button>
+                                                        <?php else: ?>
+                                                            <button type="button" class="btn btn-sm btn-success" disabled title="Edit" style="background-color: #a9a9a9; border-color: #a9a9a9;">
+                                                                <i class="fa-solid fa-edit"></i>
+                                                            </button>
                                                         <?php endif; ?>
-
-                                                        <button type="button" data-toggle="modal" data-target="#viewModal" class="btn btn-sm btn-warning view-btn" title="View" data-controlno="<?php echo htmlspecialchars($row['controlNO']); ?>">
-                                                            <i class="fa-solid fa-eye text-white"></i>
-                                                        </button>
 
                                                         <?php if ($row['is_posted'] == 0): ?>
                                                             <button class="btn btn-sm btn-info postStockBtn" data-stockin-id="<?php echo $row['stockin_id']; ?>"><i class="fas fa-square-check"></i></button>
+                                                        <?php else: ?>
+                                                            <button class="btn btn-sm btn-info" disabled title="Post" style="background-color: #a9a9a9; border-color: #a9a9a9;">
+                                                                <i class="fas fa-square-check"></i>
+                                                            </button>
                                                         <?php endif; ?>
                                                     </td>
                                                     <?php $actionDisplayed = true; ?>
