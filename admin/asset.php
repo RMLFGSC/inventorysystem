@@ -77,31 +77,30 @@ $result = mysqli_query($conn, $query);
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
 
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="viewModalLabel">Fixed Asset Details</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span>&times;</span>
+                    <!-- Modal Header with Assign button beside title -->
+                    <div class="modal-header justify-content-between align-items-center">
+                        <h5 class="modal-title mb-0 d-flex align-items-center">
+                            Fixed Asset Details
+                        </h5>
+
+                        <!-- Assign Button beside title -->
+                        <button type="button" class="btn btn-primary btn-sm btn-icon-split" data-toggle="modal" data-target="#GMCassignModal" data-id="<?php echo htmlspecialchars($row['asset_id']); ?>">
+                            <span class="icon text-white-50">
+                                <i class="fas fa-user-plus fa-sm text-white-50"></i>
+                            </span>
+                            <span class="text">Assign</span>
                         </button>
                     </div>
 
+                    <!-- Modal Body -->
                     <div class="modal-body">
-
-                        <!-- Updated button in view modal -->
-                        <div class="d-flex justify-content-end mb-3">
-                            <button type="button" class="btn btn-primary btn-sm btn-icon-split" data-toggle="modal" data-target="#GMCassignModal" data-id="<?php echo htmlspecialchars($row['asset_id']); ?>">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-user-plus fa-sm text-white-50"></i>
-                                </span>
-                                <span class="text">Assign</span>
-                            </button>
-                        </div>
-
                         <!-- Dynamic content will be inserted here via AJAX -->
                         <div id="assetDetailsContent">
-                            <!-- AJAX content -->
+                            <!-- AJAX content goes here -->
                         </div>
                     </div>
 
+                    <!-- Modal Footer -->
                     <div class="modal-footer">
                         <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
                     </div>
@@ -109,6 +108,7 @@ $result = mysqli_query($conn, $query);
                 </div>
             </div>
         </div>
+
 
         <!-- Add Fixed Asset Modal -->
         <div class="modal fade" id="GMCAssign" tabindex="-1" role="dialog" aria-labelledby="GMCAssignLabel" aria-hidden="true">
@@ -124,7 +124,6 @@ $result = mysqli_query($conn, $query);
                     <!-- Give the form an ID for JS -->
                     <form id="assignForm">
                         <div class="modal-body">
-
                             <!-- Error message container -->
                             <div id="assignError" class="alert alert-danger" style="display: none;"></div>
 
@@ -236,6 +235,32 @@ $result = mysqli_query($conn, $query);
             error: function() {
                 alert('Error fetching asset details.');
             }
+        });
+    });
+
+    $(document).ready(function() {
+        $('#submitAssignBtn').click(function() {
+            var formData = $('#assignForm').serialize(); // Serialize form data
+
+            $.ajax({
+                url: 'assign', // URL to the PHP file that handles the insert
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    // Parse the JSON response
+                    var result = JSON.parse(response);
+                    if (result.success) {
+                        // Close the modal and reload the page to see the new asset
+                        $('#GMCAssign').modal('hide'); // Close the modal
+                        location.reload(); // Reload the page to see the new asset
+                    } else {
+                        $('#assignError').text(result.message).show(); // Show error message
+                    }
+                },
+                error: function() {
+                    $('#assignError').text('Error adding asset.').show(); // Show error message
+                }
+            });
         });
     });
 </script>
