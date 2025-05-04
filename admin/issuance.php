@@ -17,8 +17,6 @@ $highlighted_req_id = isset($_GET['req_id']) ? $_GET['req_id'] : null;
 
 
 
-
-
 <!-- Content Wrapper -->
 <div id="content-wrapper" class="d-flex flex-column">
 
@@ -30,6 +28,7 @@ $highlighted_req_id = isset($_GET['req_id']) ? $_GET['req_id'] : null;
         include("../includes/topbar.php");
         ?>
 
+        <!--View modal-->
         <div class="modal fade" id="viewRequestModal" tabindex="-1" role="dialog"
             aria-labelledby="viewRequestModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
@@ -123,38 +122,8 @@ $highlighted_req_id = isset($_GET['req_id']) ? $_GET['req_id'] : null;
         </div>
         <!--End of view modal-->
 
-        <!--Edit modal-->
-        <div class="modal fade" id="editRequestModal" tabindex="-1" role="dialog" aria-labelledby="editRequestModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editRequestModalLabel">Edit Requisition Items</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="table-responsive">
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th style="width: 60%;">Items</th> <th style="width: 40%;">Qty</th>   </tr>
-                        </thead>
-                        <tbody id="edit_request_items">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button id="saveEditRequest" class="btn btn-sm btn-success">Save Changes</button>
-                <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
 
-
-
+        <!--Start of Table-->
         <div class="container-fluid">
 
             <!-- Table Card -->
@@ -405,77 +374,106 @@ $highlighted_req_id = isset($_GET['req_id']) ? $_GET['req_id'] : null;
             });
 
             // Approve button functionality
-            $('#saveRequest').on('click', function() {
-                $('#viewRequestModal').modal('hide');
-
+            $('#saveRequest').on('click', function () {
                 const reqNumber = $('#requisitionNumber').val();
                 if (!reqNumber) {
                     console.error("No request number found!");
                     return;
                 }
 
-                Swal.fire({
-                    title: 'Enter Issued By',
-                    input: 'text',
-                    inputPlaceholder: 'Enter name',
-                    showCancelButton: true,
-                    confirmButtonText: 'Submit',
-                    cancelButtonText: 'Cancel',
-                    preConfirm: (issuedBy) => {
-                        if (!issuedBy) {
-                            Swal.showValidationMessage('Please enter a valid name for "Issued By".');
-                        }
-                        return issuedBy;
-                    }
-                }).then((inputResult) => {
-                    if (inputResult.isConfirmed) {
-                        const issuedBy = inputResult.value.trim();
-
-                        const itemsToDeduct = [];
-                        $('#view_request_items tr').each(function() {
-                            const itemId = $(this).data('item_id');
-                            const quantity = $(this).find('td:eq(1)').text().trim();
-                            itemsToDeduct.push({
-                                id: itemId,
-                                qty: quantity
-                            });
-                        });
-
-                        // AJAX
-                        $.ajax({
-                            url: 'approve_request',
-                            type: 'POST',
-                            data: {
-                                req_number: reqNumber,
-                                status: 1,
-                                date_issued: new Date().toISOString().slice(0, 10),
-                                issued_by: issuedBy,
-                                items: itemsToDeduct
-                            },
-                            success: function(response) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Approved!',
-                                    text: 'The request has been approved and issued by: ' + issuedBy,
-                                    timer: 1500,
-                                    showConfirmButton: false
-                                }).then(() => {
-                                    // Remove the highlighted row
-                                    $('tr.table-warning').remove(); // Remove the row with the highlight
-                                            location.reload();
-                                });
-                            },
-                            error: function(xhr, status, error) {
-                                console.error("Error approving request: ", error);
-                                Swal.fire("Error", "Something went wrong while approving the request.", "error");
-                            }
-                        });
-                    }
+                const itemsToCheck = [];
+                $('#view_request_items tr').each(function () {
+                    const itemName = $(this).find('td:eq(0)').text().trim();
+                    const quantity = $(this).find('td:eq(1)').text().trim();
+                    itemsToCheck.push({
+                        name: itemName,
+                        qty: quantity
+                    });
                 });
 
-                setTimeout(() => {
-                    document.querySelector('#swal2-input')?.focus();
-                }, 100);
+                // AJAX to check stock
+                $.ajax({
+                    url: 'check_stock',
+                    type: 'POST',
+                    data: {
+                        items: itemsToCheck
+                    },
+                    success: function (res) {
+                        const response = JSON.parse(res);
+                        if (response.success) {
+
+                            $('#viewRequestModal').modal('hide');
+
+                            setTimeout(() => {
+                                Swal.fire({
+                                    title: 'Enter Issued By',
+                                    input: 'text',
+                                    inputPlaceholder: 'Enter name',
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Submit',
+                                    cancelButtonText: 'Cancel',
+                                    preConfirm: (issuedBy) => {
+                                        if (!issuedBy) {
+                                            Swal.showValidationMessage('Please enter a valid name.');
+                                        }
+                                        return issuedBy;
+                                    }
+                                }).then((inputResult) => {
+                                    if (inputResult.isConfirmed) {
+                                        const issuedBy = inputResult.value.trim();
+                                        const itemsToDeduct = itemsToCheck;
+
+                                        // Approve the request
+                                        $.ajax({
+                                            url: 'approve_request',
+                                            type: 'POST',
+                                            data: {
+                                                req_number: reqNumber,
+                                                status: 1,
+                                                date_issued: new Date().toISOString().slice(0, 10),
+                                                issued_by: issuedBy,
+                                                items: itemsToDeduct
+                                            },
+                                            success: function () {
+                                                Swal.fire({
+                                                    icon: 'success',
+                                                    title: 'Approved!',
+                                                    text: 'Request issued by: ' + issuedBy,
+                                                    timer: 1500,
+                                                    showConfirmButton: false
+                                                }).then(() => {
+                                                    $('tr.table-warning').remove();
+                                                    location.reload();
+                                                });
+                                            },
+                                            error: function () {
+                                                Swal.fire("Error", "Approval failed.", "error");
+                                            }
+                                        });
+                                    }
+                                });
+
+                                // Auto-focus input
+                                setTimeout(() => {
+                                    document.querySelector('#swal2-input')?.focus();
+                                }, 100);
+                            }, 300); // wait a bit after hiding modal
+                        } else {
+                            // 🔊 Play sound if stock not available
+                            const alertSound = new Audio('../sound/alert.wav');
+                            alertSound.play();
+
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Stock Not Available',
+                                text: response.message
+                            });
+                        }
+                    },
+                    error: function () {
+                        Swal.fire("Error", "Failed to check stock.", "error");
+                    }
+                });
             });
 
             // Decline button functionality

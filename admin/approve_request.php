@@ -6,7 +6,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $status = $_POST['status'];
     $date_issued = $_POST['date_issued'];
     $issued_by = $_POST['issued_by'];
-    // $items = $_POST['items']; // Removed items as it's no longer needed
 
     // 1. Update request table
     $updateQuery = "UPDATE request SET status = ?, date_issued = ?, issued_by = ? WHERE req_number = ?";
