@@ -3,7 +3,7 @@ include("../includes/header.php");
 include("../includes/navbar_admin.php");
 
 
-$query = "SELECT item, category, SUM(orig_qty) AS total_orig_qty, SUM(qty) AS total_qty FROM stock_in WHERE is_posted = 1";
+$query = "SELECT item, category, SUM(qty) AS total_qty, SUM(qty) AS total_qty FROM stock_in WHERE is_posted = 1";
 
 
 $query .= " GROUP BY item, category";
@@ -42,7 +42,7 @@ $result = mysqli_query($conn, $query);
                             <tbody>
                                 <?php while ($row = mysqli_fetch_assoc($result)): ?>
                                     <?php
-                                    $currentQty = $row['total_orig_qty'];
+                                    $currentQty = $row['total_qty'];
 
                                     if ($currentQty == 0) {
                                         $status = 'Out of Stock';
