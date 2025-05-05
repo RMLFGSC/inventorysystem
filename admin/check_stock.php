@@ -2,13 +2,12 @@
 include("../conn.php");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $items = $_POST['items']; // [{ name: "Monitor", qty: 2 }, ...]
+    $items = $_POST['items']; 
 
     foreach ($items as $item) {
-        $name = $item['name'];  // e.g. "Monitor"
+        $name = $item['name'];  
         $requestedQty = (int) $item['qty'];
         
-        // Fuzzy search using LIKE on item column
         $likeTerm = '%' . $name . '%';
 
         $stmt = $conn->prepare("SELECT SUM(qty) as total FROM stock_in WHERE item LIKE ? AND qty > 0");

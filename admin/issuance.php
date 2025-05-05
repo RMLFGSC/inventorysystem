@@ -453,13 +453,11 @@ $highlighted_req_id = isset($_GET['req_id']) ? $_GET['req_id'] : null;
                                     }
                                 });
 
-                                // Auto-focus input
                                 setTimeout(() => {
                                     document.querySelector('#swal2-input')?.focus();
                                 }, 100);
-                            }, 300); // wait a bit after hiding modal
+                            }, 300); 
                         } else {
-                            // 🔊 Play sound if stock not available
                             const alertSound = new Audio('../sound/alert.wav');
                             alertSound.play();
 

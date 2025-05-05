@@ -62,6 +62,15 @@ $result = mysqli_query($conn, $query);
                                                 data-target="#viewModal">
                                                 <i class="fas fa-eye"></i>
                                             </button>
+
+                                            <!-- Assign Button -->
+                                            <button
+                                                type="button"
+                                                class="btn btn-primary btn-sm assignAssetBtn"
+                                                data-toggle="modal"
+                                                data-target="#assignModal">
+                                                <i class="fas fa-user-plus"></i>
+                                            </button>
                                         </td>
                                     </tr>
                                 <?php endwhile; ?>
@@ -82,14 +91,6 @@ $result = mysqli_query($conn, $query);
                         <h5 class="modal-title mb-0 d-flex align-items-center">
                             Fixed Asset Details
                         </h5>
-
-                        <!-- Assign Button beside title -->
-                        <button type="button" class="btn btn-primary btn-sm btn-icon-split" data-toggle="modal" data-target="#GMCassignModal" data-id="<?php echo htmlspecialchars($row['asset_id']); ?>">
-                            <span class="icon text-white-50">
-                                <i class="fas fa-user-plus fa-sm text-white-50"></i>
-                            </span>
-                            <span class="text">Assign</span>
-                        </button>
                     </div>
 
                     <!-- Modal Body -->
