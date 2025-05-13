@@ -78,11 +78,11 @@ $result = mysqli_query($conn, $query);
                                     </div>
                                     <div id="itemFields">
                                         <div class="form-row">
-                                            <div class="form-group col-md-6">
+                                            <div class="form-group col-md-8 col-12">
                                                 <label>Item</label>
                                                 <input type="text" name="item_request[]" class="form-control" required>
                                             </div>
-                                            <div class="form-group col-md-6">
+                                            <div class="form-group col-md-4 col-12">
                                                 <label>Quantity</label>
                                                 <input type="text" name="qty[]" class="form-control" required>
                                             </div>
@@ -171,7 +171,7 @@ $result = mysqli_query($conn, $query);
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
                     <h6 class="m-0 font-weight-bold text-primary">Requisition List</h6>
                     <button type="button" class="btn btn-sm btn-primary btn-icon-split" data-toggle="modal" data-target="#GMCaddRequest">
-                    <span class="icon text-white-50">
+                        <span class="icon text-white-50">
                             <i class="fas fa-plus fa-sm text-white-50"></i>
                         </span>
                         <span class="text">Add Request</span>
@@ -258,18 +258,21 @@ $result = mysqli_query($conn, $query);
             document.getElementById('addRequest').addEventListener('click', function() {
                 const itemFields = document.getElementById('itemFields');
                 const newItemRow = document.createElement('div');
-                newItemRow.classList.add('form-row', 'item-row', 'mb-2');
+                newItemRow.classList.add('form-row', 'item-row', 'mb-3');
 
                 newItemRow.innerHTML = `
-                <div class="form-group col-md-6">
+                <div class="form-group col-md-8 col-12">
                     <label>Item</label>
                     <input type="text" name="item_request[]" class="form-control" required>
                 </div>
-                <div class="form-group col-md-6">
-                    <label>Quantity</label>
-                    <input type="text" name="qty[]" class="form-control" required>
+                <div class="form-group col-md-4 col-12">
+                    <label for="qty">Quantity</label>
+                    <div class="d-flex align-items-end">
+                        <input type="number" class="form-control" name="qty[]" placeholder="Qty" required>
+                        <button type="button" class="btn btn-danger btn-sm removeItem px-2 ml-2">X</button>
+                    </div>
                 </div>
-                <button type="button" class="btn btn-danger btn-sm removeItem">X</button>`;
+                `;
 
                 itemFields.appendChild(newItemRow);
 
@@ -284,7 +287,7 @@ $result = mysqli_query($conn, $query);
 
                 // AJAX call to fetch the requisition details
                 $.ajax({
-                    url: 'fetch_request_items', 
+                    url: 'fetch_request_items',
                     type: 'POST',
                     data: {
                         req_number: reqno
@@ -318,16 +321,16 @@ $result = mysqli_query($conn, $query);
             });
 
             <?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success!',
-                        text: 'Request successfully added.',
-                        confirmButtonColor: '#3085d6',
-                    });
-                    if (window.history.replaceState) {
-                        window.history.replaceState(null, null, window.location.pathname);
-                    }
-                <?php endif; ?>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Request successfully added.',
+                    confirmButtonColor: '#3085d6',
+                });
+                if (window.history.replaceState) {
+                    window.history.replaceState(null, null, window.location.pathname);
+                }
+            <?php endif; ?>
 
             // Print request
             document.getElementById('printRequest').addEventListener('click', function() {
