@@ -453,7 +453,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                             confirmButtonColor: '#28a745',
                             cancelButtonText: 'Cancel',
                             confirmButtonText: 'Yes, post it!',
-                            width: '300px'
+
                         }).then((result) => {
                             if (result.isConfirmed) {
                                 window.location.href = `post_stockin?stockin_id=${stockinId}`;
@@ -468,7 +468,6 @@ while ($row = mysqli_fetch_assoc($result)) {
                         title: 'Success!',
                         text: 'Stock-in successfully added.',
                         confirmButtonColor: '#3085d6',
-                        width: '300px'
                     });
                     if (window.history.replaceState) {
                         window.history.replaceState(null, null, window.location.pathname);

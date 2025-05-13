@@ -323,7 +323,6 @@ $result = mysqli_query($conn, $query);
                         title: 'Success!',
                         text: 'Request successfully added.',
                         confirmButtonColor: '#3085d6',
-                        width: '300px'
                     });
                     if (window.history.replaceState) {
                         window.history.replaceState(null, null, window.location.pathname);
@@ -410,7 +409,6 @@ $result = mysqli_query($conn, $query);
                     confirmButtonText: 'Yes, Post it',
                     cancelButtonText: 'Cancel',
                     confirmButtonColor: '#28a745',
-                    width: '300px',
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
@@ -429,7 +427,6 @@ $result = mysqli_query($conn, $query);
                                     text: 'The request has been posted successfully.',
                                     icon: 'success',
                                     timer: 1500,
-                                    width: '300px',
                                     showConfirmButton: false
                                 });
                             },

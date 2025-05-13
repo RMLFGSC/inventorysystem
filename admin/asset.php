@@ -55,21 +55,9 @@ $result = mysqli_query($conn, $query);
                                             <button
                                                 type="button"
                                                 class="btn btn-warning btn-sm viewAssetBtn"
-                                                data-id="<?php echo htmlspecialchars($row['asset_id']); ?>"
-                                                data-owner="<?php echo htmlspecialchars($row['owner']); ?>"
-                                                data-location="<?php echo htmlspecialchars($row['location']); ?>"
                                                 data-toggle="modal"
                                                 data-target="#viewModal">
                                                 <i class="fas fa-eye"></i>
-                                            </button>
-
-                                            <!-- Assign Button -->
-                                            <button
-                                                type="button"
-                                                class="btn btn-primary btn-sm assignAssetBtn"
-                                                data-toggle="modal"
-                                                data-target="#assignModal">
-                                                <i class="fas fa-user-plus"></i>
                                             </button>
                                         </td>
                                     </tr>
@@ -81,34 +69,37 @@ $result = mysqli_query($conn, $query);
             </div>
         </div>
 
+
         <!-- View Modal -->
         <div class="modal fade" id="viewModal" tabindex="-1" role="dialog" aria-labelledby="viewModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
-
-                    <!-- Modal Header with Assign button beside title -->
-                    <div class="modal-header justify-content-between align-items-center">
-                        <h5 class="modal-title mb-0 d-flex align-items-center">
-                            Fixed Asset Details
-                        </h5>
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="viewModalLabel">View Asset Info</h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
 
                     <!-- Modal Body -->
                     <div class="modal-body">
-                        <!-- Dynamic content will be inserted here via AJAX -->
-                        <div id="assetDetailsContent">
-                            <!-- AJAX content goes here -->
-                        </div>
+                        <p><strong>Item:</strong> <span id="viewItem"></span></p>
+                        <p><strong>Quantity:</strong> <span id="viewQty"></span></p>
+                        <p><strong>Status:</strong> <span id="viewStatus">Not Assigned</span></p>
                     </div>
 
                     <!-- Modal Footer -->
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="assignBtn">Assign</button>
                     </div>
-
                 </div>
             </div>
         </div>
+
+
+        <!-- End of View Modal -->
 
 
         <!-- Add Fixed Asset Modal -->
@@ -206,38 +197,7 @@ $result = mysqli_query($conn, $query);
         });
     });
 
-    $(document).ready(function() {
-        $('.viewAssetBtn').click(function() {
-            var assetId = $(this).data('id');
-            $('#assetIdInput').val(assetId);
-        });
 
-    });
-
-    $(document).on('click', '.viewAssetBtn', function() {
-        var assetId = $(this).data('id');
-        var owner = $(this).data('owner');
-        var location = $(this).data('location');
-
-        // Make an AJAX call to fetch asset details
-        $.ajax({
-            url: 'fetch_asset_details',
-            type: 'POST',
-            data: {
-                id: assetId,
-                owner: owner,
-                location: location
-            },
-            success: function(response) {
-                // Populate the modal with the response data
-                $('#viewModal .modal-body').html(response);
-                $('#viewModal').modal('show');
-            },
-            error: function() {
-                alert('Error fetching asset details.');
-            }
-        });
-    });
 
     $(document).ready(function() {
         $('#submitAssignBtn').click(function() {
