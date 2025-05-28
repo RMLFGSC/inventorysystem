@@ -142,7 +142,7 @@ $result = mysqli_query($conn, $query);
 
                         <div class="modal-footer">
                             <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-sm btn-primary" id="submitAssignBtn">Save</button>
+                            <button type="submit" class="btn btn-sm btn-primary" id="submitAssignBtn">Save</button>
                         </div>
                     </form>
                 </div>
@@ -200,26 +200,26 @@ $result = mysqli_query($conn, $query);
 
 
     $(document).ready(function() {
-        $('#submitAssignBtn').click(function() {
-            var formData = $('#assignForm').serialize(); // Serialize form data
+        $('#assignForm').submit(function(e) {
+            e.preventDefault(); // Prevent normal form submission
+
+            var formData = $(this).serialize();
 
             $.ajax({
-                url: 'assign', // URL to the PHP file that handles the insert
+                url: 'assign',
                 type: 'POST',
                 data: formData,
                 success: function(response) {
-                    // Parse the JSON response
                     var result = JSON.parse(response);
                     if (result.success) {
-                        // Close the modal and reload the page to see the new asset
-                        $('#GMCAssign').modal('hide'); // Close the modal
-                        location.reload(); // Reload the page to see the new asset
+                        $('#GMCAssign').modal('hide');
+                        location.reload();
                     } else {
-                        $('#assignError').text(result.message).show(); // Show error message
+                        $('#assignError').text(result.message).show();
                     }
                 },
                 error: function() {
-                    $('#assignError').text('Error adding asset.').show(); // Show error message
+                    $('#assignError').text('Error adding asset.').show();
                 }
             });
         });

@@ -6,14 +6,14 @@
             <!-- Nav Item - Dashboard -->
             <li class="nav-item">
                 <a class="nav-link" href="../admin/index.php">
-                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <i class="fas fa-fw fa-home"></i>
                     <span>Dashboard</span></a>
             </li>
 
             <!-- Nav Item - Pages Collapse Menu -->
             <li class="nav-item">
                 <a class="nav-link" href="asset.php">
-                    <i class="fas fa-fw fa-list"></i>
+                    <i class="fas fa-fw fa-desktop"></i>
                     <span>Fixed Asset</span></a>
             </li>
 
@@ -26,7 +26,7 @@
 
             <li class="nav-item">
                 <a class="nav-link" href="requisitions.php">
-                    <i class="fas fa-fw fa-list-alt"></i>
+                    <i class="fas fa-fw fa-file-invoice"></i>
                     <span>Requisitions</span></a>
             </li>
 
@@ -46,7 +46,7 @@
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#reports"
                     aria-expanded="true" aria-controls="reports">
-                    <i class="fas fa-fw fa-boxes"></i>
+                    <i class="fas fa-fw fa-chart-line"></i>
                     <span>Reports</span>
                 </a>
                 <div id="reports" class="collapse" aria-labelledby="headingUtilities"
